@@ -1,0 +1,14 @@
+# Raw source material — stays local, never pushed.
+# The site uses web-optimized copies in site/ instead.
+portfolio-projects/
+old-materials/
+
+# Dependencies & build output
+node_modules/
+dist/
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log
