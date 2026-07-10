@@ -1,49 +1,56 @@
 import { Link } from 'react-router-dom'
-import { projects } from '../data/projects.js'
+import { projects, getProject, asset } from '../data/projects.js'
 import ProjectCard from '../components/ProjectCard.jsx'
+import CipherRingsHero from '../components/CipherRingsHero.jsx'
 
 export default function Home() {
-  return (
-    <div className="mx-auto max-w-6xl px-6">
-      <section className="grid gap-10 py-16 lg:grid-cols-[1.5fr_1fr] lg:items-end lg:py-24">
-        <div>
-          <p className="label-mono mb-5 text-muted">Portfolio — MaCAD, IAAC Barcelona</p>
-          <h1 className="mb-5 max-w-[16ch] text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl">
-            Architect &amp; Computational Designer<span className="text-accent">.</span>
-          </h1>
-          <p className="max-w-[46ch] leading-relaxed text-soft">
-            I design buildings and the computational workflows behind them — from
-            generative geometry to BIM data pipelines.
-          </p>
-        </div>
-        <dl className="border-ink font-mono text-xs leading-loose lg:border-l lg:pl-6 max-lg:border-t max-lg:pt-5">
-          {[
-            ['ROLE', 'Computational Designer', true],
-            ['BASE', 'Beirut / Kuwait', false],
-            ['STACK', 'Rhino · GH · Python · React', false],
-            ['EDU', 'MaCAD — IAAC', false],
-          ].map(([k, v, accent]) => (
-            <div key={k} className="flex gap-3">
-              <dt className="min-w-[5.5ch] text-muted">{k}</dt>
-              <dd className={accent ? 'text-accent' : ''}>{v}</dd>
-            </div>
-          ))}
-        </dl>
-      </section>
+  const flagship = getProject('legoarch')
+  const rest = projects.filter((p) => p.slug !== flagship.slug)
 
-      <section className="pb-20">
+  return (
+    <>
+      <CipherRingsHero />
+
+      <section id="work" className="mx-auto max-w-6xl scroll-mt-24 px-6 py-16 sm:py-20">
         <div className="label-mono flex items-baseline justify-between border-t border-ink py-3">
           <span>Selected Work</span>
           <Link to="/work" className="text-muted transition-colors hover:text-accent">
             2025–2026 / {String(projects.length).padStart(2, '0')} Projects →
           </Link>
         </div>
-        <div className="grid gap-4 pt-2 sm:grid-cols-2 lg:grid-cols-3">
-          {projects.map((p, i) => (
-            <ProjectCard key={p.slug} project={p} featured={i === 0} />
+
+        {/* Featured flagship — routes recruiters to the strongest case study */}
+        <Link
+          to={`/work/${flagship.slug}`}
+          className="group mt-2 grid overflow-hidden border border-line transition-colors hover:border-ink sm:grid-cols-2"
+        >
+          <div className="overflow-hidden border-b-[3px] border-accent sm:border-b-0 sm:border-r-[3px]">
+            <img
+              src={asset(flagship.cover)}
+              alt={flagship.title}
+              fetchPriority="high"
+              className="aspect-[4/3] w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+            />
+          </div>
+          <div className="flex flex-col justify-between gap-6 p-6 sm:p-8">
+            <div>
+              <p className="label-mono mb-3 text-muted">Featured — 01</p>
+              <h2 className="mb-3 text-2xl font-bold tracking-tight sm:text-3xl">{flagship.title}</h2>
+              <p className="max-w-[46ch] leading-relaxed text-soft">{flagship.subtitle}</p>
+            </div>
+            <p className="label-mono text-muted">
+              {flagship.toolsShort} —{' '}
+              <span className="text-ink transition-colors group-hover:text-accent">Case study →</span>
+            </p>
+          </div>
+        </Link>
+
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          {rest.map((p) => (
+            <ProjectCard key={p.slug} project={p} />
           ))}
         </div>
       </section>
-    </div>
+    </>
   )
 }
