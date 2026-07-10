@@ -3,6 +3,142 @@ export const asset = (p) => base + p
 
 export const projects = [
   {
+    slug: 'sensi',
+    title: 'Sensi',
+    subtitle:
+      'A sensory copilot for floor plans — it reads a plan and scores how each room will feel across six coupled senses, personalized to the person who will live in it.',
+    year: '2026',
+    module: 'AIA Studio — MaCAD, IAAC',
+    team: ['Charles Abi Chahine', 'Emilie El Chidiac', 'Lakzhmy Mari Zaro', 'María Sánchez Domínguez'],
+    tools: ['Python', 'LLM agents', 'Vision models', 'Web app'],
+    tag: 'AI',
+    toolsShort: 'PYTHON · SENSORY AI',
+    cover: 'projects/sensi/cover.gif',
+    intro: [
+      'In architecture we model everything — structure, cost, energy, code compliance. Layer after layer that makes a building accountable before it is built. Sensi adds the one layer we never formalized: how a space will actually feel. Not emotion — the full sensory experience of standing in a room, scored across six senses: thermal, visual, acoustic, spatial, olfactory, tactile. Not in the abstract, but for a specific person.',
+    ],
+    sections: [
+      {
+        heading: 'The sensory layer',
+        body: [
+          'Comfort research studies one sense at a time — thermal has its own models, acoustic its own standards. But we take a room in through all of them at once, and the senses are coupled: one moderates another. We call it the ripple. Add a bigger window and the daylight improves — but the same glass is a thinner sound barrier and leaks heat, and the noise that gets in can even diminish the daylight you gained. One design move, a chain of consequences.',
+          'The room score is not an average. It is half mean, half worst — the worst sense carries the room, because that is the one you would actually feel. A kitchen that scores fine on everything except smell does not get to hide behind its other senses. The scoring is deterministic: fixed rules over a coupling matrix. The LLM routes intent and explains results; it never decides the score. No black box.',
+        ],
+        media: [
+          { type: 'video', src: 'projects/sensi/sensi-demo.mp4', caption: 'Sensi, end to end: a plan goes in, a room-by-room comfort report comes out.' },
+        ],
+      },
+      {
+        heading: 'Act 1 · Onboard — who is this for',
+        body: [
+          'Comfort is not universal. The same plan read through two lenses tells two stories: a child who minds noise sees the loud living room light up; a grandmother who minds the cold sees the cold bedroom. So Sensi opens by learning who you are — a few questions, then a moodboard where each image you keep quietly tags the senses you lean toward. Your words become sense weights, the images nudge them, and it all compiles into a persona drawn as a petal rose.',
+        ],
+        media: [
+          { type: 'video', src: 'projects/sensi/onboard.mp4', caption: 'Onboarding: from a few questions and a moodboard to a personal weighting of the six senses.' },
+          { type: 'image', src: 'projects/sensi/onboarding.webp', caption: 'The persona, visualized as a petal rose — your comfort priorities, made explicit.' },
+        ],
+      },
+      {
+        heading: 'Act 2 · Shape — comfort you can edit',
+        body: [
+          'This is the heart of the system. You talk to it in plain language; a fast routing model classifies your intent in about 0.6 seconds — score a room, edit it, or explore the relationships. Ask a question and a heavier model reads the whole room and answers in words. Make an edit — change a material, add a window, place curtains, adjust ventilation — and the agent plans it, validates it against the plan, applies it, and re-scores, live. Every edit is kept as a checkpoint, so the plan improves honestly over time.',
+          'Rooms are nodes, doors are edges: the kitchen’s noise and smell reaching the bedroom through the hallway makes comfort a zoning problem you can see. The galaxy view holds the whole project as one living map — rooms, senses, and the design levers behind them — so you can find the connection you did not know was there.',
+        ],
+        media: [
+          { type: 'video', src: 'projects/sensi/shape.mp4', caption: 'Shaping: conversational edits that re-score the plan in real time.' },
+          { type: 'image', src: 'projects/sensi/shape-01.webp', caption: 'Reading the plan into rooms, uses, and adjacencies.' },
+          { type: 'image', src: 'projects/sensi/shape-02.webp', caption: 'Scores respond to every edit, the ripple propagating by fixed rules.' },
+          { type: 'image', src: 'projects/sensi/shape-03.webp', caption: 'The galaxy view: rooms, senses, and levers as one connected system.' },
+        ],
+      },
+      {
+        heading: 'Act 3 · Report — closing the loop',
+        body: [
+          'The last act closes the loop. Your final scores write a prompt and a vision model renders each room, under an honest rule: only the extreme senses speak — a clearly good or bad sense writes a phrase, the comfortable middle stays quiet — so the render stays grounded in what actually changed. You compare it back to the moodboard from Act 1; input and output meet. We benchmarked the renders across providers: about $0.039 per room and 2.75× faster than the alternative we tested.',
+        ],
+        media: [
+          { type: 'video', src: 'projects/sensi/report.mp4', caption: 'Generating the report: final scores become a grounded render of each room.' },
+          { type: 'image', src: 'projects/sensi/report-01.webp', caption: 'The comfort report — the sensory layer, made legible.' },
+          { type: 'image', src: 'projects/sensi/report-02.webp', caption: 'Room-by-room detail, ready for a design team to act on.' },
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'urban-risk',
+    title: 'Encoding Urban Risk',
+    subtitle:
+      'A machine-learning pipeline that classifies London street segments into low, medium, and high morphological-risk typologies from public spatial data alone — then tests whether the reading survives a move to another city.',
+    year: '2026',
+    module: 'Data Encoding — MaCAD, IAAC',
+    team: ['Charles Abi Chahine', 'Emilie El Chidiac', 'Lakzhmy Mari Zaro', 'María Sánchez Domínguez'],
+    tools: ['Python', 'scikit-learn', 'OpenStreetMap', 'Mapillary', 'SHAP'],
+    tag: 'ML',
+    toolsShort: 'PYTHON · ML · GIS',
+    cover: 'projects/urban-risk/cover.webp',
+    intro: [
+      'Can the physical layout of a street — measurable from public map data — predict how risky it feels? We framed it as a three-class problem: low, medium, or high risk, using seven spatial features drawn from OpenStreetMap and Mapillary per street segment. This is the full arc of the project — not just the results, but the wrong turn that made them honest.',
+    ],
+    sections: [
+      {
+        heading: 'Grounded in sixty years of theory',
+        body: [
+          'Every feature we chose traces back to established urban-safety theory. Jane Jacobs argued that active entrances create natural surveillance — “eyes on the street.” Oscar Newman showed that territorial clarity reduces the conditions for risk. Hillier and Hanson demonstrated through Space Syntax that network configuration shapes movement in predictable ways. Our unit of analysis is the segment — the stretch of street between two intersections — because risk clusters at that scale and a classified segment points a designer to a specific, addressable piece of street.',
+        ],
+        media: [
+          { type: 'image', src: 'projects/urban-risk/theory.webp', caption: 'Seven features, each anchored in a lineage of urban-safety theory.' },
+        ],
+      },
+      {
+        heading: 'Hitting the wall',
+        body: [
+          'We first tried to predict crime directly — sourcing roughly 920,000 London incidents and regressing them against our spatial features across five boroughs. Three models — Linear Regression, Decision Tree, Random Forest — all returned R² under 0.064. The models failed to learn. Crime is driven by social and economic forces that street geometry alone cannot capture. We treated this as a finding, not a failure: spatial form is too weak for direct regression against crime, so we pivoted to a more honest goal — a spatial typology that serves as a proxy for perceived risk.',
+        ],
+        media: [
+          { type: 'image', src: 'projects/urban-risk/the-wall.webp', caption: 'The wall: every model flat against the diagonal. Crime does not reduce to spatial features.' },
+        ],
+      },
+      {
+        heading: 'The pivot — a spatial typology',
+        body: [
+          'We rebuilt the pipeline into eight steps: fetch from OSM and Mapillary, place seven normalised features onto each segment, collapse them into a weighted risk score, use PCA and a Kohonen map as diagnostics, cut into three classes with K-Means, train a classifier, and deploy to other cities. Across 36,000 segments the score is roughly normal, centred near 0.35 — so rather than impose fixed cuts through the densest part, we let K-Means find the natural breakpoints. The split: 31% low, 47% medium, 22% high.',
+        ],
+        media: [
+          { type: 'image', src: 'projects/urban-risk/pipeline.webp', caption: 'The eight-step pipeline: from OSM features to a deployable classifier.' },
+          { type: 'image', src: 'projects/urban-risk/correlation.webp', caption: 'Redundancy check — the one strong correlation is visibility vs. enclosure at −0.75.' },
+        ],
+      },
+      {
+        heading: 'Coherent types, ambiguous risk',
+        body: [
+          'The Kohonen map sorts all seven features onto a 2D grid by similarity, and the network organises into legible street types. But coloured by risk, near-identical cells show quite different values. Typologies describe street character; they do not cleanly determine risk. That gap is the honest heart of the project.',
+        ],
+        media: [
+          { type: 'image', src: 'projects/urban-risk/kohonen.webp', caption: 'Kohonen SOM: coherent typologies emerge, but risk sits ambiguously across them.' },
+        ],
+      },
+      {
+        heading: 'What actually matters',
+        body: [
+          'Logistic Regression hits 99% accuracy and Random Forest 95% — expected by construction, since the label was built from the same features the classifiers train on. Accuracy tells us the rule is clean and learnable, not that it is correct. The ablation study is more informative: transport proximity is the single most important feature, followed by connectivity and land use. Lighting contributes almost nothing — because Mapillary lighting is inconsistently mapped, and a feature that does not vary cannot discriminate.',
+        ],
+        media: [
+          { type: 'image', src: 'projects/urban-risk/ablation.webp', caption: 'Ablation study: accuracy drop per feature removed. Transport leads; lighting barely registers.' },
+        ],
+      },
+      {
+        heading: 'London trained, world tested',
+        body: [
+          'With London as the training set, we applied the model to Barcelona’s Eixample and Trastevere in Rome. The Eixample comes out almost entirely high-risk — not because it is dangerous, but because its orthogonal grid, high enclosure, and high connectivity map onto London’s high-risk feature region. SHAP pinpoints the divergence: land use and visibility hit values the model has never seen, so it extrapolates into high-risk by default. Not an architecture flaw — a per-city normalisation and distribution-shift problem. English cities like Leeds and Birmingham, which share London’s morphological history, transfer far better; re-fitting the pipeline on Barcelona produces a contextually plausible spread of its own.',
+        ],
+        media: [
+          { type: 'image', src: 'projects/urban-risk/cross-city.webp', caption: 'The same model on London, Barcelona, and Rome — the reading breaks where the morphology diverges.' },
+          { type: 'image', src: 'projects/urban-risk/shap.webp', caption: 'SHAP: London’s high-risk drivers stay in-distribution; the Eixample’s do not.' },
+        ],
+      },
+    ],
+  },
+  {
     slug: 'legoarch',
     title: 'lEgoarCh',
     subtitle:
@@ -13,7 +149,7 @@ export const projects = [
     tools: ['FLUX.2 + LoRA', 'TRELLIS-2', 'ComfyUI', 'Python'],
     tag: 'AI',
     toolsShort: 'FLUX · TRELLIS · PYTHON',
-    cover: 'projects/legoarch/sagrada-render.webp',
+    cover: 'projects/legoarch/cover.gif',
     intro: [
       'You type a building, and a minute later a real LEGO set is sitting on a shelf: rendered, modelled, brick-built, priced, and catalog-legal. Most "AI makes LEGO" demos stop at a gorgeous render — but a render is a promise, not a product. lEgoarCh builds the downstream half: the machinery that forces the dream to obey real bricks, real colours, and real gravity.',
     ],
@@ -73,60 +209,77 @@ export const projects = [
     ],
   },
   {
-    slug: 'sensi',
-    title: 'Sensi',
+    slug: 'breathing-mass',
+    title: 'Breathing Mass',
     subtitle:
-      'A comfort copilot — an app that reads a floor plan and reports on how the spaces inside will feel.',
+      'A hyperbuilding for Santiago conceived as a vertical lung — a tower that captures, cleans, and redistributes the city’s polluted air through a breathing core, resolved as a topology-optimized structure and a performance-driven facade.',
     year: '2026',
-    module: 'MaCAD, IAAC',
-    team: ['MaCAD Group 02'],
-    tools: ['Rhino', 'Web application'],
-    tag: 'APP',
-    toolsShort: 'APP · COMFORT',
-    cover: 'projects/sensi/report-hero.webp',
+    module: 'BIMSC Studio — MaCAD, IAAC',
+    team: ['Charles Abi Chahine', 'Ramy Ayoub', 'Hani Karime'],
+    tools: ['Rhino', 'Grasshopper', 'Alpaca', 'Speckle'],
+    tag: 'GH',
+    toolsShort: 'GH · ALPACA · SPECKLE',
+    cover: 'projects/breathing-mass/cover.gif',
     intro: [
-      'In building design we already model a plan in layers — structure, cost, energy, code. Sensi adds the sensory layer: it reads a floor plan and tells you how the spaces will feel, producing a room-by-room comfort report before anything is built.',
+      'Breathing Mass is a vertical ecosystem in Santiago where architecture, wind, and energy converge. The Hyper Lung captures, cleans, and redistributes polluted air through a breathing core, turning the tower into living infrastructure that breathes with the city. Within a larger hyperbuilding studio, our team owned its structure and facade — translating the lung analogy into a self-braced skeleton and an adaptive skin, every form justified by data and published to the program and data teams through Speckle.',
     ],
     sections: [
       {
-        heading: 'The demo',
+        heading: 'The alveolar spine — a lung analogy',
         body: [
-          'Forty-five seconds, end to end: a plan goes in, a comfort report comes out.',
+          'The core of the building is defined by the Alveolar Spine. Taking inspiration from the human lung, we developed a porous structural core that mirrors the function of the bronchi — a spine that carries load and moves air at the same time. The concept is not decorative; it is the organising logic for both the structure and the way the tower breathes.',
         ],
         media: [
-          { type: 'video', src: 'projects/sensi/sensi-demo.mp4', caption: 'Sensi, end to end.' },
+          { type: 'image', src: 'projects/breathing-mass/lung-analogy.webp', caption: 'From bronchi to a porous structural core: the lung analogy driving the spine.' },
         ],
       },
       {
-        heading: 'Onboarding',
+        heading: 'A self-braced skeleton',
         body: [
-          'Sensi meets you where the work starts: drop in a plan and describe the project.',
+          'The structure rests on the core: each volume is plugged onto it, so load transfers from volume to core to foundation. Three cores form a triangle that turns vertical mass into a self-braced system. Using Alpaca we measured the stress at the points connecting the core to the volumes, ran a structural optimization to remove unnecessary material, and transformed the resulting voxels into a lattice — dense at high-load junctions, tapered where the loads fall away. The optimization cuts the primary structure from roughly 1,650 to 235 tonnes.',
         ],
         media: [
-          { type: 'video', src: 'projects/sensi/onboard.mp4', caption: 'Onboarding flow.' },
-          { type: 'image', src: 'projects/sensi/onboarding.webp', caption: 'The first screen.' },
+          { type: 'image', src: 'projects/breathing-mass/structure.webp', caption: 'Self-braced structural system: load transfer from plugged volumes through the triangulated cores.' },
+          { type: 'image', src: 'projects/breathing-mass/topology.gif', caption: 'Topology optimization: the stressed column resolving into a load-following lattice.' },
         ],
       },
       {
-        heading: 'Shaping the plan',
+        heading: 'Growing the volumes',
         body: [
-          'The plan is interpreted into rooms and uses that you can review and correct — the model’s reading of the drawing stays visible and editable throughout.',
+          'The plugin masses are computationally grown along the lattice, their placement and density optimized by incident radiation for thermal regulation, wind pressure for airflow, and volumetric density. A data-driven deterministic engine measures each candidate volume across 232 branches and normalises it, so every form is justified by data before it is committed.',
         ],
         media: [
-          { type: 'video', src: 'projects/sensi/shape.mp4', caption: 'Shaping: from drawing to structured rooms.' },
-          { type: 'image', src: 'projects/sensi/shape-01.webp', caption: 'Reading the plan.' },
-          { type: 'image', src: 'projects/sensi/shape-02.webp', caption: 'Rooms and uses, reviewable.' },
+          { type: 'image', src: 'projects/breathing-mass/volume-scatter.webp', caption: 'Volume scattering: candidate masses evaluated by radiation, wind, and density.' },
         ],
       },
       {
-        heading: 'The comfort report',
+        heading: 'The breathing core — an environmental machine',
         body: [
-          'The output is a sensory report of the plan: how the spaces will feel, room by room, presented so a design team can act on it.',
+          'The core is where the tower earns its name. A water-cascade system, electrostatic precipitation for air purification, and Climeworks-style capture pull CO₂ and particulates from ambient air, cleaning it before it is redistributed through the spine and stored back into the ground. The structure and the environmental system are one and the same object.',
         ],
         media: [
-          { type: 'video', src: 'projects/sensi/report.mp4', caption: 'Generating the report.' },
-          { type: 'image', src: 'projects/sensi/report-01.webp', caption: 'The comfort report.' },
-          { type: 'image', src: 'projects/sensi/report-02.webp', caption: 'Room-by-room detail.' },
+          { type: 'image', src: 'projects/breathing-mass/breathing-core.webp', caption: 'The environmental machine: water cascade, electrostatic precipitation, and CO₂ capture.' },
+        ],
+      },
+      {
+        heading: 'Fixed vs. adaptive facade',
+        body: [
+          'The skin operates in two modes depending on the program behind it. A pattern derived from mashrabiya logic becomes a performative facade geometry — an adaptive, dynamic system where it needs to breathe and respond, and a fixed, collated system where it does not. Wind direction and radiation set the pattern; the same grammar reads as both a static and a moving skin.',
+        ],
+        media: [
+          { type: 'image', src: 'projects/breathing-mass/facade-pattern.webp', caption: 'From mashrabiya inspiration to a performative facade geometry.' },
+          { type: 'image', src: 'projects/breathing-mass/adaptive-facade.webp', caption: 'One grammar, two modes: an adaptive dynamic skin and a fixed collated one.' },
+        ],
+      },
+      {
+        heading: 'The tower',
+        body: [
+          'Assembled, the system reads as a stack of plugged volumes around a breathing spine — a tower that behaves less like an object and more like a piece of the city’s respiratory infrastructure.',
+        ],
+        media: [
+          { type: 'image', src: 'projects/breathing-mass/cover.webp', caption: 'The Hyper Lung against the Andes.' },
+          { type: 'image', src: 'projects/breathing-mass/renders.webp', caption: 'Plugged volumes around the breathing spine.' },
+          { type: 'image', src: 'projects/breathing-mass/context.webp', caption: 'The tower against the Santiago skyline.' },
         ],
       },
     ],
@@ -137,8 +290,8 @@ export const projects = [
     subtitle:
       'A wind-adaptive research & education hub with expedition basecamp in Punta Arenas, Chile — discrete modules aggregated against a perpetually windy subpolar climate.',
     year: '2025/26',
-    module: 'Studio — MaCAD, IAAC',
-    team: ['Charles Abi Chahine', 'Emilie El Chidiac', 'María Sánchez', 'Lakzhmy Zaro'],
+    module: 'ACESD Studio — MaCAD, IAAC',
+    team: ['Charles Abi Chahine', 'Emilie El Chidiac', 'María Sánchez Domínguez', 'Lakzhmy Mari Zaro'],
     tools: ['Rhino', 'Grasshopper', 'Wasp', 'Kangaroo', 'Speckle'],
     tag: 'GH',
     toolsShort: 'GH · WASP · KANGAROO',
@@ -176,6 +329,63 @@ export const projects = [
           { type: 'image', src: 'projects/huddle/axonometric.webp', caption: 'Aggregation axonometric.' },
           { type: 'image', src: 'projects/huddle/persp-01.webp', caption: 'The Huddle against the Patagonian horizon.' },
           { type: 'image', src: 'projects/huddle/persp-02.webp', caption: 'Between the modules.' },
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'luminous-stratum',
+    title: 'The Luminous Stratum',
+    subtitle:
+      'A “volume of sedimented light” inserted into Cairo’s historic fabric — an independent lattice that hovers within a market void, filtering the harsh sun without ever touching the historic walls.',
+    year: '2025',
+    module: 'Complex Forming — MaCAD, IAAC',
+    team: ['Charles Abi Chahine'],
+    tools: ['Rhino', 'Grasshopper', 'Kangaroo'],
+    tag: 'GH',
+    toolsShort: 'GH · KANGAROO',
+    cover: 'projects/luminous-stratum/cover.webp',
+    intro: [
+      'In the dense historic fabric of Cairo, light is both a blessing and a burden. The Luminous Stratum proposes a new architectural language that negotiates this relationship — a “volume of sedimented light” that mimics the city’s stratification while filtering the harsh sun. Designed for the Complex Forming seminar, it is an independent system of stacked lamellas that hovers within the void of the Bab Al-Luk historic market, leaving the original structure untouched.',
+    ],
+    sections: [
+      {
+        heading: 'More than a roof',
+        body: [
+          'The system is deliberately independent: it revitalizes the market below without touching the historic walls. Voids are cut into the geometry precisely so the new form pulls away from its context, respecting the constraint of independence. It reads as a continuous volume that nests within the void — a porous buffer that protects the atrium without sealing it off.',
+        ],
+        media: [
+          { type: 'image', src: 'projects/luminous-stratum/concept.webp', caption: 'A volume of sedimented light: an independent system layered above the untouched historic market.' },
+          { type: 'image', src: 'projects/luminous-stratum/axo.webp', caption: 'The lattice hovering within the historic market hall.' },
+        ],
+      },
+      {
+        heading: 'Computational form-finding',
+        body: [
+          'The geometry is generated through Kangaroo physics. The process begins with a flat mesh; strategic voids are cut in to ensure the form pulls away from the historic context. Edge anchor points and specific ‘OnCurve’ goals define the footprint, then vertical load forces pull the mesh upward into a relaxed catenary vault. The most defining move comes next: mesh faces are sorted by their normal vectors, and that orientation dictates function.',
+        ],
+        media: [
+          { type: 'image', src: 'projects/luminous-stratum/form-finding.gif', caption: 'Step by step: flat mesh, strategic voids, form-finding goals, solver relaxation, face sorting.' },
+          { type: 'image', src: 'projects/luminous-stratum/form-logic.webp', caption: 'The computational logic: anchor points, form-finding forces, and the sorting of mesh faces.' },
+        ],
+      },
+      {
+        heading: 'Geometry becomes function',
+        body: [
+          'Vertical faces become gradient frosted louvers that control sun glare; horizontal faces become structural lamellas that serve as shelving and walkable surfaces. The architectural elements all materialize simultaneously from the relaxed mesh — the form-finding is the generator, resolving the complex geometry into louvers, lamellas, and paths in one unified move. The system is modular, repeated along the market hall; for the last vault, different anchor points turn the workflow into a continuous staircase connecting the two levels.',
+        ],
+        media: [
+          { type: 'image', src: 'projects/luminous-stratum/iterations.webp', caption: 'Iterating vertical loads and louver/lamella domains to balance shading against structure.' },
+        ],
+      },
+      {
+        heading: 'An occupiable lattice',
+        body: [
+          'Form-finding is rarely linear. I tested vertical loads from a shallow 15% to a steep 75%, and calibrated the domains for the frosted louvers and structural lamellas to tune porosity — the balance between sun shading and structural integrity. The selected iteration uses a 35% vertical load, giving the optimal vault height and spatial clearance for the functional layers below. The result is an occupiable lattice of filtered light that respects the past while embracing a computational future.',
+        ],
+        media: [
+          { type: 'image', src: 'projects/luminous-stratum/section.webp', caption: 'Section: an independent system hovering within the void, holding its distance from the historic walls.' },
+          { type: 'image', src: 'projects/luminous-stratum/interior.webp', caption: 'Sedimented light in the market below.' },
         ],
       },
     ],
