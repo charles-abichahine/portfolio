@@ -14,6 +14,12 @@ export const projects = [
     tag: 'AI',
     toolsShort: 'PYTHON · SENSORY AI',
     cover: 'projects/sensi/cover.gif',
+    category: 'Computation & AI',
+    award: 'MaCAD Award 2026',
+    links: {
+      github: 'https://github.com/sclebow/AIA26_Studio/tree/main/team_02',
+      blog: 'https://blog.iaac.net/sensi-making-comfort-a-design-layer/',
+    },
     intro: [
       'In architecture we model everything — structure, cost, energy, code compliance. Layer after layer that makes a building accountable before it is built. Sensi adds the one layer we never formalized: how a space will actually feel. Not emotion — the full sensory experience of standing in a room, scored across six senses: thermal, visual, acoustic, spatial, olfactory, tactile. Not in the abstract, but for a specific person.',
     ],
@@ -76,6 +82,12 @@ export const projects = [
     tag: 'ML',
     toolsShort: 'PYTHON · ML · GIS',
     cover: 'projects/urban-risk/cover.webp',
+    category: 'Computation & AI',
+    award: null,
+    links: {
+      github: 'https://github.com/modnas-m/MaCAD26-G01-DataEncoding',
+      blog: 'https://blog.iaac.net/encoding-urban-risk-spatial-feature-analysis-and-assessment/',
+    },
     intro: [
       'Can the physical layout of a street — measurable from public map data — predict how risky it feels? We framed it as a three-class problem: low, medium, or high risk, using seven spatial features drawn from OpenStreetMap and Mapillary per street segment. This is the full arc of the project — not just the results, but the wrong turn that made them honest.',
     ],
@@ -150,6 +162,12 @@ export const projects = [
     tag: 'AI',
     toolsShort: 'FLUX · TRELLIS · PYTHON',
     cover: 'projects/legoarch/cover.gif',
+    category: 'Computation & AI',
+    award: null,
+    links: {
+      github: 'https://github.com/hi-em/genai-legoarch',
+      blog: 'https://blog.iaac.net/legoarch-behind-the-sets/',
+    },
     intro: [
       'You type a building, and a minute later a real LEGO set is sitting on a shelf: rendered, modelled, brick-built, priced, and catalog-legal. Most "AI makes LEGO" demos stop at a gorgeous render — but a render is a promise, not a product. lEgoarCh builds the downstream half: the machinery that forces the dream to obey real bricks, real colours, and real gravity.',
     ],
@@ -220,6 +238,11 @@ export const projects = [
     tag: 'GH',
     toolsShort: 'GH · ALPACA · SPECKLE',
     cover: 'projects/breathing-mass/cover.gif',
+    category: 'BIM & Workflows',
+    award: null,
+    links: {
+      blog: 'https://blog.iaac.net/breathing-mass-hb01-structural-facade/',
+    },
     intro: [
       'Breathing Mass is a vertical ecosystem in Santiago where architecture, wind, and energy converge. The Hyper Lung captures, cleans, and redistributes polluted air through a breathing core, turning the tower into living infrastructure that breathes with the city. Within a larger hyperbuilding studio, our team owned its structure and facade — translating the lung analogy into a self-braced skeleton and an adaptive skin, every form justified by data and published to the program and data teams through Speckle.',
     ],
@@ -296,6 +319,11 @@ export const projects = [
     tag: 'GH',
     toolsShort: 'GH · WASP · KANGAROO',
     cover: 'projects/huddle/persp-01.webp',
+    category: 'Design & Research',
+    award: null,
+    links: {
+      blog: 'https://blog.iaac.net/the-huddle-wind-adaptive-research-hub-in-punta-arenas-chile/',
+    },
     intro: [
       'Punta Arenas sits at the southern tip of Chile in a cold, perpetually windy subpolar climate. The Huddle is a research and education hub with an expedition basecamp for 1,000 users, designed the way penguins survive the same latitudes: compact forms, packed close, shielding one another from the wind.',
     ],
@@ -345,6 +373,11 @@ export const projects = [
     tag: 'GH',
     toolsShort: 'GH · KANGAROO',
     cover: 'projects/luminous-stratum/cover.webp',
+    category: 'Design & Research',
+    award: null,
+    links: {
+      blog: 'https://blog.iaac.net/the-luminous-stratum/',
+    },
     intro: [
       'In the dense historic fabric of Cairo, light is both a blessing and a burden. The Luminous Stratum proposes a new architectural language that negotiates this relationship — a “volume of sedimented light” that mimics the city’s stratification while filtering the harsh sun. Designed for the Complex Forming seminar, it is an independent system of stacked lamellas that hovers within the void of the Bab Al-Luk historic market, leaving the original structure untouched.',
     ],
