@@ -1,3 +1,4 @@
+import { Fragment } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { asset, getProject, projects } from '../data/projects.js'
 
@@ -37,6 +38,29 @@ export default function Project() {
   const prev = projects[(idx - 1 + projects.length) % projects.length]
   const next = projects[(idx + 1) % projects.length]
 
+  const metaBits = []
+  if (project.category) {
+    metaBits.push(<span key="cat" className="text-ink">{project.category}</span>)
+  }
+  if (project.award) {
+    metaBits.push(
+      <span
+        key="award"
+        className="inline-flex items-center gap-1.5 rounded-full border border-accent/40 px-2.5 py-0.5 text-accent"
+      >
+        <span className="text-[0.72em]" aria-hidden="true">★</span>
+        {project.award}
+      </span>,
+    )
+  }
+  if (project.tools?.length) {
+    metaBits.push(<span key="tools" className="text-muted">{project.tools.join(' · ')}</span>)
+  }
+
+  const links = []
+  if (project.links?.github) links.push({ label: 'GitHub', href: project.links.github })
+  if (project.links?.blog) links.push({ label: 'Read the blog', href: project.links.blog })
+
   return (
     <article className="mx-auto max-w-6xl px-6 py-14">
       <Link to="/work" className="label-mono text-muted transition-colors hover:text-accent">
@@ -48,9 +72,37 @@ export default function Project() {
           {project.title}
           <span className="text-accent">.</span>
         </h1>
-        <p className="mb-10 max-w-[62ch] text-lg leading-relaxed text-soft">{project.subtitle}</p>
+        <p className="mb-6 max-w-[62ch] text-lg leading-relaxed text-soft">{project.subtitle}</p>
 
-        <dl className="mb-10 grid grid-cols-2 gap-x-6 gap-y-5 border-t border-ink pt-5 font-mono text-xs sm:grid-cols-4">
+        {metaBits.length > 0 && (
+          <div className="label-mono flex flex-wrap items-center gap-x-4 gap-y-3">
+            {metaBits.map((bit, i) => (
+              <Fragment key={bit.key}>
+                {i > 0 && <span className="h-1 w-1 shrink-0 rounded-full bg-line" aria-hidden="true" />}
+                {bit}
+              </Fragment>
+            ))}
+          </div>
+        )}
+
+        {links.length > 0 && (
+          <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2">
+            {links.map((l) => (
+              <a
+                key={l.href}
+                href={l.href}
+                target="_blank"
+                rel="noreferrer"
+                className="label-mono group inline-flex items-center gap-1.5 text-soft transition-colors hover:text-accent"
+              >
+                {l.label}
+                <span className="text-muted transition-colors group-hover:text-accent" aria-hidden="true">↗</span>
+              </a>
+            ))}
+          </div>
+        )}
+
+        <dl className="mb-10 mt-10 grid grid-cols-2 gap-x-6 gap-y-5 border-t border-ink pt-5 font-mono text-xs sm:grid-cols-4">
           {[
             ['YEAR', project.year],
             ['MODULE', project.module],
