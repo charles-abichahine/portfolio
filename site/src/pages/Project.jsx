@@ -53,9 +53,6 @@ export default function Project() {
       </span>,
     )
   }
-  if (project.tools?.length) {
-    metaBits.push(<span key="tools" className="text-muted">{project.tools.join(' · ')}</span>)
-  }
 
   const links = []
   if (project.links?.github) links.push({ label: 'GitHub', href: project.links.github })
