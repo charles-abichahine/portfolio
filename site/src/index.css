@@ -31,3 +31,16 @@
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
+
+/* Cover reveal: on the /work index a hovered project's animated cover fades in
+   over its static poster, so the GIF projects come alive on interaction. */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@utility fade-in {
+  animation: fade-in 0.4s ease both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .fade-in { animation: none; }
+}
