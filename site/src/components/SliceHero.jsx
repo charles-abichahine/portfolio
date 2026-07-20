@@ -252,9 +252,12 @@ export default function SliceHero() {
       pointer.y = e.clientY - r.top
       pointer.active = true
     }
+    // pointerleave never fires on touch, so end the deposit on up/cancel too.
     const onLeave = () => { pointer.active = false }
     section.addEventListener('pointermove', onMove)
     section.addEventListener('pointerleave', onLeave)
+    section.addEventListener('pointerup', onLeave)
+    section.addEventListener('pointercancel', onLeave)
 
     const onMotionPref = () => {
       reduce = mq.matches
@@ -291,17 +294,21 @@ export default function SliceHero() {
       clearTimeout(rt)
       section.removeEventListener('pointermove', onMove)
       section.removeEventListener('pointerleave', onLeave)
+      section.removeEventListener('pointerup', onLeave)
+      section.removeEventListener('pointercancel', onLeave)
     }
   }, [])
 
+  // touch-none lets a finger drag deposit material instead of the browser
+  // claiming the gesture as a scroll — the landing doesn't scroll anyway.
   return (
     <section
       ref={sectionRef}
       onClick={() => regenRef.current()}
-      className="relative h-[100svh] w-full overflow-hidden bg-[#0e0e12]"
+      className="relative h-[100svh] w-full touch-none overflow-hidden bg-[#0e0e12]"
     >
       <canvas ref={canvasRef} className="absolute inset-0 z-0 h-full w-full" aria-hidden="true" />
-      <div className="relative z-10 mx-auto flex h-[100svh] max-w-6xl flex-col justify-end px-6 pb-16 pt-28">
+      <div className="relative z-10 flex h-[100svh] w-full flex-col justify-end px-6 pb-16 pt-28 sm:px-10 lg:px-16">
         <div className="flex items-center gap-4 sm:gap-5">
           <Logo className="h-14 w-auto shrink-0 text-[#f4f4ee] sm:h-20" />
           <div>

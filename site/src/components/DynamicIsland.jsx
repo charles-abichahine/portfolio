@@ -12,7 +12,7 @@ import Logo from './Logo.jsx'
 
 const links = [
   { to: '/work', label: 'Work' },
-  { to: '/about', label: 'About me' },
+  { to: '/about', label: 'About' },
   { to: '/cv', label: 'CV' },
 ]
 
