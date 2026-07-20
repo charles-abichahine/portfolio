@@ -3,7 +3,7 @@ import { certificates, contact, education, experience, languages, skills } from 
 const base = import.meta.env.BASE_URL
 
 function SectionLabel({ children }) {
-  return <h2 className="label-mono mb-6 border-t border-ink pt-4 text-muted">{children}</h2>
+  return <h2 className="label-mono mb-6 border-t border-rule pt-4 text-muted">{children}</h2>
 }
 
 export default function CV() {

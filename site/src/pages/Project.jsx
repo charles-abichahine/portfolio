@@ -99,7 +99,7 @@ export default function Project() {
           </div>
         )}
 
-        <dl className="mb-10 mt-10 grid grid-cols-2 gap-x-6 gap-y-5 border-t border-ink pt-5 font-mono text-xs sm:grid-cols-4">
+        <dl className="mb-10 mt-10 grid grid-cols-2 gap-x-6 gap-y-5 border-t border-rule pt-5 font-mono text-xs sm:grid-cols-4">
           {[
             ['YEAR', project.year],
             ['MODULE', project.module],
@@ -144,7 +144,7 @@ export default function Project() {
         ))}
       </div>
 
-      <nav className="label-mono mt-16 flex justify-between border-t border-ink pt-5">
+      <nav className="label-mono mt-16 flex justify-between border-t border-rule pt-5">
         <Link to={`/work/${prev.slug}`} className="text-muted transition-colors hover:text-accent">
           ← {prev.title}
         </Link>

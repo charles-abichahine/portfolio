@@ -34,7 +34,7 @@ export default function Work() {
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-16">
-      <header className="mb-10 flex items-baseline justify-between border-b border-ink pb-5">
+      <header className="mb-10 flex items-baseline justify-between border-b border-rule pb-5">
         <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Work</h1>
         <p className="label-mono text-muted">
           Index — {String(displayOrder.length).padStart(2, '0')} Projects · 2025–2026
@@ -43,7 +43,7 @@ export default function Work() {
 
       {groups.map((group) => (
         <section key={group.category} className="mb-12 last:mb-0">
-          <div className="mb-2 flex items-baseline justify-between border-t border-ink pt-3">
+          <div className="mb-2 flex items-baseline justify-between border-t border-rule pt-3">
             <h2 className="label-mono text-ink">{group.category}</h2>
             <span className="label-mono text-muted">{String(group.items.length).padStart(2, '0')}</span>
           </div>
