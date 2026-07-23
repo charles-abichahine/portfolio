@@ -1,0 +1,16 @@
+<svg viewBox="0 0 110 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Theme-adaptive: ink on light UI, off-white on dark UI (matches the nav
+       logo). Modern browsers use this SVG for the tab; favicon.ico is the
+       black-line fallback for Google search and older browsers. -->
+  <style>
+    .stroke { stroke: #111110; }
+    @media (prefers-color-scheme: dark) { .stroke { stroke: #ececE6; } }
+  </style>
+  <g class="stroke" fill="none" stroke-linecap="round">
+    <circle cx="48" cy="50" r="40" stroke-width="6" pathLength="100"
+      stroke-dasharray="86 14" transform="rotate(18 48 50)" />
+    <circle cx="48" cy="50" r="31" stroke-width="5.5" pathLength="100"
+      stroke-dasharray="38 10 40 12" transform="rotate(-30 48 50)" />
+  </g>
+  <rect x="93" y="57" width="5" height="25" rx="1" fill="#d92b1f" />
+</svg>
