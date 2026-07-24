@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Logo from './Logo.jsx'
 
 /*
@@ -6,13 +6,33 @@ import Logo from './Logo.jsx'
  * A slowly-morphing solid is expressed as its signed-distance field, then
  * drawn the way a slicer draws a layer: perimeter shells + 45° rectilinear
  * infill (marching squares over the SDF). The pointer deposits material like
- * a nozzle; clicking the field re-slices a fresh form. Monochrome white-on-
- * dark — the only red is the name's period. Static settled frame under
- * prefers-reduced-motion (which is honoured live, not only at load).
+ * a nozzle; clicking the field re-slices a fresh form. The only red is the
+ * name's period. Static settled frame under prefers-reduced-motion (which is
+ * honoured live, not only at load).
  *
  * The solids are stored in normalised coordinates so a resize re-fits the
  * SAME composition to the new size instead of re-rolling a new one.
+ *
+ * Themed: light-on-dark and dark-on-light. The dark values are deliberately
+ * deeper/brighter than the interior tokens (bg below paper, name above ink),
+ * so the palette is kept here as literals rather than routed through the CSS
+ * tokens, which would flatten that tuning. `line`/`lineSoft` are "r,g,b"
+ * fragments — the canvas composes the alpha per stroke.
  */
+const PALETTES = {
+  dark: {
+    bg: '#0e0e12', grid: 'rgba(244,244,238,0.04)', line: '244,244,238', lineSoft: '233,233,228',
+    name: '#f4f4ee', red: '#e5382b', sub: '#a9a9a2', hint: '#5a5a62',
+  },
+  light: {
+    bg: '#ffffff', grid: 'rgba(17,17,16,0.05)', line: '20,20,19', lineSoft: '42,42,40',
+    name: '#111110', red: '#d92b1f', sub: '#55554f', hint: '#8a8a82',
+  },
+}
+const readTheme = () =>
+  (typeof document !== 'undefined' && document.documentElement.getAttribute('data-theme') === 'light')
+    ? 'light'
+    : 'dark'
 
 const rnd = (a, b) => a + Math.random() * (b - a)
 const ri = (n) => (Math.random() * n) | 0
@@ -137,14 +157,14 @@ function makeSlice(ctx, W, H, carry) {
     const i = r * cols + c
     return field[i] * (1 - fx) * (1 - fy) + field[i + 1] * fx * (1 - fy) + field[i + cols] * (1 - fx) * fy + field[i + cols + 1] * fx * fy
   }
-  function frame(fctx, w, h, t, pointer) {
+  function frame(fctx, w, h, t, pointer, pal) {
     const mt = t * 0.0013
     const build = easeOut(Math.min(1, t / 1400))
     dep.s = lerp(dep.s, pointer.active ? 1 : 0, 0.06)
     if (pointer.active) { dep.x = lerp(dep.x, pointer.x, 0.12); dep.y = lerp(dep.y, pointer.y, 0.12) }
     const mn = evalField(mt)
     fctx.clearRect(0, 0, w, h)
-    fctx.strokeStyle = 'rgba(244,244,238,0.04)'
+    fctx.strokeStyle = pal.grid
     fctx.lineWidth = 1
     fctx.stroke(gridPath)
     if (mn < -1) {
@@ -153,7 +173,7 @@ function makeSlice(ctx, W, H, carry) {
       const inset = spacing * 0.55
       for (let s = 0; s < 3; s++) {
         const L = -s * inset
-        fctx.strokeStyle = s === 0 ? `rgba(244,244,238,${0.55 * build})` : `rgba(233,233,228,${0.32 * build})`
+        fctx.strokeStyle = s === 0 ? `rgba(${pal.line},${0.55 * build})` : `rgba(${pal.lineSoft},${0.32 * build})`
         fctx.lineWidth = s === 0 ? 1.3 : 1
         fctx.beginPath()
         isoPath(fctx, field, cols, rows, cell, L)
@@ -166,7 +186,7 @@ function makeSlice(ctx, W, H, carry) {
       const cx = w / 2
       const cy = h / 2
       const Lr = Math.hypot(w, h)
-      fctx.strokeStyle = `rgba(233,233,228,${0.17 * build})`
+      fctx.strokeStyle = `rgba(${pal.lineSoft},${0.17 * build})`
       fctx.lineWidth = 1
       fctx.beginPath()
       for (let off = -Lr; off <= Lr; off += spacing) {
@@ -199,6 +219,30 @@ export default function SliceHero() {
   const sectionRef = useRef(null)
   const canvasRef = useRef(null)
   const regenRef = useRef(() => {})
+  const redrawRef = useRef(() => {})
+
+  const [theme, setTheme] = useState(readTheme)
+  const pal = PALETTES[theme]
+  // The canvas loop reads the palette off a ref so a theme flip never has to
+  // rebuild the scene (which would re-roll the composition).
+  const palRef = useRef(pal)
+
+  // Follow the toggle: DynamicIsland flips data-theme on <html>.
+  useEffect(() => {
+    const el = document.documentElement
+    const sync = () => setTheme(readTheme())
+    const mo = new MutationObserver(sync)
+    mo.observe(el, { attributes: true, attributeFilter: ['data-theme'] })
+    sync()
+    return () => mo.disconnect()
+  }, [])
+
+  // Push the new palette to the loop and force one frame, so a paused hero
+  // (reduced motion, or scrolled out of view) recolours immediately.
+  useEffect(() => {
+    palRef.current = PALETTES[theme]
+    redrawRef.current()
+  }, [theme])
 
   useEffect(() => {
     const section = sectionRef.current
@@ -213,6 +257,9 @@ export default function SliceHero() {
     let start = 0
     let scene = null
     const pointer = { x: -1, y: -1, active: false }
+    redrawRef.current = () => {
+      if (scene) scene.frame(ctx, W, H, reduce ? 1e6 : performance.now() - start, pointer, palRef.current)
+    }
 
     function size() {
       const dpr = Math.min(devicePixelRatio || 1, 2)
@@ -225,7 +272,7 @@ export default function SliceHero() {
     }
     function loop() {
       const t = performance.now() - start
-      scene.frame(ctx, W, H, t, pointer)
+      scene.frame(ctx, W, H, t, pointer, palRef.current)
       if (visible && !reduce) raf = requestAnimationFrame(loop)
       else raf = 0
     }
@@ -235,14 +282,14 @@ export default function SliceHero() {
       size()
       scene = makeSlice(ctx, W, H, carry)
       start = carry ? performance.now() - 2000 : performance.now() // skip the build-in fade on resize
-      if (reduce) scene.frame(ctx, W, H, 1e6, pointer)
+      if (reduce) scene.frame(ctx, W, H, 1e6, pointer, palRef.current)
       else loop()
     }
     regenRef.current = () => {
       if (!scene) return
       scene.regen()
       start = performance.now()
-      if (reduce) scene.frame(ctx, W, H, 1e6, pointer)
+      if (reduce) scene.frame(ctx, W, H, 1e6, pointer, palRef.current)
       else if (!raf) loop()
     }
 
@@ -261,7 +308,7 @@ export default function SliceHero() {
 
     const onMotionPref = () => {
       reduce = mq.matches
-      if (reduce) { if (raf) cancelAnimationFrame(raf); raf = 0; if (scene) scene.frame(ctx, W, H, 1e6, pointer) } else if (!raf) { start = performance.now() - 2000; loop() }
+      if (reduce) { if (raf) cancelAnimationFrame(raf); raf = 0; if (scene) scene.frame(ctx, W, H, 1e6, pointer, palRef.current) } else if (!raf) { start = performance.now() - 2000; loop() }
     }
     mq.addEventListener('change', onMotionPref)
 
@@ -305,23 +352,27 @@ export default function SliceHero() {
     <section
       ref={sectionRef}
       onClick={() => regenRef.current()}
-      className="relative h-[100svh] w-full touch-none overflow-hidden bg-[#0e0e12]"
+      className="relative h-[100svh] w-full touch-none overflow-hidden"
+      style={{ backgroundColor: pal.bg }}
     >
       <canvas ref={canvasRef} className="absolute inset-0 z-0 h-full w-full" aria-hidden="true" />
       <div className="relative z-10 flex h-[100svh] w-full flex-col justify-end px-6 pb-16 pt-28 sm:px-10 lg:px-16">
-        <div className="flex items-center gap-4 sm:gap-5">
-          <Logo className="h-14 w-auto shrink-0 text-[#f4f4ee] sm:h-20" />
+        <div className="flex items-center gap-4 sm:gap-5" style={{ color: pal.name }}>
+          <Logo className="h-14 w-auto shrink-0 sm:h-20" />
           <div>
-            <h1 className="text-5xl font-bold leading-[0.96] tracking-tight text-[#f4f4ee] sm:text-6xl md:text-7xl">
-              Charles Abi Chahine<span className="text-[#e5382b]">.</span>
+            <h1 className="text-5xl font-bold leading-[0.96] tracking-tight sm:text-6xl md:text-7xl">
+              Charles Abi Chahine<span style={{ color: pal.red }}>.</span>
             </h1>
-            <p className="mt-3 font-mono text-xs uppercase tracking-[0.16em] text-[#a9a9a2]">
+            <p className="mt-3 font-mono text-xs uppercase tracking-[0.16em]" style={{ color: pal.sub }}>
               Architect · Computational Designer
             </p>
           </div>
         </div>
       </div>
-      <span className="pointer-events-none absolute bottom-5 right-5 z-10 font-mono text-[0.56rem] uppercase tracking-[0.1em] text-[#5a5a62]">
+      <span
+        className="pointer-events-none absolute bottom-5 right-5 z-10 font-mono text-[0.56rem] uppercase tracking-[0.1em]"
+        style={{ color: pal.hint }}
+      >
         Click to re-slice
       </span>
     </section>
