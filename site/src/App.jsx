@@ -11,15 +11,18 @@ function App() {
   useEffect(() => {
     window.scrollTo(0, 0)
   }, [pathname])
-  const home = pathname === '/'
+  // Routes that own the whole viewport and supply their own footer. They must not
+  // sit inside min-h-screen: a 100vh wrapper around a 100svh child is taller than
+  // the visual viewport on mobile, which hands the page a phantom scrollbar.
+  const fullBleed = pathname === '/' || pathname === '/about'
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className={fullBleed ? 'flex flex-col' : 'flex min-h-screen flex-col'}>
       <DynamicIsland />
-      <main className="flex-1">
+      <main className={fullBleed ? '' : 'flex-1'}>
         <Outlet />
       </main>
-      {!home && <Footer />}
+      {!fullBleed && <Footer />}
     </div>
   )
 }
