@@ -50,22 +50,18 @@
     />
     <meta name="twitter:image" content="https://charlesabichahine.com/og-image.png" />
     <!--
-      Resolve the theme before first paint, or the page renders light and then
-      snaps to dark once React mounts. Must stay inline and stay in <head>:
-      an external file would be another round trip with the flash inside it.
-      Absent a stored choice we follow the OS and store nothing, so the site
-      keeps tracking prefers-color-scheme until the toggle is actually used.
+      Resolve the theme before first paint, or the page renders one theme and
+      then snaps to the other once React mounts. Must stay inline and stay in
+      <head>: an external file would be another round trip with the flash inside
+      it. Light is the default — a first visit (or any visit with no stored
+      choice) opens light regardless of the OS setting; only an explicit toggle,
+      persisted in localStorage, moves it to dark.
     -->
     <script>
       (function () {
         try {
           var stored = localStorage.getItem('theme')
-          var theme =
-            stored === 'light' || stored === 'dark'
-              ? stored
-              : window.matchMedia('(prefers-color-scheme: dark)').matches
-                ? 'dark'
-                : 'light'
+          var theme = stored === 'dark' ? 'dark' : 'light'
           document.documentElement.setAttribute('data-theme', theme)
         } catch (e) {
           // localStorage throws in some privacy modes — fall back to light.

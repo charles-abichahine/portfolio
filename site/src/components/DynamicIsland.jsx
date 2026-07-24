@@ -83,9 +83,9 @@ export default function DynamicIsland() {
     }
   }, [activeTo])
 
-  // Persist only on an explicit toggle. Writing the resolved theme on mount
-  // would freeze whatever the OS happened to say on the first visit, and the
-  // site would stop following prefers-color-scheme forever after.
+  // Light is the default; dark is only ever reached by an explicit toggle, and
+  // that choice is what gets persisted. Nothing is written on mount, so a
+  // first-time visitor always opens light.
   const toggleTheme = () => {
     // Deliberately not inside a setTheme updater: updaters must stay pure, and
     // React may invoke one during a render it later discards — which would leave
@@ -99,23 +99,6 @@ export default function DynamicIsland() {
       // Private mode — the theme still applies, it just will not survive a reload.
     }
   }
-
-  // Until a choice is stored, keep tracking the OS so the site flips with it.
-  useEffect(() => {
-    const mq = window.matchMedia('(prefers-color-scheme: dark)')
-    const onSystemChange = (e) => {
-      let stored = null
-      try {
-        stored = localStorage.getItem(THEME_KEY)
-      } catch { /* unreadable — treat as unset and follow the OS */ }
-      if (stored === 'light' || stored === 'dark') return
-      const next = e.matches ? 'dark' : 'light'
-      applyTheme(next)
-      setTheme(next)
-    }
-    mq.addEventListener('change', onSystemChange)
-    return () => mq.removeEventListener('change', onSystemChange)
-  }, [])
 
   const open = !compact || hover
   const dark = theme === 'dark'
