@@ -11,6 +11,9 @@ const MONO = 'font-mono text-[0.56rem] uppercase tracking-[0.2em] font-normal'
 const ZOOM_MIN = 1
 const ZOOM_MAX = 3.2
 const CLOSE_DELAY = 160
+// Spotlight radius, in viewBox units (the frame is 360 wide). ~28 reveals the
+// region a place sits in — its neighbours and coastline — not the continent.
+const SPOT_R = 28
 
 export default function About() {
   const stageRef = useRef(null)
@@ -26,10 +29,20 @@ export default function About() {
   // whether pointer-leave is allowed to close the card.
   const pinnedRef = useRef(false)
   const [activeId, setActiveId] = useState(null)
-  // The landmass is context, not content — dropping it leaves the eleven and the
-  // thread alone on the paper, which is a legitimate way to read the page.
-  const [showLand, setShowLand] = useState(true)
+  // Off by default: the page opens as the eleven and the thread alone on the
+  // paper, which is the stronger image and the one worth landing on. The
+  // landmass is context you ask for, not context you arrive in.
+  const [showLand, setShowLand] = useState(false)
   const active = activeId ? byId[activeId] : null
+
+  /* The spotlight tracks the active place but keeps the last one after it
+     clears, so the reveal fades out where it appeared instead of snapping to
+     the top-left corner on the way out. byId returns a stable reference, so
+     this settles in one pass. */
+  const [spot, setSpot] = useState(null)
+  useEffect(() => {
+    if (active) setSpot(active)
+  }, [active])
 
   const isNarrow = () => window.matchMedia('(max-width: 767px)').matches
 
@@ -172,11 +185,33 @@ export default function About() {
         className="absolute inset-0 block h-full w-full origin-top-left transition-transform duration-300 ease-out motion-reduce:transition-none"
         onClick={(e) => { if (e.target === svgRef.current) close() }}
       >
+        {/* With the map off, hovering a place reveals only its own neighbourhood:
+            a radial ramp centred on that dot, solid at the centre and gone by
+            SPOT_R. Masking the single land path rather than drawing a second
+            copy keeps the 2,400-dot geometry rasterised once. */}
+        <defs>
+          <radialGradient
+            id="land-spot"
+            gradientUnits="userSpaceOnUse"
+            cx={spot ? lonToX(spot.lon) : 0}
+            cy={spot ? latToY(spot.lat) : 0}
+            r={SPOT_R}
+          >
+            <stop offset="0%" stopColor="#fff" stopOpacity="1" />
+            <stop offset="45%" stopColor="#fff" stopOpacity="0.8" />
+            <stop offset="100%" stopColor="#fff" stopOpacity="0" />
+          </radialGradient>
+          <mask id="land-spot-mask">
+            <rect x={VIEWBOX.x} y={VIEWBOX.y} width={VIEWBOX.w} height={VIEWBOX.h} fill="url(#land-spot)" />
+          </mask>
+        </defs>
+
         {/* the world, as a dot field — decorative, so it never takes a pointer */}
         <path
           d={LAND_PATH}
-          className={`pointer-events-none fill-line transition-opacity duration-500 ease-out motion-reduce:transition-none ${
-            showLand ? 'opacity-100' : 'opacity-0'
+          mask={showLand ? undefined : 'url(#land-spot-mask)'}
+          className={`pointer-events-none fill-land transition-opacity duration-300 ease-out motion-reduce:transition-none ${
+            showLand || active ? 'opacity-100' : 'opacity-0'
           }`}
         />
 
@@ -190,7 +225,7 @@ export default function About() {
               strokeLinecap="round"
               strokeWidth="0.34"
               className={`pointer-events-none transition-[stroke,opacity] duration-300 motion-reduce:transition-none ${
-                lit ? 'stroke-accent opacity-80' : 'stroke-rule opacity-30'
+                lit ? 'stroke-accent opacity-80' : 'stroke-soft opacity-45'
               }`}
             />
           )
@@ -231,9 +266,14 @@ export default function About() {
         })}
       </svg>
 
-      {/* veils keep the overlaid text legible over the dot field */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-[2] h-[52%] bg-gradient-to-b from-paper via-paper/80 to-transparent" />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] h-[26%] bg-gradient-to-t from-paper via-paper/70 to-transparent" />
+      {/* Veils keep the overlaid text legible over the dot field. The top one is
+          masked to the left on desktop: the copy sits in the left column, and a
+          full-width veil tall enough to cover the paragraph also covers the top
+          half of the map — which is most of it, since the band is vertically
+          centred. Masking buys legible text over the copy and an unveiled map
+          everywhere else. Below md the copy spans the width, so the mask goes. */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-[2] h-[56%] bg-gradient-to-b from-paper via-paper/75 to-transparent md:[mask-image:linear-gradient(to_right,#000_0%,#000_44%,transparent_70%)]" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] h-[24%] bg-gradient-to-t from-paper via-paper/55 to-transparent" />
 
       <div className="pointer-events-none absolute inset-0 z-[4] flex flex-col justify-between px-5 pb-5 pt-24 sm:px-8 sm:pb-8 lg:px-12">
         <div className="max-w-[58ch] md:max-w-[48%]">

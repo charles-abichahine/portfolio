@@ -6,6 +6,12 @@
   --color-soft: #55554f;
   --color-muted: #8a8a82;
   --color-line: #e6e6e2;
+  /* The /about dot-matrix landmass. Deliberately NOT --color-line: a hairline
+     border is meant to nearly disappear, but a field of ~2,400 dots is the
+     page's ground and has to read as a continuous surface. At line's value the
+     map sits at 1.25:1 and looks like blank paper; this is ~2.2:1 — clearly
+     present, still far below the place dots, which is the intended hierarchy. */
+  --color-land: #b0b0a8;
   /* Heavy rules (section tops, header underlines). Identical to ink in light —
      but ink flips to a near-white in dark, where a full-strength rule would
      outweigh the heading it sits under, so dark gives it its own quieter value. */
@@ -32,6 +38,7 @@ html[data-theme="dark"] {
   --color-soft: #a8a8a2;
   --color-muted: #82827a;
   --color-line: #2e2e34;
+  --color-land: #4a4a56;
   --color-rule: #4a4a52;
   --color-accent: #f0554a;
   color-scheme: dark;
