@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 import Logo from './Logo.jsx'
 
 /*
@@ -356,25 +357,74 @@ export default function SliceHero() {
       style={{ backgroundColor: pal.bg }}
     >
       <canvas ref={canvasRef} className="absolute inset-0 z-0 h-full w-full" aria-hidden="true" />
-      <div className="relative z-10 flex h-[100svh] w-full flex-col justify-end px-6 pb-16 pt-28 sm:px-10 lg:px-16">
-        <div className="flex items-center gap-4 sm:gap-5" style={{ color: pal.name }}>
-          <Logo className="h-14 w-auto shrink-0 sm:h-20" />
-          <div>
-            <h1 className="text-5xl font-bold leading-[0.96] tracking-tight sm:text-6xl md:text-7xl">
-              Charles Abi Chahine<span style={{ color: pal.red }}>.</span>
-            </h1>
-            <p className="mt-3 font-mono text-xs uppercase tracking-[0.16em]" style={{ color: pal.sub }}>
-              Architect · Computational Designer
-            </p>
-          </div>
+
+      {/* Name block, lifted off the bottom edge. The logo is set to the name's
+          height and sits directly in front of it as a lockup; the role line
+          sits under the name, and the CTA below that. */}
+      <div className="absolute bottom-16 left-6 right-6 z-10 sm:left-10">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <span className="flex shrink-0" style={{ color: pal.name }}>
+            <Logo className="h-11 w-auto sm:h-14" />
+          </span>
+          <h1 className="text-5xl font-bold leading-[0.98] tracking-tight sm:text-6xl" style={{ color: pal.name }}>
+            Charles Abi Chahine<span style={{ color: pal.red }}>.</span>
+          </h1>
         </div>
+        <p className="mt-4 font-mono text-xs uppercase tracking-[0.16em]" style={{ color: pal.sub }}>
+          Architect · Computational Designer
+        </p>
+        <Link
+          to="/work"
+          onClick={(e) => e.stopPropagation()}
+          className="mt-5 inline-flex items-center gap-1.5 font-mono text-[0.62rem] uppercase tracking-[0.18em] transition-opacity hover:opacity-70"
+          style={{ color: pal.red }}
+        >
+          View selected work <span aria-hidden="true">→</span>
+        </Link>
       </div>
-      <span
-        className="pointer-events-none absolute bottom-5 right-5 z-10 font-mono text-[0.56rem] uppercase tracking-[0.1em]"
+
+      {/* Legend — names the slicer layers the canvas actually draws (outer
+          perimeter, inner shells, 45° infill), so the piece reads as the
+          slice it is. Swatches are tinted from the same palette as the
+          strokes, so they track the theme. Rests on the baseline with the name.
+          pointer-events-none keeps a click here re-slicing like the rest. */}
+      <div
+        className="pointer-events-none absolute bottom-16 right-10 z-10 hidden flex-col items-end gap-1.5 font-mono text-[0.56rem] uppercase tracking-[0.1em] lg:flex"
         style={{ color: pal.hint }}
       >
-        Click to re-slice
-      </span>
+        {[
+          {
+            label: 'Outer shell',
+            swatch: <span className="block h-0 w-4" style={{ borderTop: `1.5px solid rgba(${pal.line},0.85)` }} />,
+          },
+          {
+            label: 'Inner shells',
+            swatch: (
+              <span className="flex w-4 flex-col gap-[3px]">
+                <span className="block h-0 w-full" style={{ borderTop: `1px solid rgba(${pal.lineSoft},0.5)` }} />
+                <span className="block h-0 w-full" style={{ borderTop: `1px solid rgba(${pal.lineSoft},0.5)` }} />
+              </span>
+            ),
+          },
+          {
+            label: 'Infill · 45°',
+            swatch: (
+              <span
+                className="block h-2 w-4"
+                style={{ backgroundImage: `repeating-linear-gradient(45deg, rgba(${pal.lineSoft},0.55) 0 1px, transparent 1px 4px)` }}
+              />
+            ),
+          },
+        ].map((row) => (
+          <div key={row.label} className="flex items-center gap-2">
+            <span>{row.label}</span>
+            {row.swatch}
+          </div>
+        ))}
+        <span className="mt-1.5" style={{ color: pal.hint, opacity: 0.7 }}>
+          Click to re-slice
+        </span>
+      </div>
     </section>
   )
 }
