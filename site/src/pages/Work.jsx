@@ -1,109 +1,177 @@
-import { useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { asset, projects } from '../data/projects.js'
+import { contact } from '../data/cv.js'
 
-// Grouped, ordered display. The projects array is already newest-first, so
-// filtering by category preserves the within-group order the design calls for.
-const CATEGORY_ORDER = ['Computation & AI', 'BIM & Workflows', 'Design & Research']
-const groups = CATEGORY_ORDER.map((category) => ({
-  category,
-  items: projects.filter((p) => p.category === category),
-}))
-const displayOrder = groups.flatMap((g) => g.items)
-const numberOf = new Map(displayOrder.map((p, i) => [p.slug, i + 1]))
-const num = (slug) => String(numberOf.get(slug)).padStart(2, '0')
-
-// Each row shows a static cover; GIF projects fall back to their first-frame
-// poster (public/projects/<slug>/poster.webp) and only load the multi-MB GIF
-// when the row is hovered.
+// A GIF cover falls back to its static first-frame poster here — the index is a
+// wall of stills, so nothing multi-MB loads; motion lives on the project page.
 const isGif = (p) => p.cover.endsWith('.gif')
-const posterFor = (p) => (isGif(p) ? p.cover.replace(/cover\.gif$/, 'poster.webp') : p.cover)
+const coverFor = (p) => (isGif(p) ? p.cover.replace(/cover\.gif$/, 'poster.webp') : p.cover)
 
-function AwardPill({ label }) {
+const MONO = 'font-mono text-[0.56rem] uppercase tracking-[0.16em]'
+const LABEL = 'font-mono text-[0.6rem] uppercase tracking-[0.18em]'
+
+// The three categories, each with its own hue. The name is shown in its colour
+// under every tile and the hover wash takes the same colour, so the grouping
+// reads without a separate legend.
+const CATEGORY_COLOR = {
+  'Computation & AI': 'var(--color-accent)',
+  'BIM & Workflows': 'var(--color-blue)',
+  'Design & Research': 'var(--color-green)',
+}
+
+// Fixed tile geometry, shared by real and placeholder tiles so the strip is even.
+const FRAME = 'aspect-[4/3] w-full overflow-hidden lg:h-[clamp(300px,46vh,480px)] lg:w-auto'
+
+// Six placeholders round the index out to twelve — it reads as complete but
+// growing. No slug, so they render as non-clickable "in progress" tiles.
+const placeholders = Array.from({ length: 6 }, (_, i) => ({ id: `soon-${i}` }))
+
+function ProjectTile({ p }) {
+  const color = CATEGORY_COLOR[p.category]
   return (
-    <span className="label-mono inline-flex shrink-0 items-center gap-1.5 self-center rounded-full border border-accent/40 px-2.5 py-0.5 text-accent">
-      <span className="text-[0.72em]" aria-hidden="true">★</span>
-      {label}
-    </span>
+    <Link to={`/work/${p.slug}`} className="group block">
+      <div className={`relative bg-line ${FRAME}`}>
+        <img
+          src={asset(coverFor(p))}
+          alt={p.title}
+          loading="lazy"
+          className="h-full w-full object-cover grayscale transition duration-500 ease-out group-hover:scale-[1.03]"
+        />
+        {/* Hover wash in the category colour. Multiply tints the grayscale still
+            while keeping its structure legible through it. */}
+        <span
+          aria-hidden="true"
+          className="absolute inset-0 opacity-0 mix-blend-multiply transition-opacity duration-300 ease-out group-hover:opacity-90"
+          style={{ backgroundColor: color }}
+        />
+        <div className="absolute inset-0 flex items-center justify-center px-5 text-center opacity-0 transition-opacity duration-300 ease-out group-hover:opacity-100">
+          <h2 className="text-xl font-bold uppercase tracking-wider text-white sm:text-2xl">{p.title}</h2>
+        </div>
+      </div>
+      {/* Category, always visible under the image, in the category colour. */}
+      <p className={`mt-3 ${LABEL}`} style={{ color }}>{p.category}</p>
+    </Link>
+  )
+}
+
+function PlaceholderTile() {
+  return (
+    <div>
+      <div className={`flex items-center justify-center border border-dashed border-line bg-paper ${FRAME}`}>
+        <span className={`${MONO} text-muted`}>In progress</span>
+      </div>
+      <p className={`mt-3 ${LABEL} text-muted`}>Upcoming</p>
+    </div>
   )
 }
 
 export default function Work() {
-  // Only used to swap in a GIF project's animated cover while its row is hovered.
-  const [hovered, setHovered] = useState(null)
+  const stripRef = useRef(null)
+  const trackRef = useRef(null)
+  const thumbRef = useRef(null)
+
+  useEffect(() => {
+    const el = stripRef.current
+    const track = trackRef.current
+    const thumb = thumbRef.current
+    if (!el) return
+    const isDesktop = () => window.matchMedia('(min-width: 1024px)').matches
+
+    // Reflect scroll position in the custom indicator: thumb width is the share
+    // of the strip on screen, its offset is how far through the scroll we are.
+    const syncThumb = () => {
+      if (!track || !thumb) return
+      const trackW = track.clientWidth
+      const thumbW = Math.max(28, Math.round(trackW * (el.clientWidth / el.scrollWidth)))
+      const maxScroll = el.scrollWidth - el.clientWidth
+      const pos = maxScroll > 0 ? (el.scrollLeft / maxScroll) * (trackW - thumbW) : 0
+      thumb.style.width = `${thumbW}px`
+      thumb.style.transform = `translateX(${pos}px)`
+    }
+
+    // Mouse-wheel users can't scroll a horizontal strip natively; translate the
+    // vertical wheel to horizontal — desktop only, and only when it overflows.
+    const onWheel = (e) => {
+      if (!isDesktop() || el.scrollWidth <= el.clientWidth || e.deltaY === 0) return
+      e.preventDefault()
+      el.scrollLeft += e.deltaY
+    }
+
+    // Click or drag anywhere on the track to jump/scrub through the strip.
+    let dragging = false
+    const scrollToClientX = (clientX) => {
+      if (!track || !thumb) return
+      const rect = track.getBoundingClientRect()
+      const thumbW = thumb.offsetWidth
+      const span = rect.width - thumbW
+      const x = Math.max(0, Math.min(clientX - rect.left - thumbW / 2, span))
+      el.scrollLeft = span > 0 ? (x / span) * (el.scrollWidth - el.clientWidth) : 0
+    }
+    const onDown = (e) => { dragging = true; scrollToClientX(e.clientX); track?.setPointerCapture?.(e.pointerId) }
+    const onMove = (e) => { if (dragging) scrollToClientX(e.clientX) }
+    const onUp = () => { dragging = false }
+
+    el.addEventListener('wheel', onWheel, { passive: false })
+    el.addEventListener('scroll', syncThumb, { passive: true })
+    window.addEventListener('resize', syncThumb)
+    track?.addEventListener('pointerdown', onDown)
+    track?.addEventListener('pointermove', onMove)
+    track?.addEventListener('pointerup', onUp)
+    track?.addEventListener('pointercancel', onUp)
+    syncThumb()
+
+    return () => {
+      el.removeEventListener('wheel', onWheel)
+      el.removeEventListener('scroll', syncThumb)
+      window.removeEventListener('resize', syncThumb)
+      track?.removeEventListener('pointerdown', onDown)
+      track?.removeEventListener('pointermove', onMove)
+      track?.removeEventListener('pointerup', onUp)
+      track?.removeEventListener('pointercancel', onUp)
+    }
+  }, [])
+
+  const items = [...projects, ...placeholders]
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-16">
-      <header className="mb-10 flex items-baseline justify-between border-b border-rule pb-5">
-        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Work</h1>
-        <p className="label-mono text-muted">
-          Index — {String(displayOrder.length).padStart(2, '0')} Projects · 2025–2026
-        </p>
-      </header>
+    <div className="flex w-full flex-col lg:h-[100svh] lg:overflow-hidden">
+      <h1 className="sr-only">Work</h1>
 
-      {groups.map((group) => (
-        <section key={group.category} className="mb-12 last:mb-0">
-          <div className="mb-2 flex items-baseline justify-between border-t border-rule pt-3">
-            <h2 className="label-mono text-ink">{group.category}</h2>
-            <span className="label-mono text-muted">{String(group.items.length).padStart(2, '0')}</span>
-          </div>
+      {/* Below lg: a vertical grid that scrolls with the page. lg and up: a
+          horizontal filmstrip that fills the viewport height and scrolls
+          sideways, so the page itself never scrolls down. Native scrollbar is
+          hidden — the custom indicator below carries position. */}
+      <div
+        ref={stripRef}
+        className="flex-1 px-6 py-24 lg:overflow-x-auto lg:overflow-y-hidden lg:px-0 lg:py-0 lg:[scrollbar-width:none] lg:[&::-webkit-scrollbar]:hidden"
+      >
+        <ul className="grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:flex lg:h-full lg:items-center lg:gap-8 lg:px-10">
+          {items.map((it) => (
+            <li key={it.slug || it.id} className="lg:shrink-0">
+              {it.slug ? <ProjectTile p={it} /> : <PlaceholderTile />}
+            </li>
+          ))}
+        </ul>
+      </div>
 
-          <ul>
-            {group.items.map((p) => {
-              const showGif = isGif(p) && hovered === p.slug
-              return (
-                <li key={p.slug}>
-                  <Link
-                    to={`/work/${p.slug}`}
-                    onMouseEnter={() => setHovered(p.slug)}
-                    onMouseLeave={() => setHovered((h) => (h === p.slug ? null : h))}
-                    className="group relative flex flex-col gap-5 border-b border-line py-7 pl-5 sm:flex-row sm:items-center sm:gap-8"
-                  >
-                    {/* red left-bar on hover */}
-                    <span
-                      aria-hidden="true"
-                      className="absolute left-0 top-0 h-full w-[3px] origin-top scale-y-0 bg-accent transition-transform duration-300 ease-out group-hover:scale-y-100"
-                    />
+      {/* Scroll-position indicator (desktop filmstrip only). Click or drag to scrub. */}
+      <div className="hidden shrink-0 px-10 pb-3 lg:block">
+        <div ref={trackRef} className="relative h-[3px] w-full cursor-pointer rounded-full bg-line">
+          <div ref={thumbRef} className="absolute left-0 top-0 h-full rounded-full bg-soft" style={{ width: '80px' }} />
+        </div>
+      </div>
 
-                    {/* cover — static poster, animated GIF fades in on hover for GIF projects */}
-                    <div className="relative aspect-[4/3] w-full shrink-0 overflow-hidden border border-line bg-line sm:w-64 lg:w-80">
-                      <img
-                        src={asset(posterFor(p))}
-                        alt={p.title}
-                        loading="lazy"
-                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
-                      />
-                      {showGif && (
-                        <img
-                          src={asset(p.cover)}
-                          alt=""
-                          aria-hidden="true"
-                          className="fade-in absolute inset-0 h-full w-full object-cover"
-                        />
-                      )}
-                    </div>
-
-                    {/* text */}
-                    <div className="flex min-w-0 flex-1 flex-col gap-3">
-                      <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1.5">
-                        <span className="label-mono shrink-0 text-muted">{num(p.slug)}</span>
-                        <h3 className="text-2xl font-bold tracking-tight sm:text-3xl">{p.title}</h3>
-                        {p.award && <AwardPill label={p.award} />}
-                      </div>
-                      <p className="line-clamp-2 max-w-[56ch] text-[0.95rem] leading-relaxed text-soft">{p.subtitle}</p>
-                      <div className="flex items-center gap-3">
-                        <span className="label-mono text-muted">{p.toolsShort}</span>
-                        <span className="h-1 w-1 shrink-0 rounded-full bg-line" aria-hidden="true" />
-                        <span className="label-mono text-muted transition-colors group-hover:text-accent">Open project →</span>
-                      </div>
-                    </div>
-                  </Link>
-                </li>
-              )
-            })}
-          </ul>
-        </section>
-      ))}
+      {/* Footer — the About page's contact bar. This full-bleed route has no
+          global Footer, so contact lives here. */}
+      <footer className="flex shrink-0 flex-wrap items-center justify-between gap-x-6 gap-y-3 px-6 py-6 lg:px-10">
+        <p className={`${MONO} text-muted`}>Selected Work — Charles Abi Chahine</p>
+        <nav className="flex gap-5">
+          <a className={`${MONO} text-muted transition-colors hover:text-accent`} href={`mailto:${contact.email}`}>Email</a>
+          <a className={`${MONO} text-muted transition-colors hover:text-accent`} href={contact.linkedin} target="_blank" rel="noreferrer">LinkedIn</a>
+          <a className={`${MONO} text-muted transition-colors hover:text-accent`} href={contact.github} target="_blank" rel="noreferrer">GitHub</a>
+        </nav>
+      </footer>
     </div>
   )
 }

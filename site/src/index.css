@@ -17,6 +17,11 @@
      outweigh the heading it sits under, so dark gives it its own quieter value. */
   --color-rule: #111110;
   --color-accent: #d92b1f;
+  /* Work-page category colours. Computation & AI reuses the red accent; BIM and
+     Design get their own hue so the three groups read at a glance. Lifted in
+     dark (below) the way accent is, so each stays legible on both grounds. */
+  --color-blue: #1f6feb;
+  --color-green: #1a7f37;
   --font-sans: "Helvetica Neue", Helvetica, Arial, ui-sans-serif, system-ui, sans-serif;
   --font-mono: Consolas, "Cascadia Code", "SF Mono", ui-monospace, monospace;
 }
@@ -41,6 +46,8 @@ html[data-theme="dark"] {
   --color-land: #4a4a56;
   --color-rule: #4a4a52;
   --color-accent: #f0554a;
+  --color-blue: #4c8dff;
+  --color-green: #3fb950;
   color-scheme: dark;
 }
 

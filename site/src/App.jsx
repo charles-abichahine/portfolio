@@ -14,7 +14,8 @@ function App() {
   // Routes that own the whole viewport and supply their own footer. They must not
   // sit inside min-h-screen: a 100vh wrapper around a 100svh child is taller than
   // the visual viewport on mobile, which hands the page a phantom scrollbar.
-  const fullBleed = pathname === '/' || pathname === '/about'
+  // '/work' exactly — the project pages under /work/:slug still scroll normally.
+  const fullBleed = pathname === '/' || pathname === '/about' || pathname === '/work'
 
   return (
     <div className={fullBleed ? 'flex flex-col' : 'flex min-h-screen flex-col'}>
