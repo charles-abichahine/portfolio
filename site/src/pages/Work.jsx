@@ -20,12 +20,8 @@ const CATEGORY_COLOR = {
   'Design & Research': 'var(--color-green)',
 }
 
-// Fixed tile geometry, shared by real and placeholder tiles so the strip is even.
+// Fixed tile geometry so the strip is even.
 const FRAME = 'aspect-[4/3] w-full overflow-hidden lg:h-[clamp(300px,46vh,480px)] lg:w-auto'
-
-// Six placeholders round the index out to twelve — it reads as complete but
-// growing. No slug, so they render as non-clickable "in progress" tiles.
-const placeholders = Array.from({ length: 6 }, (_, i) => ({ id: `soon-${i}` }))
 
 function ProjectTile({ p }) {
   const color = CATEGORY_COLOR[p.category]
@@ -52,17 +48,6 @@ function ProjectTile({ p }) {
       {/* Category, always visible under the image, in the category colour. */}
       <p className={`mt-3 ${LABEL}`} style={{ color }}>{p.category}</p>
     </Link>
-  )
-}
-
-function PlaceholderTile() {
-  return (
-    <div>
-      <div className={`flex items-center justify-center border border-dashed border-line bg-paper ${FRAME}`}>
-        <span className={`${MONO} text-muted`}>In progress</span>
-      </div>
-      <p className={`mt-3 ${LABEL} text-muted`}>Upcoming</p>
-    </div>
   )
 }
 
@@ -132,8 +117,6 @@ export default function Work() {
     }
   }, [])
 
-  const items = [...projects, ...placeholders]
-
   return (
     <div className="flex w-full flex-col lg:h-[100svh] lg:overflow-hidden">
       <h1 className="sr-only">Work</h1>
@@ -147,9 +130,9 @@ export default function Work() {
         className="flex-1 px-6 py-24 lg:overflow-x-auto lg:overflow-y-hidden lg:px-0 lg:py-0 lg:[scrollbar-width:none] lg:[&::-webkit-scrollbar]:hidden"
       >
         <ul className="grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:flex lg:h-full lg:items-center lg:gap-8 lg:px-10">
-          {items.map((it) => (
-            <li key={it.slug || it.id} className="lg:shrink-0">
-              {it.slug ? <ProjectTile p={it} /> : <PlaceholderTile />}
+          {projects.map((p) => (
+            <li key={p.slug} className="lg:shrink-0">
+              <ProjectTile p={p} />
             </li>
           ))}
         </ul>

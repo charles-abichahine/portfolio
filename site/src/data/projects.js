@@ -1,9 +1,10 @@
 const base = import.meta.env.BASE_URL
 export const asset = (p) => base + p
 
-export const projects = [
+const _projects = [
   {
     slug: 'sensi',
+    date: '2026-06-28',
     title: 'Sensi',
     subtitle:
       'A sensory copilot for floor plans — it reads a plan and scores how each room will feel across six coupled senses, personalized to the person who will live in it.',
@@ -72,6 +73,7 @@ export const projects = [
   },
   {
     slug: 'urban-risk',
+    date: '2026-06-19',
     title: 'Encoding Urban Risk',
     subtitle:
       'A machine-learning pipeline that classifies London street segments into low, medium, and high morphological-risk typologies from public spatial data alone — then tests whether the reading survives a move to another city.',
@@ -152,6 +154,7 @@ export const projects = [
   },
   {
     slug: 'legoarch',
+    date: '2026-06-18',
     title: 'lEgoarCh',
     subtitle:
       'From a one-sentence prompt to a priced, buildable LEGO set — generative AI proposes the form, deterministic computation proves it stands.',
@@ -228,6 +231,7 @@ export const projects = [
   },
   {
     slug: 'breathing-mass',
+    date: '2026-03-25',
     title: 'Breathing Mass',
     subtitle:
       'A hyperbuilding for Santiago conceived as a vertical lung — a tower that captures, cleans, and redistributes the city’s polluted air through a breathing core, resolved as a topology-optimized structure and a performance-driven facade.',
@@ -309,6 +313,7 @@ export const projects = [
   },
   {
     slug: 'huddle',
+    date: '2025-12-22',
     title: 'The Huddle',
     subtitle:
       'A wind-adaptive research & education hub with expedition basecamp in Punta Arenas, Chile — discrete modules aggregated against a perpetually windy subpolar climate.',
@@ -363,6 +368,7 @@ export const projects = [
   },
   {
     slug: 'luminous-stratum',
+    date: '2025-12-13',
     title: 'The Luminous Stratum',
     subtitle:
       'A “volume of sedimented light” inserted into Cairo’s historic fabric — an independent lattice that hovers within a market void, filtering the harsh sun without ever touching the historic walls.',
@@ -423,6 +429,406 @@ export const projects = [
       },
     ],
   },
+  {
+    slug: 'facadeiq',
+    date: '2026-03-22',
+    title: 'FacadeIQ',
+    subtitle:
+      'An interactive tool that syncs facade design with live financial feasibility — linking geometry to real-time cost and efficiency so typologies can be prototyped against budget as they are drawn.',
+    year: '2026',
+    module: 'Cloud Data Management — MaCAD, IAAC',
+    team: ['Charles Abi Chahine'],
+    tools: ['Web app', 'Computational design', 'Data'],
+    tag: 'WEB',
+    toolsShort: 'WEB APP · DATA',
+    cover: 'projects/facadeiq/cover.webp',
+    category: 'Computation & AI',
+    award: null,
+    links: {
+      github: 'https://github.com/iaac-macad/bimsc26-datamgmt-final-project/tree/FinalAssignment/CharlesAbiChahine',
+      blog: 'https://blog.iaac.net/facadeiq-facade-feasibility-estimator/',
+    },
+    intro: [
+      'FacadeIQ is an interactive computational tool that synchronizes facade design with real-time financial feasibility. By linking geometric parameters — building footprint, floor count, balcony depth — to live cost metrics, it gives immediate feedback on project value and efficiency ratios, letting designers prototype typologies while checking aesthetic ambition against budgetary thresholds.',
+    ],
+    sections: [
+      {
+        heading: 'Feasibility as a design layer',
+        body: [],
+        media: [
+          { type: 'image', src: 'projects/facadeiq/webapp.webp', caption: 'The FacadeIQ web app: geometry linked to live cost and efficiency metrics.' },
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'narkomfin',
+    date: '2026-06-25',
+    title: 'Analyzing Narkomfin Through Its Graph',
+    subtitle:
+      'The Narkomfin Building rebuilt as a spatial graph — centrality and community detection recover Ginzburg’s vertical living cells from topology alone, and a GraphSAGE classifier reads room types the plan cannot show.',
+    year: '2026',
+    module: 'Graph Machine Learning — MaCAD, IAAC',
+    team: ['Charles Abi Chahine', 'Emilie El Chidiac', 'Lakzhmy Mari Zaro', 'María Sánchez Domínguez'],
+    tools: ['Python', 'GraphSAGE', 'Graph ML'],
+    tag: 'ML',
+    toolsShort: 'PYTHON · GRAPH ML',
+    cover: 'projects/narkomfin/cover.webp',
+    category: 'Computation & AI',
+    award: null,
+    links: {
+      github: 'https://github.com/charles-abichahine/GraphML_G02',
+      blog: 'https://blog.iaac.net/analyzing-narkomfin-through-its-graph/',
+    },
+    intro: [
+      'The Narkomfin Building (Moscow, 1930) is reconstructed as a spatial graph to analyse what floor plans cannot show. Grid sampling and stair stitching connect both apartment types into weighted networks; closeness and betweenness centrality expose the corridor as the building’s sole topological spine. Community detection recovers Ginzburg’s intended vertical living cells from topology alone, and a GraphSAGE room-type classifier scores 68% on the communal Type K layout — confirming the building deliberately breaks domestic spatial conventions.',
+    ],
+    sections: [
+      {
+        heading: 'Reading the plan as a network',
+        body: [],
+        media: [
+          { type: 'image', src: 'projects/narkomfin/slide1.webp', caption: 'The building sampled into a weighted spatial graph.' },
+          { type: 'image', src: 'projects/narkomfin/slide2.webp', caption: 'Centrality exposes the corridor as the topological spine.' },
+          { type: 'image', src: 'projects/narkomfin/slide3.webp', caption: 'Community detection recovers the vertical living cells.' },
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'integrative-modeling',
+    date: '2026-03-17',
+    title: 'Hyperbuilding 01 · Integrative Modeling',
+    subtitle:
+      'A data-driven parametric skyscraper complex inspired by the lung — three towers shaped by a deterministic Grasshopper script, with a lattice core, plug-in volumes, and an adaptive facade of 67,218 panels, documented through Speckle and Revit.',
+    year: '2026',
+    module: 'Integrative Modeling — MaCAD, IAAC',
+    team: ['Ramy Ayoub', 'Charles Abi Chahine', 'Hani Karime'],
+    tools: ['Grasshopper', 'Speckle', 'Revit'],
+    tag: 'BIM',
+    toolsShort: 'GH · SPECKLE · REVIT',
+    cover: 'projects/integrative-modeling/cover.webp',
+    category: 'BIM & Workflows',
+    award: null,
+    links: {
+      blog: 'https://blog.iaac.net/integrative-modeling-hb01-structure-facade/',
+    },
+    intro: [
+      'Hyperbuilding 01 is a data-driven parametric skyscraper complex inspired by the lung’s bronchiole system. Three towers — 600m, 500m, and 400m — are shaped by a deterministic Grasshopper script that balances program requirements against environmental pressures. The complex features a performance-optimized lattice core, modular plug-in volumes, and an adaptive facade of 67,218 panels, fixed or climate-responsive, all documented and published through Speckle and Revit.',
+    ],
+    sections: [
+      {
+        heading: 'Structure and facade',
+        body: [],
+        media: [
+          { type: 'image', src: 'projects/integrative-modeling/render.webp', caption: 'The parametric complex: three towers on a shared lattice logic.' },
+          { type: 'image', src: 'projects/integrative-modeling/detail.webp', caption: 'Structure and facade resolved from the deterministic script.' },
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'collaborative-workflow',
+    date: '2026-03-14',
+    title: 'Hyperbuilding 01 · Collaborative Workflow',
+    subtitle:
+      'An automated Speckle pipeline that fires on every model push — traversing Grasshopper and Rhino geometry, extracting structured properties, and exporting to Excel and Google Sheets, so architectural analytics become repeatable instead of manual.',
+    year: '2026',
+    module: 'Collaborative Workflows — MaCAD, IAAC',
+    team: ['Ramy Ayoub', 'Hani Karime', 'Charles Abi Chahine'],
+    tools: ['Speckle Automate', 'Grasshopper', 'Python'],
+    tag: 'BIM',
+    toolsShort: 'SPECKLE · GH · PYTHON',
+    cover: 'projects/collaborative-workflow/cover.webp',
+    category: 'BIM & Workflows',
+    award: null,
+    links: {
+      github: 'https://github.com/ramyayoub-design/Data-S-F-HB1',
+      blog: 'https://blog.iaac.net/collaborative-workflow-structure-facade-hb01/',
+    },
+    intro: [
+      'The structure-and-facade team built an automated pipeline on Speckle Automate that triggers whenever a new model version is pushed. It traverses nested geometry collections from Grasshopper and Rhino, extracts structured properties, and exports formatted data to Excel and Google Sheets simultaneously — eliminating manual extraction from 3D models and making architectural analytics automatic, repeatable, and structured.',
+    ],
+    sections: [
+      {
+        heading: 'The pipeline',
+        body: [],
+        media: [
+          { type: 'image', src: 'projects/collaborative-workflow/pipeline.webp', caption: 'The automated pipeline, triggered on every model push.' },
+          { type: 'image', src: 'projects/collaborative-workflow/sheet.webp', caption: 'Structured properties exported to Excel and Google Sheets.' },
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'tsukiji',
+    date: '2025-12-12',
+    title: 'Revitalizing the Tsukiji Fish Market',
+    subtitle:
+      'An environmental analysis of a 19-hectare redevelopment on Tokyo’s former Tsukiji market — reading the city’s climate and the building’s behaviour with Ladybug, Infrared, and Galapagos to drive formal change.',
+    year: '2025',
+    module: 'Environmental Analysis — MaCAD, IAAC',
+    team: ['María Sánchez Domínguez', 'Charles Abi Chahine', 'Emilie El Chidiac', 'Lakzhmy Mari Zaro'],
+    tools: ['Ladybug', 'Galapagos', 'Grasshopper'],
+    tag: 'ENV',
+    toolsShort: 'LADYBUG · GALAPAGOS',
+    cover: 'projects/tsukiji/cover.webp',
+    category: 'Design & Research',
+    award: null,
+    links: {
+      blog: 'https://blog.iaac.net/revitalizing-the-tsukiji-fish-market-an-environmental-analysis-of-tokyo/',
+    },
+    intro: [
+      'Environmental analysis was conducted on a 19-hectare redevelopment proposal for Tokyo’s former Tsukiji fish market, a site facing a dual climatic challenge of cold winters and hot, humid summers. Using Ladybug, Infrared, and Galapagos, both the city’s climate and the building’s environmental behaviour were evaluated; formal modifications addressed the initial issues, and the project closes by assessing the strengths and shortcomings of the design.',
+    ],
+    sections: [
+      {
+        heading: 'Reading the climate',
+        body: [],
+        media: [
+          { type: 'image', src: 'projects/tsukiji/env1.webp', caption: 'Environmental analysis of the site and its dual-season climate.' },
+          { type: 'image', src: 'projects/tsukiji/env2.webp', caption: 'Building behaviour evaluated with Ladybug and Galapagos.' },
+          { type: 'image', src: 'projects/tsukiji/env3.webp', caption: 'Formal modifications driven by the analysis.' },
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'clebsch-pavilion',
+    date: '2025-12-18',
+    title: 'The Clebsch Pavilion',
+    subtitle:
+      'A pavilion built on the Clebsch Diagonal Cubic — Crystallon lattices and Alpaca analysis, with evolutionary solvers minimizing mass and deflection across nine iterations, in glass-reinforced recycled PET.',
+    year: '2025',
+    module: 'Structural Optimization — MaCAD, IAAC',
+    team: ['Charles Abi Chahine', 'Mahmoud Fathi'],
+    tools: ['Crystallon', 'Alpaca', 'Grasshopper'],
+    tag: 'GH',
+    toolsShort: 'CRYSTALLON · ALPACA',
+    cover: 'projects/clebsch-pavilion/cover.webp',
+    category: 'Design & Research',
+    award: null,
+    links: {
+      blog: 'https://blog.iaac.net/the-clebsch-pavilion/',
+    },
+    intro: [
+      'The Clebsch Pavilion explores the intersection of algebraic geometry and structural optimization. Centred on the Clebsch Diagonal Cubic — a surface known for its geometric stability — it uses Crystallon for lattice generation and Alpaca for structural analysis. Working in Glass Reinforced Recycled PET, the team ran evolutionary solvers to minimize mass and deflection across nine design iterations.',
+    ],
+    sections: [
+      {
+        heading: 'Geometry into structure',
+        body: [],
+        media: [
+          { type: 'image', src: 'projects/clebsch-pavilion/render2.webp', caption: 'The pavilion built on the Clebsch Diagonal Cubic.' },
+          { type: 'image', src: 'projects/clebsch-pavilion/concept.webp', caption: 'The algebraic surface driving the form.' },
+          { type: 'image', src: 'projects/clebsch-pavilion/lattice.webp', caption: 'Surface to lattice: Crystallon generation, Alpaca analysis.' },
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'puffer-playscape',
+    date: '2025-11-20',
+    title: 'The Puffer Playscape',
+    subtitle:
+      'A Complex Forming study that develops a playscape from puffer-inspired geometry, iterated step by step into an inhabitable landscape.',
+    year: '2025',
+    module: 'Complex Forming — MaCAD, IAAC',
+    team: ['Charles Abi Chahine'],
+    tools: ['Rhino', 'Grasshopper'],
+    tag: 'GH',
+    toolsShort: 'RHINO · GH',
+    cover: 'projects/puffer-playscape/cover.webp',
+    category: 'Design & Research',
+    award: null,
+    links: {},
+    intro: [
+      'The Puffer Playscape is a form-finding exercise from the Complex Forming seminar at IAAC. Taking its cue from the geometry of a pufferfish, it iterates a spiky, porous surface step by step into an inhabitable playscape.',
+    ],
+    sections: [
+      {
+        heading: 'Iterating the form',
+        body: [],
+        media: [
+          { type: 'image', src: 'projects/puffer-playscape/axo.webp', caption: 'Axonometric of a selected iteration.' },
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'wave-chair',
+    date: '2025-11-15',
+    title: 'The Wave Chair',
+    subtitle:
+      'A Complex Forming study that resolves an undulating surface into a fabricable, 3D-printed chair, developed through geometry iterations and print trials.',
+    year: '2025',
+    module: 'Complex Forming — MaCAD, IAAC',
+    team: ['Charles Abi Chahine'],
+    tools: ['Rhino', 'Grasshopper', 'Dendro'],
+    tag: 'GH',
+    toolsShort: 'RHINO · GH · DENDRO',
+    cover: 'projects/wave-chair/cover.webp',
+    category: 'Design & Research',
+    award: null,
+    links: {},
+    intro: [
+      'The Wave Chair is a form-finding exercise from the Complex Forming seminar at IAAC, resolving an undulating surface into a fabricable object. The geometry was iterated and tested toward a 3D-printed chair.',
+    ],
+    sections: [
+      {
+        heading: 'From surface to print',
+        body: [],
+        media: [
+          { type: 'image', src: 'projects/wave-chair/zoom.webp', caption: 'Detail of a 3D-print trial.' },
+          { type: 'image', src: 'projects/wave-chair/iter.webp', caption: 'Geometry iteration.' },
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'cross-cap-house',
+    date: '2025-11-10',
+    title: 'The Cross-Cap House',
+    subtitle:
+      'A Complex Forming study developing an architecture on the cross-cap — a non-orientable, self-intersecting surface — through iterative geometry.',
+    year: '2025',
+    module: 'Complex Forming — MaCAD, IAAC',
+    team: ['Charles Abi Chahine'],
+    tools: ['Rhino', 'Grasshopper'],
+    tag: 'GH',
+    toolsShort: 'RHINO · GH',
+    cover: 'projects/cross-cap-house/cover.webp',
+    category: 'Design & Research',
+    award: null,
+    links: {},
+    intro: [
+      'The Cross-Cap House is a form-finding exercise from the Complex Forming seminar at IAAC. It develops an architecture on the cross-cap — a non-orientable, self-intersecting surface — through iterative geometry and low-poly studies.',
+    ],
+    sections: [
+      {
+        heading: 'Working the surface',
+        body: [],
+        media: [
+          { type: 'image', src: 'projects/cross-cap-house/geom.webp', caption: 'The cross-cap surface geometry.' },
+          { type: 'image', src: 'projects/cross-cap-house/iter.webp', caption: 'The chosen iteration.' },
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'marception',
+    date: '2024-05-12',
+    title: 'Marsception 2024',
+    subtitle:
+      'An international competition imagining architecture for life on Mars — our entry, with Emilie El Chidiac, was selected among the Top 50.',
+    year: '2024',
+    module: 'International Competition',
+    team: ['Charles Abi Chahine', 'Emilie El Chidiac'],
+    tools: ['Rhino', 'Illustrator'],
+    tag: 'COMP',
+    toolsShort: 'COMPETITION',
+    cover: 'projects/marception/cover.webp',
+    category: 'Design & Research',
+    award: 'Top 50',
+    links: {},
+    intro: [
+      'Marsception 2024 was an international competition imagining architecture for life on Mars. Developed with Emilie El Chidiac, our entry was selected among the Top 50.',
+    ],
+    sections: [
+      {
+        heading: 'Top 50',
+        body: [],
+        media: [
+          { type: 'image', src: 'projects/marception/badge.webp', caption: 'Selected among the Top 50 entries.' },
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'soma-verve',
+    date: '2024-01-18',
+    title: 'Verve, City Walk',
+    subtitle:
+      'A residential development at City Walk in Dubai, a Meraas project — design and documentation produced at SOMA, where I worked as a Design Architect.',
+    year: '2023–2024',
+    module: 'SOMA · Design Architect',
+    team: ['SOMA — office project'],
+    tools: ['Rhino', 'Revit', 'Adobe Suite'],
+    tag: 'ARCH',
+    toolsShort: 'PRACTICE',
+    cover: 'projects/soma-verve/cover.webp',
+    category: 'Design & Research',
+    award: null,
+    links: {},
+    intro: [
+      'Verve is a residential development at City Walk in Dubai, a Meraas project. I worked on it as a Design Architect at SOMA, contributing to its design and documentation.',
+    ],
+    sections: [
+      {
+        heading: 'At SOMA',
+        body: [],
+        media: [
+          { type: 'image', src: 'projects/soma-verve/spread2.webp', caption: 'From the City Walk portfolio.' },
+          { type: 'image', src: 'projects/soma-verve/spread3.webp', caption: 'From the City Walk portfolio.' },
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'soma-stratus',
+    date: '2024-04-23',
+    title: 'Stratus, Plot 42',
+    subtitle:
+      'A tower project on Plot 42, developed at SOMA where I worked as a Design Architect.',
+    year: '2024',
+    module: 'SOMA · Design Architect',
+    team: ['SOMA — office project'],
+    tools: ['Rhino', 'Revit', 'Adobe Suite'],
+    tag: 'ARCH',
+    toolsShort: 'PRACTICE',
+    cover: 'projects/soma-stratus/cover.webp',
+    category: 'Design & Research',
+    award: null,
+    links: {},
+    intro: [
+      'Stratus is a tower project on Plot 42, developed at SOMA. I contributed to it as a Design Architect.',
+    ],
+    sections: [],
+  },
+  {
+    slug: 'lau-anfeh',
+    date: '2023-05-22',
+    title: 'Anfeh',
+    subtitle:
+      'My bachelor final-year thesis at LAU — reimagining the coastal town of Anfeh in North Lebanon through its landscape of salt ponds, fishing, and olives.',
+    year: '2023',
+    module: 'B.Arch Final Year Project — LAU',
+    team: ['Charles Abi Chahine'],
+    tools: ['Architecture', 'Urban design'],
+    tag: 'ARCH',
+    toolsShort: 'ARCHITECTURE',
+    cover: 'projects/lau-anfeh/cover.webp',
+    category: 'Design & Research',
+    award: null,
+    links: {},
+    intro: [
+      'Anfeh is my final-year thesis at the Lebanese American University (Spring 2023), advised by Issam Barhouch and Omar Harb. It reimagines the rural coastal town of Anfeh in North Lebanon, working from its landscape of salt ponds, fishing, and olives toward an urban re-imagination of the town.',
+    ],
+    sections: [
+      {
+        heading: 'From the portfolio',
+        body: [],
+        media: [
+          { type: 'image', src: 'projects/lau-anfeh/spread1.webp', caption: 'From the Anfeh final-year portfolio.' },
+          { type: 'image', src: 'projects/lau-anfeh/spread2.webp', caption: 'From the Anfeh final-year portfolio.' },
+          { type: 'image', src: 'projects/lau-anfeh/spread3.webp', caption: 'From the Anfeh final-year portfolio.' },
+        ],
+      },
+    ],
+  },
 ]
+
+// Newest first, by exact submission date.
+export const projects = _projects.slice().sort((a, b) => b.date.localeCompare(a.date))
 
 export const getProject = (slug) => projects.find((p) => p.slug === slug)
