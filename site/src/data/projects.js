@@ -14,7 +14,7 @@ const _projects = [
     tools: ['Python', 'LLM agents', 'Vision models', 'Web app'],
     tag: 'AI',
     toolsShort: 'PYTHON · SENSORY AI',
-    cover: 'projects/sensi/cover.gif',
+    cover: 'projects/sensi/cover.webm',
     category: 'Computation & AI',
     award: 'MaCAD Award 2026',
     links: {
@@ -164,7 +164,7 @@ const _projects = [
     tools: ['FLUX.2 + LoRA', 'TRELLIS-2', 'ComfyUI', 'Python'],
     tag: 'AI',
     toolsShort: 'FLUX · TRELLIS · PYTHON',
-    cover: 'projects/legoarch/cover.gif',
+    cover: 'projects/legoarch/cover.webm',
     category: 'Computation & AI',
     award: null,
     links: {
@@ -241,7 +241,7 @@ const _projects = [
     tools: ['Rhino', 'Grasshopper', 'Alpaca', 'Speckle'],
     tag: 'GH',
     toolsShort: 'GH · ALPACA · SPECKLE',
-    cover: 'projects/breathing-mass/cover.gif',
+    cover: 'projects/breathing-mass/cover.webm',
     category: 'BIM & Workflows',
     award: null,
     links: {
@@ -267,7 +267,7 @@ const _projects = [
         ],
         media: [
           { type: 'image', src: 'projects/breathing-mass/structure.webp', caption: 'Self-braced structural system: load transfer from plugged volumes through the triangulated cores.' },
-          { type: 'image', src: 'projects/breathing-mass/topology.gif', caption: 'Topology optimization: the stressed column resolving into a load-following lattice.' },
+          { type: 'loop', src: 'projects/breathing-mass/topology.webm', caption: 'Topology optimization: the stressed column resolving into a load-following lattice.' },
         ],
       },
       {
@@ -404,7 +404,7 @@ const _projects = [
           'The geometry is generated through Kangaroo physics. The process begins with a flat mesh; strategic voids are cut in to ensure the form pulls away from the historic context. Edge anchor points and specific ‘OnCurve’ goals define the footprint, then vertical load forces pull the mesh upward into a relaxed catenary vault. The most defining move comes next: mesh faces are sorted by their normal vectors, and that orientation dictates function.',
         ],
         media: [
-          { type: 'image', src: 'projects/luminous-stratum/form-finding.gif', caption: 'Step by step: flat mesh, strategic voids, form-finding goals, solver relaxation, face sorting.' },
+          { type: 'loop', src: 'projects/luminous-stratum/form-finding.webm', caption: 'Step by step: flat mesh, strategic voids, form-finding goals, solver relaxation, face sorting.' },
           { type: 'image', src: 'projects/luminous-stratum/form-logic.webp', caption: 'The computational logic: anchor points, form-finding forces, and the sorting of mesh faces.' },
         ],
       },

@@ -3,11 +3,14 @@ import { Link } from 'react-router-dom'
 import { asset, projects } from '../data/projects.js'
 import { contact } from '../data/cv.js'
 
-// A GIF cover rests on its static first-frame poster, so the index is a wall of
-// stills and nothing multi-MB loads. The animation is mounted only while the
-// cursor is on the tile, which is also what stops it again when it leaves.
-const isGif = (p) => p.cover.endsWith('.gif')
-const posterFor = (p) => (isGif(p) ? p.cover.replace(/cover\.gif$/, 'poster.webp') : p.cover)
+// An animated cover rests on its static first-frame poster, so the index is a
+// wall of stills and nothing heavy loads. The animation is mounted only while
+// the cursor is on the tile, which is also what stops it again when it leaves.
+// The three animated covers are video, not GIF: same footage at roughly a tenth
+// of the bytes (3.9MB of GIF became 399KB of WebM). WebM first, MP4 for Safari.
+const isAnimated = (p) => p.cover.endsWith('.webm')
+const posterFor = (p) => (isAnimated(p) ? p.cover.replace(/cover\.webm$/, 'poster.webp') : p.cover)
+const videoFor = (p, ext) => p.cover.replace(/cover\.webm$/, `cover.${ext}`)
 
 const MONO = 'font-mono text-[0.56rem] uppercase tracking-[0.16em]'
 
@@ -32,47 +35,28 @@ const R = 'rounded-[10px]'
 // of the fourth fit, and that slice is what tells you the strip scrolls.
 const FRAME = `relative aspect-[4/3] w-full overflow-hidden bg-line lg:h-[clamp(250px,38vh,400px)] lg:w-auto ${R}`
 
-// Which animated covers have finished downloading. Module-level, so a 1.5MB GIF
-// is paid for once per visit rather than on every hover.
-const gifLoaded = new Set()
-
 function ProjectTile({ p, hot, motionOk }) {
   const color = CATEGORY_COLOR[p.category]
-  const animate = motionOk && isGif(p)
-  const [ready, setReady] = useState(() => gifLoaded.has(p.slug))
+  const animate = motionOk && isAnimated(p)
+  // mounted: the element exists and is fetching. ready: it can paint a frame.
+  const [mounted, setMounted] = useState(false)
+  const [ready, setReady] = useState(false)
 
-  // The covers are 0.65–1.7MB against a 3–6KB poster. Mounting one the instant
-  // the cursor arrives makes the browser paint it while it is still arriving —
-  // a half-decoded frame with the poster showing through the rest. So it is
-  // fetched off-screen first and only swapped in once it can paint whole.
+  // A cursor sweeping the strip crosses every tile on the way, so mounting waits
+  // for it to settle — otherwise one pass pulls every cover on the row. Unlike
+  // the preloaded GIF this replaced, an unmounted <video> also aborts its own
+  // request, so a sweep costs nothing once the cursor has moved on.
   useEffect(() => {
-    if (!hot || !animate || gifLoaded.has(p.slug)) return
-    let cancelled = false
-    // A cursor sweeping along the strip crosses every tile on the way. Cancelling
-    // the effect stops the cover mounting but cannot abort a request already in
-    // flight, so the fetch waits for the cursor to settle — otherwise one pass
-    // along the strip pulls down every animated cover on it.
-    const timer = setTimeout(() => {
-      const img = new Image()
-      // onload, not decode(): every byte has arrived by then, which is what
-      // stops the tearing. decode() looks like the tighter guarantee but never
-      // settles for an animated GIF that is not in the document, so gating on
-      // it means the cover simply never appears.
-      img.onload = () => {
-        if (cancelled) return
-        gifLoaded.add(p.slug)
-        setReady(true)
-      }
-      // on failure the poster simply stays put
-      img.src = asset(p.cover)
-    }, 140)
-    return () => {
-      cancelled = true
-      clearTimeout(timer)
+    if (!hot || !animate) {
+      setMounted(false)
+      setReady(false)
+      return
     }
-  }, [hot, animate, p])
+    const timer = setTimeout(() => setMounted(true), 140)
+    return () => clearTimeout(timer)
+  }, [hot, animate])
 
-  const playing = hot && animate && ready
+  const playing = mounted && ready
 
   return (
     <Link to={`/work/${p.slug}`} data-slug={p.slug} className={`block ${R}`}>
@@ -86,17 +70,25 @@ function ProjectTile({ p, hot, motionOk }) {
             hot ? 'scale-[1.03] grayscale-0' : 'grayscale'
           }`}
         />
-        {/* The animated cover fades in over its own poster, already decoded, so it
-            arrives whole. Unmounting it when the cursor leaves is what rewinds it,
-            so every visit starts from frame one. */}
-        {playing && (
-          <img
-            src={asset(p.cover)}
-            alt=""
+        {/* The animated cover fades in over its own poster once it can paint a
+            frame, so it never tears. Unmounting it when the cursor leaves is what
+            rewinds it, so every visit starts from frame one. */}
+        {mounted && (
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
             aria-hidden="true"
-            draggable="false"
-            className="fade-in absolute inset-0 h-full w-full scale-[1.03] object-cover"
-          />
+            onCanPlay={() => setReady(true)}
+            className={`absolute inset-0 h-full w-full scale-[1.03] object-cover transition-opacity duration-300 ${
+              playing ? 'opacity-100' : 'opacity-0'
+            }`}
+          >
+            <source src={asset(videoFor(p, 'webm'))} type="video/webm" />
+            <source src={asset(videoFor(p, 'mp4'))} type="video/mp4" />
+          </video>
         )}
       </div>
       {/* Title under the image, so all nineteen can be read without hovering —
@@ -114,6 +106,15 @@ function ProjectTile({ p, hot, motionOk }) {
         >
           {p.title}
         </h2>
+        {/* Awarded work earns a mark. Always the accent, never the category
+            colour — a distinction should read as itself, not as its group.
+            title/sr-only carry the actual award, which has no room in the row. */}
+        {p.award && (
+          <span className="shrink-0 text-[0.7rem] leading-none text-accent" title={p.award}>
+            <span aria-hidden="true">★</span>
+            <span className="sr-only">Awarded: {p.award}</span>
+          </span>
+        )}
         <span className={`ml-auto shrink-0 tabular-nums ${MONO} text-muted`}>{p.year}</span>
       </div>
     </Link>

@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { asset, getProject, projects } from '../data/projects.js'
 
 function Media({ item }) {
+  // A demo someone chooses to watch: give it controls and load only metadata.
   if (item.type === 'video') {
     return (
       <video
@@ -13,6 +14,26 @@ function Media({ item }) {
         preload="metadata"
         className="w-full border border-line"
       />
+    )
+  }
+  // An ambient animation that used to be a GIF — it plays itself and has no
+  // sound, so controls would be furniture. Video rather than GIF because the
+  // same footage costs a fraction of the bytes (2.6MB of GIF became 443KB).
+  if (item.type === 'loop') {
+    const stem = item.src.replace(/\.webm$/, '')
+    return (
+      <video
+        autoPlay
+        muted
+        loop
+        playsInline
+        poster={asset(`${stem}-poster.webp`)}
+        aria-label={item.caption}
+        className="w-full border border-line"
+      >
+        <source src={asset(item.src)} type="video/webm" />
+        <source src={asset(`${stem}.mp4`)} type="video/mp4" />
+      </video>
     )
   }
   return (
@@ -113,7 +134,29 @@ export default function Project() {
           ))}
         </dl>
 
-        <img src={asset(project.cover)} alt={project.title} className="w-full border border-line" />
+        {/* The animated covers are video rather than GIF — same footage at about
+            a tenth of the bytes, which matters most here, where the cover runs
+            full width. The poster holds the frame until it can play. */}
+        {project.cover.endsWith('.webm') ? (
+          <video
+            // Without a key React reuses this element between projects, and
+            // swapping <source> children does not reload a video — the previous
+            // project's cover keeps playing on the next one's page.
+            key={project.slug}
+            autoPlay
+            muted
+            loop
+            playsInline
+            poster={asset(project.cover.replace(/cover\.webm$/, 'poster.webp'))}
+            aria-label={project.title}
+            className="w-full border border-line"
+          >
+            <source src={asset(project.cover)} type="video/webm" />
+            <source src={asset(project.cover.replace(/cover\.webm$/, 'cover.mp4'))} type="video/mp4" />
+          </video>
+        ) : (
+          <img src={asset(project.cover)} alt={project.title} className="w-full border border-line" />
+        )}
       </header>
 
       <div className="mx-auto max-w-3xl">
