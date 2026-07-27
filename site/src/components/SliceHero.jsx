@@ -21,13 +21,21 @@ import Logo from './Logo.jsx'
  * fragments — the canvas composes the alpha per stroke.
  */
 const PALETTES = {
+  /*
+   * shell/inner/infill are the stroke weights, per theme rather than shared.
+   * Light needs more: a faint mark on a dark ground still glows, the same mark
+   * on white simply vanishes. At the dark values the light hero measured 1.4%
+   * ink at 1.36:1 against the paper — close to a blank page.
+   */
   dark: {
     bg: '#0e0e12', grid: 'rgba(244,244,238,0.04)', line: '244,244,238', lineSoft: '233,233,228',
     name: '#f4f4ee', red: '#e5382b', sub: '#a9a9a2', hint: '#5a5a62',
+    shell: 0.55, inner: 0.32, infill: 0.17, weight: 1,
   },
   light: {
-    bg: '#ffffff', grid: 'rgba(17,17,16,0.05)', line: '20,20,19', lineSoft: '42,42,40',
+    bg: '#ffffff', grid: 'rgba(17,17,16,0.09)', line: '20,20,19', lineSoft: '42,42,40',
     name: '#111110', red: '#d92b1f', sub: '#55554f', hint: '#8a8a82',
+    shell: 0.72, inner: 0.5, infill: 0.34, weight: 1.15,
   },
 }
 const readTheme = () =>
@@ -44,17 +52,49 @@ const smin = (a, b, k) => {
   return b * (1 - h) + a * h - k * h * (1 - h)
 }
 
+/*
+ * Signed distance to a rotated rounded box.
+ *
+ * The field used circles, smooth-minned together with a wide radius — which is
+ * the metaball recipe, and metaballs always read biological. A slice through a
+ * building has edges, so the primitive is a box: rounded just enough to stay
+ * drawable, rotated to one of two axes so masses read aligned rather than grown.
+ */
+const sdBox = (px, py, hx, hy, rot, cr) => {
+  const c = Math.cos(rot)
+  const s = Math.sin(rot)
+  const qx = Math.abs(px * c + py * s) - hx
+  const qy = Math.abs(py * c - px * s) - hy
+  return Math.hypot(Math.max(qx, 0), Math.max(qy, 0)) + Math.min(Math.max(qx, qy), 0) - cr
+}
+
 function makeSolids() {
   const n = 3 + ri(2)
   const arr = []
   for (let i = 0; i < n; i++) {
+    /*
+     * The first solid is the dominant mass and the rest plug into it. Fixing
+     * that hierarchy is what makes every re-slice compose: rolling four equal
+     * lumps gave a different — and often worse — page on every visit.
+     */
+    const lead = i === 0
+    const scale = lead ? rnd(0.86, 1) : rnd(0.34, 0.6)
     arr.push({
-      bxf: rnd(-0.16, 0.16), byf: 0.4 + rnd(-0.22, 0.22), // bxf is offset from the horizontal anchor
-      rNf: rnd(0.05, 0.11),
-      axNf: rnd(0.009, 0.037), ayNf: rnd(0.009, 0.037),
+      /* bxf is offset from the horizontal anchor; the lead mass stays near it.
+         Satellites are kept close: spread wide they read as debris around the
+         mass rather than volumes plugged into it, and the tight blend no longer
+         melts a stray one back into the whole. */
+      bxf: lead ? rnd(-0.04, 0.04) : rnd(-0.15, 0.15),
+      byf: 0.4 + (lead ? rnd(-0.06, 0.06) : rnd(-0.16, 0.16)),
+      wNf: rnd(0.075, 0.125) * scale,
+      hNf: rnd(0.055, 0.1) * scale,
+      crNf: rnd(0.004, 0.015), // corner radius: drawable, not soft
+      // Snapped to one of two axes with a small jitter — built, not grown.
+      rot: (ri(2) ? 0 : Math.PI / 2) + rnd(-0.09, 0.09),
+      axNf: rnd(0.006, 0.026), ayNf: rnd(0.006, 0.026),
       fx: rnd(0.05, 0.12), fy: rnd(0.05, 0.12),
       px: rnd(0, 6.28), py: rnd(0, 6.28),
-      rr: rnd(0.15, 0.45), rf: rnd(0.05, 0.12), rp: rnd(0, 6.28),
+      rr: rnd(0.06, 0.2), rf: rnd(0.05, 0.12), rp: rnd(0, 6.28),
     })
   }
   return arr
@@ -97,14 +137,19 @@ function makeSlice(ctx, W, H, carry) {
   const minWH = Math.min(W, H)
   const anchorX = (wide ? 0.66 : 0.5) * W
   const field = new Float32Array(cols * rows)
-  const km = minWH * 0.045
+  // Blend radius. Tight on purpose: a wide one melts the masses into a single
+  // organic lump, a narrow one lets them read as separate volumes meeting.
+  const km = minWH * 0.018
   const spacing = wide ? 13 : 15
 
   let solids = carry ? carry.solids : makeSolids()
   let infAng = carry ? carry.infAng : [Math.PI / 4, -Math.PI / 4][ri(2)]
 
   const dep = { x: 0, y: 0, s: 0 }
-  const scratch = Array.from({ length: 6 }, () => ({ x: 0, y: 0, r: 0 })) // solids (≤5) + deposit
+  // solids (≤5) + the pointer deposit, which is a rounded square like the rest:
+  // a round one was left over from the circle field and read as a foreign object
+  // against masses that now have edges.
+  const scratch = Array.from({ length: 6 }, () => ({ x: 0, y: 0, hx: 0, hy: 0, rot: 0, cr: 0 }))
 
   // Static, size-dependent draws precomputed once per scene (rebuilt on resize).
   const gridPath = new Path2D()
@@ -124,11 +169,18 @@ function makeSlice(ctx, W, H, carry) {
       const o = scratch[i]
       o.x = anchorX + s.bxf * W + s.axNf * minWH * Math.sin(s.fx * mt + s.px)
       o.y = s.byf * H + s.ayNf * minWH * Math.sin(s.fy * mt + s.py)
-      o.r = s.rNf * minWH * (1 + s.rr * Math.sin(s.rf * mt + s.rp))
+      const pulse = 1 + s.rr * Math.sin(s.rf * mt + s.rp)
+      o.hx = s.wNf * minWH * pulse
+      o.hy = s.hNf * minWH * pulse
+      o.rot = s.rot
+      o.cr = s.crNf * minWH
     }
     if (dep.s > 0.01) {
       const o = scratch[count]
-      o.x = dep.x; o.y = dep.y; o.r = 0.06 * minWH * dep.s
+      // Axis-aligned: a square needs no rotation to sit with the field, and it
+      // keeps the deposit reading as material rather than another volume.
+      const d = minWH * dep.s
+      o.x = dep.x; o.y = dep.y; o.hx = 0.04 * d; o.hy = 0.04 * d; o.rot = 0; o.cr = 0.014 * d
       count++
     }
     let mn = Infinity
@@ -139,7 +191,7 @@ function makeSlice(ctx, W, H, carry) {
         let d = Infinity
         for (let k = 0; k < count; k++) {
           const s = scratch[k]
-          const dd = Math.hypot(x - s.x, y - s.y) - s.r
+          const dd = sdBox(x - s.x, y - s.y, s.hx, s.hy, s.rot, s.cr)
           d = d === Infinity ? dd : smin(d, dd, km)
         }
         field[r * cols + c] = d
@@ -174,8 +226,8 @@ function makeSlice(ctx, W, H, carry) {
       const inset = spacing * 0.55
       for (let s = 0; s < 3; s++) {
         const L = -s * inset
-        fctx.strokeStyle = s === 0 ? `rgba(${pal.line},${0.55 * build})` : `rgba(${pal.lineSoft},${0.32 * build})`
-        fctx.lineWidth = s === 0 ? 1.3 : 1
+        fctx.strokeStyle = s === 0 ? `rgba(${pal.line},${pal.shell * build})` : `rgba(${pal.lineSoft},${pal.inner * build})`
+        fctx.lineWidth = (s === 0 ? 1.3 : 1) * pal.weight
         fctx.beginPath()
         isoPath(fctx, field, cols, rows, cell, L)
         fctx.stroke()
@@ -187,8 +239,8 @@ function makeSlice(ctx, W, H, carry) {
       const cx = w / 2
       const cy = h / 2
       const Lr = Math.hypot(w, h)
-      fctx.strokeStyle = `rgba(${pal.lineSoft},${0.17 * build})`
-      fctx.lineWidth = 1
+      fctx.strokeStyle = `rgba(${pal.lineSoft},${pal.infill * build})`
+      fctx.lineWidth = pal.weight
       fctx.beginPath()
       for (let off = -Lr; off <= Lr; off += spacing) {
         let prev = false

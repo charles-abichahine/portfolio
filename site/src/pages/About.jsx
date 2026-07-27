@@ -206,14 +206,27 @@ export default function About() {
           </mask>
         </defs>
 
-        {/* the world, as a dot field — decorative, so it never takes a pointer */}
+        {/* The world as a dot field — decorative, so it never takes a pointer.
+            Two layers when the map is off: a ghost of the whole world, faint
+            enough to stay out of the way but present enough that eleven dots
+            read as places rather than floating marks, and the spotlight on top
+            of it. With the map on, the ghost simply comes up to full strength
+            and the spotlight is unnecessary. */}
         <path
           d={LAND_PATH}
-          mask={showLand ? undefined : 'url(#land-spot-mask)'}
-          className={`pointer-events-none fill-land transition-opacity duration-300 ease-out motion-reduce:transition-none ${
-            showLand || active ? 'opacity-100' : 'opacity-0'
+          className={`pointer-events-none fill-land transition-opacity duration-500 ease-out motion-reduce:transition-none ${
+            showLand ? 'opacity-100' : 'opacity-25'
           }`}
         />
+        {!showLand && (
+          <path
+            d={LAND_PATH}
+            mask="url(#land-spot-mask)"
+            className={`pointer-events-none fill-land transition-opacity duration-300 ease-out motion-reduce:transition-none ${
+              active ? 'opacity-100' : 'opacity-0'
+            }`}
+          />
+        )}
 
         {threads.map((t) => {
           const lit = activeId === t.a || activeId === t.b
