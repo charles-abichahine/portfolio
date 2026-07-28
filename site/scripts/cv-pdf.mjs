@@ -19,7 +19,8 @@
  * risk of a committed artefact, so the build refuses rather than shipping a
  * download that disagrees with the page.
  */
-import { writeFileSync, unlinkSync, existsSync, statSync } from 'node:fs'
+import { writeFileSync, readFileSync, unlinkSync, existsSync } from 'node:fs'
+import { createHash } from 'node:crypto'
 import { execFileSync } from 'node:child_process'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { dirname, resolve } from 'node:path'
@@ -41,18 +42,33 @@ const CHROME = [
   '/usr/bin/chromium-browser',
 ].find((p) => existsSync(p))
 
-// `--check` is the build's guard: it renders nothing, it only refuses to let a
-// stale PDF ship. The build runs this on every machine; the render below only
-// happens where a browser exists, which on CI it does not.
+/*
+ * The staleness guard compares a hash of cv.js against the hash recorded when
+ * the PDF was last generated.
+ *
+ * It used to compare file mtimes, which broke every deploy: git does not
+ * preserve modification times, so on a fresh CI checkout every file carries the
+ * checkout timestamp in arbitrary order and "cv.js is newer than cv.pdf" is a
+ * coin flip. A hash is the same on every machine.
+ *
+ * Line endings are normalised before hashing. Git checks this repo out with
+ * CRLF on Windows and LF on the Linux runner, so hashing the raw bytes would
+ * fail on CI for exactly the same reason mtimes did.
+ */
+const STAMP = resolve(here, 'cv.hash')
+const hashOf = (file) =>
+  createHash('sha256').update(readFileSync(file, 'utf8').replace(/\r\n/g, '\n')).digest('hex')
+
 const checkOnly = process.argv.includes('--check')
-const stale = existsSync(PDF) && statSync(CV_DATA).mtimeMs > statSync(PDF).mtimeMs
 
 if (checkOnly) {
-  if (!existsSync(PDF)) throw new Error('cv-pdf: public/cv.pdf is missing — run `npm run cv`')
-  if (stale) {
+  if (!existsSync(PDF)) throw new Error('cv-pdf: public/cv.pdf is missing, run `npm run cv`')
+  const current = hashOf(CV_DATA)
+  const recorded = existsSync(STAMP) ? readFileSync(STAMP, 'utf8').trim() : null
+  if (recorded !== current) {
     throw new Error(
-      'cv-pdf: src/data/cv.js is newer than public/cv.pdf.\n' +
-        '        The page and the download would ship out of sync — run `npm run cv` and commit the PDF.',
+      'cv-pdf: src/data/cv.js has changed since public/cv.pdf was generated.\n' +
+        '        The page and the download would ship out of sync. Run `npm run cv` and commit both.',
     )
   }
   console.log('cv.pdf: up to date with cv.js')
@@ -201,4 +217,7 @@ execFileSync(
   { stdio: 'ignore' },
 )
 unlinkSync(tmpHtml)
+// Record what the PDF was built from, so the build can tell whether cv.js has
+// moved on since. Commit this alongside the PDF.
+writeFileSync(STAMP, `${hashOf(CV_DATA)}\n`)
 console.log(`cv.pdf: generated from cv.js (${experience.length} roles, ${education.length} degrees)`)
