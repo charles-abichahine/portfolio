@@ -68,7 +68,7 @@ const esc = (s) =>
 const short = (url) => url.replace(/^https?:\/\/(www\.)?/, '')
 
 const html = `<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><title>Charles Abi Chahine — CV</title>
+<html lang="en"><head><meta charset="utf-8"><title>Charles Abi Chahine, CV</title>
 <style>
   @page { size: A4; margin: 14mm 15mm; }
   * { box-sizing: border-box; }
@@ -132,7 +132,7 @@ const html = `<!doctype html>
           (j) => `<div class="entry">
         <div class="when mono">${esc(j.dates)}</div>
         <div class="what">
-          <h3>${esc(j.role)} — ${esc(j.firm)}</h3>
+          <h3>${esc(j.role)}, ${esc(j.firm)}</h3>
           <div class="where mono">${esc(j.where)}</div>
           <ul>${j.points.map((pt) => `<li>${esc(pt)}</li>`).join('')}</ul>
         </div></div>`,

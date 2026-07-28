@@ -122,7 +122,7 @@ export default function DynamicIsland() {
         {/* Logo only — the wordmark lives in the hero, and dropping it here keeps
             the pill compact enough for the nav links and the theme toggle at any
             width. aria-label carries the name for screen readers. */}
-        <Link to="/" className="flex items-center rounded-full px-2 py-1" aria-label="Home — Charles Abi Chahine">
+        <Link to="/" className="flex items-center rounded-full px-2 py-1" aria-label="Home, Charles Abi Chahine">
           <Logo className="h-5 w-auto text-[#f0f0ea]" />
         </Link>
         <span className={`h-4 w-px shrink-0 bg-white/20 transition-opacity duration-300 ${open ? 'opacity-100' : 'opacity-0'}`} />

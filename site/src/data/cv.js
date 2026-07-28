@@ -6,44 +6,44 @@ export const contact = {
 
 export const education = [
   {
-    dates: '2025 — 2026',
-    school: 'IAAC — Institute for Advanced Architecture of Catalonia',
+    dates: '2025–2026',
+    school: 'IAAC, Institute for Advanced Architecture of Catalonia',
     degree: 'Master in Advanced Computation for Architecture & Design (MaCAD)',
     notes: 'Computational design, BIM & interoperability, AI in AEC.',
   },
   {
-    dates: '2018 — 2023',
+    dates: '2018–2023',
     school: 'Lebanese American University, Byblos',
     degree: 'Bachelor of Architecture (NASAD & NAAB accredited)',
-    notes: 'Dean’s Distinction List — 3.7/4.0 GPA. Honor scholarship all consecutive terms; featured in the NASAD Accreditation and SARD exhibitions.',
+    notes: 'Dean’s Distinction List: 3.7/4.0 GPA. Honor scholarship all consecutive terms; featured in the NASAD Accreditation and SARD exhibitions.',
   },
   {
     dates: '2022',
     school: 'Kent State University, Ohio',
-    degree: 'Bachelor of Architecture — study abroad program',
-    notes: 'Dean’s Distinction List — 3.8/4.0 GPA.',
+    degree: 'Bachelor of Architecture, study abroad program',
+    notes: 'Dean’s Distinction List: 3.8/4.0 GPA.',
   },
 ]
 
 export const experience = [
   {
-    dates: '2023 — 2024',
+    dates: '2023–2024',
     role: 'Design Architect',
     firm: 'SOMA',
     where: 'Beirut / Dubai',
     points: [
-      'Verve, City Walk — concept phase: led design and facade studies in Rhino & Grasshopper; developed the BIM model for floorplans and interiors.',
-      'Saria, Dubai Maritime City — pre-concept to design development: parametric facade studies and iterations; BIM model for documentation and execution.',
-      'District O & Enara, Business Bay — massing studies, design exploration, and BIM models for master plan and documentation.',
+      'Verve, City Walk, concept phase: led design and facade studies in Rhino & Grasshopper; developed the BIM model for floorplans and interiors.',
+      'Saria, Dubai Maritime City, pre-concept to design development: parametric facade studies and iterations; BIM model for documentation and execution.',
+      'District O & Enara, Business Bay: massing studies, design exploration, and BIM models for master plan and documentation.',
     ],
   },
   {
-    dates: '2023 —',
+    dates: '2023–',
     role: 'Project Architect',
     firm: 'Dynamic Solution Co',
     where: 'Kuwait',
     points: [
-      'Led office and retail design — restaurants, showrooms — focusing on layout efficiency, furniture, and facade studies.',
+      'Led office and retail design (restaurants, showrooms), focusing on layout efficiency, furniture, and facade studies.',
       'Designed interactive exhibition booths, stage and experiential design for major brands using computational design in Grasshopper.',
       'Oversaw 3D modeling, slicing, and printing for 3D-printed products.',
     ],
@@ -59,12 +59,12 @@ export const experience = [
     ],
   },
   {
-    dates: '2022 —',
+    dates: '2022–',
     role: 'Design Architect',
     firm: 'Self-employed',
     where: 'Hybrid',
     points: [
-      'Rings of Mars | Ring 4000 for Marsception — Top 50 — using AI-driven workflows, Rhino & V-Ray.',
+      'Rings of Mars | Ring 4000 for Marsception, Top 50, using AI-driven workflows, Rhino & V-Ray.',
       'Workshops on computational design, AI, and emerging technologies in architecture.',
     ],
   },
@@ -74,7 +74,7 @@ export const experience = [
     firm: 'Jemma Chidiac Architects',
     where: 'Beirut',
     points: [
-      'Moujassam Watan competition entry, Khobar KSA — from concept to fully visualized proposal.',
+      'Moujassam Watan competition entry, Khobar KSA: from concept to fully visualized proposal.',
       'Wrote the shortlisted technical report for the Abdullatif Al Fozan Award for Mosque Architecture (CEBRA Architects, Mussallah Gasr Al Hosn).',
     ],
   },

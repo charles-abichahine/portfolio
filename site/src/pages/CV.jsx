@@ -35,7 +35,7 @@ export default function CV() {
                   <p className="font-mono text-xs text-muted tabular-nums">{job.dates}</p>
                   <div>
                     <h3 className="font-semibold">
-                      {job.role} — {job.firm}
+                      {job.role}, {job.firm}
                     </h3>
                     <p className="label-mono mb-2 mt-1 text-muted">{job.where}</p>
                     <ul className="max-w-[62ch] space-y-1.5 text-sm leading-relaxed text-soft">

@@ -410,29 +410,43 @@ export default function SliceHero() {
     >
       <canvas ref={canvasRef} className="absolute inset-0 z-0 h-full w-full" aria-hidden="true" />
 
-      {/* Name block, lifted off the bottom edge. The logo is set to the name's
-          height and sits directly in front of it as a lockup; the role line
-          sits under the name, and the CTA below that. */}
+      {/* Name block, lifted off the bottom edge. The logo sits outside the text
+          column rather than above it, so every line below the name starts on the
+          name's own left edge instead of the logo's. */}
       <div className="absolute bottom-16 left-6 right-6 z-10 sm:left-10">
-        <div className="flex items-center gap-3 sm:gap-4">
-          <span className="flex shrink-0" style={{ color: pal.name }}>
+        <div className="flex items-start gap-3 sm:gap-4">
+          <span className="flex shrink-0 pt-1 sm:pt-1.5" style={{ color: pal.name }}>
             <Logo className="h-11 w-auto sm:h-14" />
           </span>
-          <h1 className="text-5xl font-bold leading-[0.98] tracking-tight sm:text-6xl" style={{ color: pal.name }}>
-            Charles Abi Chahine<span style={{ color: pal.red }}>.</span>
-          </h1>
+          <div className="min-w-0">
+            <h1 className="text-5xl font-bold leading-[0.98] tracking-tight sm:text-6xl" style={{ color: pal.name }}>
+              Charles Abi Chahine<span style={{ color: pal.red }}>.</span>
+            </h1>
+            {/* Lowercase, deliberately: the drafting labels elsewhere on the
+                site shout in caps, and the one place that speaks in Charles's
+                own voice should not. */}
+            <p className="mt-4 font-mono text-xs lowercase tracking-[0.16em]" style={{ color: pal.sub }}>
+              architect · computational designer
+            </p>
+            {/* The statement carries the voice, so it is set apart from the mono
+                label above it: the page's own Helvetica, larger, in the name's
+                ink rather than the muted grey, and held to one line. */}
+            <p
+              className="mt-3 text-[1.05rem] font-light lowercase leading-snug sm:whitespace-nowrap sm:text-[1.3rem]"
+              style={{ color: pal.name }}
+            >
+              design, computation, and the work of getting it built.
+            </p>
+            <Link
+              to="/work"
+              onClick={(e) => e.stopPropagation()}
+              className="mt-6 inline-flex items-center gap-1.5 font-mono text-[0.62rem] lowercase tracking-[0.18em] transition-opacity hover:opacity-70"
+              style={{ color: pal.red }}
+            >
+              view selected work <span aria-hidden="true">→</span>
+            </Link>
+          </div>
         </div>
-        <p className="mt-4 font-mono text-xs uppercase tracking-[0.16em]" style={{ color: pal.sub }}>
-          Architect · Computational Designer
-        </p>
-        <Link
-          to="/work"
-          onClick={(e) => e.stopPropagation()}
-          className="mt-5 inline-flex items-center gap-1.5 font-mono text-[0.62rem] uppercase tracking-[0.18em] transition-opacity hover:opacity-70"
-          style={{ color: pal.red }}
-        >
-          View selected work <span aria-hidden="true">→</span>
-        </Link>
       </div>
 
       {/* Legend — names the slicer layers the canvas actually draws (outer

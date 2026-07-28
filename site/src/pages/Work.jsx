@@ -459,7 +459,7 @@ export default function Work() {
             ref={stripRef}
             tabIndex={0}
             role="region"
-            aria-label="Projects — scroll sideways or use the arrow keys"
+            aria-label="Projects: scroll sideways or use the arrow keys"
             className="min-h-0 px-6 pb-6 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent lg:overflow-x-auto lg:overflow-y-hidden lg:overscroll-x-contain lg:px-0 lg:pb-0 lg:cursor-grab lg:[scrollbar-width:none] lg:[&::-webkit-scrollbar]:hidden"
           >
             <ul
@@ -518,7 +518,7 @@ export default function Work() {
       {/* Footer — the About page's contact bar. This full-bleed route has no
           global Footer, so contact lives here. */}
       <footer className="flex shrink-0 flex-wrap items-center justify-between gap-x-6 gap-y-3 px-6 py-6 lg:px-10">
-        <p className={`${MONO} text-muted`}>Selected Work — Charles Abi Chahine</p>
+        <p className={`${MONO} text-muted`}>Selected Work · Charles Abi Chahine</p>
         <nav className="flex gap-5">
           <a className={`${MONO} text-muted transition-colors hover:text-accent`} href={`mailto:${contact.email}`}>Email</a>
           <a className={`${MONO} text-muted transition-colors hover:text-accent`} href={contact.linkedin} target="_blank" rel="noreferrer">LinkedIn</a>

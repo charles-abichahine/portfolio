@@ -7,9 +7,9 @@ const _projects = [
     date: '2026-06-28',
     title: 'Sensi',
     subtitle:
-      'A sensory copilot for floor plans — it reads a plan and scores how each room will feel across six coupled senses, personalized to the person who will live in it.',
+      'A sensory copilot for floor plans: it reads a plan and scores how each room will feel across six coupled senses, personalized to the person who will live in it.',
     year: '2026',
-    module: 'AIA Studio — MaCAD, IAAC',
+    module: 'AIA Studio · MaCAD, IAAC',
     team: ['Charles Abi Chahine', 'Emilie El Chidiac', 'Lakzhmy Mari Zaro', 'María Sánchez Domínguez'],
     tools: ['Python', 'LLM agents', 'Vision models', 'Web app'],
     tag: 'AI',
@@ -22,34 +22,34 @@ const _projects = [
       blog: 'https://blog.iaac.net/sensi-making-comfort-a-design-layer/',
     },
     intro: [
-      'In architecture we model everything — structure, cost, energy, code compliance. Layer after layer that makes a building accountable before it is built. Sensi adds the one layer we never formalized: how a space will actually feel. Not emotion — the full sensory experience of standing in a room, scored across six senses: thermal, visual, acoustic, spatial, olfactory, tactile. Not in the abstract, but for a specific person.',
+      'In architecture we model everything: structure, cost, energy, code compliance. Layer after layer that makes a building accountable before it is built. Sensi adds the one layer we never formalized: how a space will actually feel. Not emotion, but the full sensory experience of standing in a room, scored across six senses: thermal, visual, acoustic, spatial, olfactory, tactile. Not in the abstract, but for a specific person.',
     ],
     sections: [
       {
         heading: 'The sensory layer',
         body: [
-          'Comfort research studies one sense at a time — thermal has its own models, acoustic its own standards. But we take a room in through all of them at once, and the senses are coupled: one moderates another. We call it the ripple. Add a bigger window and the daylight improves — but the same glass is a thinner sound barrier and leaks heat, and the noise that gets in can even diminish the daylight you gained. One design move, a chain of consequences.',
-          'The room score is not an average. It is half mean, half worst — the worst sense carries the room, because that is the one you would actually feel. A kitchen that scores fine on everything except smell does not get to hide behind its other senses. The scoring is deterministic: fixed rules over a coupling matrix. The LLM routes intent and explains results; it never decides the score. No black box.',
+          'Comfort research studies one sense at a time: thermal has its own models, acoustic its own standards. But we take a room in through all of them at once, and the senses are coupled: one moderates another. We call it the ripple. Add a bigger window and the daylight improves, but the same glass is a thinner sound barrier and leaks heat, and the noise that gets in can even diminish the daylight you gained. One design move, a chain of consequences.',
+          'The room score is not an average. It is half mean, half worst: the worst sense carries the room, because that is the one you would actually feel. A kitchen that scores fine on everything except smell does not get to hide behind its other senses. The scoring is deterministic: fixed rules over a coupling matrix. The LLM routes intent and explains results; it never decides the score. No black box.',
         ],
         media: [
           { type: 'video', src: 'projects/sensi/sensi-demo.mp4', caption: 'Sensi, end to end: a plan goes in, a room-by-room comfort report comes out.' },
         ],
       },
       {
-        heading: 'Act 1 · Onboard — who is this for',
+        heading: 'Act 1 · Onboard: who is this for',
         body: [
-          'Comfort is not universal. The same plan read through two lenses tells two stories: a child who minds noise sees the loud living room light up; a grandmother who minds the cold sees the cold bedroom. So Sensi opens by learning who you are — a few questions, then a moodboard where each image you keep quietly tags the senses you lean toward. Your words become sense weights, the images nudge them, and it all compiles into a persona drawn as a petal rose.',
+          'Comfort is not universal. The same plan read through two lenses tells two stories: a child who minds noise sees the loud living room light up; a grandmother who minds the cold sees the cold bedroom. So Sensi opens by learning who you are: a few questions, then a moodboard where each image you keep quietly tags the senses you lean toward. Your words become sense weights, the images nudge them, and it all compiles into a persona drawn as a petal rose.',
         ],
         media: [
           { type: 'video', src: 'projects/sensi/onboard.mp4', caption: 'Onboarding: from a few questions and a moodboard to a personal weighting of the six senses.' },
-          { type: 'image', src: 'projects/sensi/onboarding.webp', caption: 'The persona, visualized as a petal rose — your comfort priorities, made explicit.' },
+          { type: 'image', src: 'projects/sensi/onboarding.webp', caption: 'The persona, visualized as a petal rose: your comfort priorities, made explicit.' },
         ],
       },
       {
-        heading: 'Act 2 · Shape — comfort you can edit',
+        heading: 'Act 2 · Shape: comfort you can edit',
         body: [
-          'This is the heart of the system. You talk to it in plain language; a fast routing model classifies your intent in about 0.6 seconds — score a room, edit it, or explore the relationships. Ask a question and a heavier model reads the whole room and answers in words. Make an edit — change a material, add a window, place curtains, adjust ventilation — and the agent plans it, validates it against the plan, applies it, and re-scores, live. Every edit is kept as a checkpoint, so the plan improves honestly over time.',
-          'Rooms are nodes, doors are edges: the kitchen’s noise and smell reaching the bedroom through the hallway makes comfort a zoning problem you can see. The galaxy view holds the whole project as one living map — rooms, senses, and the design levers behind them — so you can find the connection you did not know was there.',
+          'This is the heart of the system. You talk to it in plain language; a fast routing model classifies your intent in about 0.6 seconds: score a room, edit it, or explore the relationships. Ask a question and a heavier model reads the whole room and answers in words. Make an edit (change a material, add a window, place curtains, adjust ventilation) and the agent plans it, validates it against the plan, applies it, and re-scores, live. Every edit is kept as a checkpoint, so the plan improves honestly over time.',
+          'Rooms are nodes, doors are edges: the kitchen’s noise and smell reaching the bedroom through the hallway makes comfort a zoning problem you can see. The galaxy view holds the whole project as one living map of rooms, senses, and the design levers behind them, so you can find the connection you did not know was there.',
         ],
         media: [
           { type: 'video', src: 'projects/sensi/shape.mp4', caption: 'Shaping: conversational edits that re-score the plan in real time.' },
@@ -59,13 +59,13 @@ const _projects = [
         ],
       },
       {
-        heading: 'Act 3 · Report — closing the loop',
+        heading: 'Act 3 · Report: closing the loop',
         body: [
-          'The last act closes the loop. Your final scores write a prompt and a vision model renders each room, under an honest rule: only the extreme senses speak — a clearly good or bad sense writes a phrase, the comfortable middle stays quiet — so the render stays grounded in what actually changed. You compare it back to the moodboard from Act 1; input and output meet. We benchmarked the renders across providers: about $0.039 per room and 2.75× faster than the alternative we tested.',
+          'The last act closes the loop. Your final scores write a prompt and a vision model renders each room, under an honest rule: only the extreme senses speak. A clearly good or bad sense writes a phrase, the comfortable middle stays quiet, so the render stays grounded in what actually changed. You compare it back to the moodboard from Act 1; input and output meet. We benchmarked the renders across providers: about $0.039 per room and 2.75× faster than the alternative we tested.',
         ],
         media: [
           { type: 'video', src: 'projects/sensi/report.mp4', caption: 'Generating the report: final scores become a grounded render of each room.' },
-          { type: 'image', src: 'projects/sensi/report-01.webp', caption: 'The comfort report — the sensory layer, made legible.' },
+          { type: 'image', src: 'projects/sensi/report-01.webp', caption: 'The comfort report: the sensory layer, made legible.' },
           { type: 'image', src: 'projects/sensi/report-02.webp', caption: 'Room-by-room detail, ready for a design team to act on.' },
         ],
       },
@@ -76,9 +76,9 @@ const _projects = [
     date: '2026-06-19',
     title: 'Encoding Urban Risk',
     subtitle:
-      'A machine-learning pipeline that classifies London street segments into low, medium, and high morphological-risk typologies from public spatial data alone — then tests whether the reading survives a move to another city.',
+      'A machine-learning pipeline that classifies London street segments into low, medium, and high morphological-risk typologies from public spatial data alone, then tests whether the reading survives a move to another city.',
     year: '2026',
-    module: 'Data Encoding — MaCAD, IAAC',
+    module: 'Data Encoding · MaCAD, IAAC',
     team: ['Charles Abi Chahine', 'Emilie El Chidiac', 'Lakzhmy Mari Zaro', 'María Sánchez Domínguez'],
     tools: ['Python', 'scikit-learn', 'OpenStreetMap', 'Mapillary', 'SHAP'],
     tag: 'ML',
@@ -91,13 +91,13 @@ const _projects = [
       blog: 'https://blog.iaac.net/encoding-urban-risk-spatial-feature-analysis-and-assessment/',
     },
     intro: [
-      'Can the physical layout of a street — measurable from public map data — predict how risky it feels? We framed it as a three-class problem: low, medium, or high risk, using seven spatial features drawn from OpenStreetMap and Mapillary per street segment. This is the full arc of the project — not just the results, but the wrong turn that made them honest.',
+      'Can the physical layout of a street, measurable from public map data, predict how risky it feels? We framed it as a three-class problem: low, medium, or high risk, using seven spatial features drawn from OpenStreetMap and Mapillary per street segment. This is the full arc of the project, not just the results, but the wrong turn that made them honest.',
     ],
     sections: [
       {
         heading: 'Grounded in sixty years of theory',
         body: [
-          'Every feature we chose traces back to established urban-safety theory. Jane Jacobs argued that active entrances create natural surveillance — “eyes on the street.” Oscar Newman showed that territorial clarity reduces the conditions for risk. Hillier and Hanson demonstrated through Space Syntax that network configuration shapes movement in predictable ways. Our unit of analysis is the segment — the stretch of street between two intersections — because risk clusters at that scale and a classified segment points a designer to a specific, addressable piece of street.',
+          'Every feature we chose traces back to established urban-safety theory. Jane Jacobs argued that active entrances create natural surveillance: “eyes on the street.” Oscar Newman showed that territorial clarity reduces the conditions for risk. Hillier and Hanson demonstrated through Space Syntax that network configuration shapes movement in predictable ways. Our unit of analysis is the segment, the stretch of street between two intersections, because risk clusters at that scale and a classified segment points a designer to a specific, addressable piece of street.',
         ],
         media: [
           { type: 'image', src: 'projects/urban-risk/theory.webp', caption: 'Seven features, each anchored in a lineage of urban-safety theory.' },
@@ -106,20 +106,20 @@ const _projects = [
       {
         heading: 'Hitting the wall',
         body: [
-          'We first tried to predict crime directly — sourcing roughly 920,000 London incidents and regressing them against our spatial features across five boroughs. Three models — Linear Regression, Decision Tree, Random Forest — all returned R² under 0.064. The models failed to learn. Crime is driven by social and economic forces that street geometry alone cannot capture. We treated this as a finding, not a failure: spatial form is too weak for direct regression against crime, so we pivoted to a more honest goal — a spatial typology that serves as a proxy for perceived risk.',
+          'We first tried to predict crime directly: sourcing roughly 920,000 London incidents and regressing them against our spatial features across five boroughs. Three models, Linear Regression, Decision Tree, Random Forest, all returned R² under 0.064. The models failed to learn. Crime is driven by social and economic forces that street geometry alone cannot capture. We treated this as a finding, not a failure. Spatial form is too weak for direct regression against crime, so we pivoted to a more honest goal: a spatial typology that serves as a proxy for perceived risk.',
         ],
         media: [
           { type: 'image', src: 'projects/urban-risk/the-wall.webp', caption: 'The wall: every model flat against the diagonal. Crime does not reduce to spatial features.' },
         ],
       },
       {
-        heading: 'The pivot — a spatial typology',
+        heading: 'The pivot: a spatial typology',
         body: [
-          'We rebuilt the pipeline into eight steps: fetch from OSM and Mapillary, place seven normalised features onto each segment, collapse them into a weighted risk score, use PCA and a Kohonen map as diagnostics, cut into three classes with K-Means, train a classifier, and deploy to other cities. Across 36,000 segments the score is roughly normal, centred near 0.35 — so rather than impose fixed cuts through the densest part, we let K-Means find the natural breakpoints. The split: 31% low, 47% medium, 22% high.',
+          'We rebuilt the pipeline into eight steps: fetch from OSM and Mapillary, place seven normalised features onto each segment, collapse them into a weighted risk score, use PCA and a Kohonen map as diagnostics, cut into three classes with K-Means, train a classifier, and deploy to other cities. Across 36,000 segments the score is roughly normal, centred near 0.35, so rather than impose fixed cuts through the densest part, we let K-Means find the natural breakpoints. The split: 31% low, 47% medium, 22% high.',
         ],
         media: [
           { type: 'image', src: 'projects/urban-risk/pipeline.webp', caption: 'The eight-step pipeline: from OSM features to a deployable classifier.' },
-          { type: 'image', src: 'projects/urban-risk/correlation.webp', caption: 'Redundancy check — the one strong correlation is visibility vs. enclosure at −0.75.' },
+          { type: 'image', src: 'projects/urban-risk/correlation.webp', caption: 'Redundancy check: the one strong correlation is visibility vs. enclosure at −0.75.' },
         ],
       },
       {
@@ -134,7 +134,7 @@ const _projects = [
       {
         heading: 'What actually matters',
         body: [
-          'Logistic Regression hits 99% accuracy and Random Forest 95% — expected by construction, since the label was built from the same features the classifiers train on. Accuracy tells us the rule is clean and learnable, not that it is correct. The ablation study is more informative: transport proximity is the single most important feature, followed by connectivity and land use. Lighting contributes almost nothing — because Mapillary lighting is inconsistently mapped, and a feature that does not vary cannot discriminate.',
+          'Logistic Regression hits 99% accuracy and Random Forest 95%: expected by construction, since the label was built from the same features the classifiers train on. Accuracy tells us the rule is clean and learnable, not that it is correct. The ablation study is more informative: transport proximity is the single most important feature, followed by connectivity and land use. Lighting contributes almost nothing, because Mapillary lighting is inconsistently mapped, and a feature that does not vary cannot discriminate.',
         ],
         media: [
           { type: 'image', src: 'projects/urban-risk/ablation.webp', caption: 'Ablation study: accuracy drop per feature removed. Transport leads; lighting barely registers.' },
@@ -143,10 +143,10 @@ const _projects = [
       {
         heading: 'London trained, world tested',
         body: [
-          'With London as the training set, we applied the model to Barcelona’s Eixample and Trastevere in Rome. The Eixample comes out almost entirely high-risk — not because it is dangerous, but because its orthogonal grid, high enclosure, and high connectivity map onto London’s high-risk feature region. SHAP pinpoints the divergence: land use and visibility hit values the model has never seen, so it extrapolates into high-risk by default. Not an architecture flaw — a per-city normalisation and distribution-shift problem. English cities like Leeds and Birmingham, which share London’s morphological history, transfer far better; re-fitting the pipeline on Barcelona produces a contextually plausible spread of its own.',
+          'With London as the training set, we applied the model to Barcelona’s Eixample and Trastevere in Rome. The Eixample comes out almost entirely high-risk, not because it is dangerous, but because its orthogonal grid, high enclosure, and high connectivity map onto London’s high-risk feature region. SHAP pinpoints the divergence: land use and visibility hit values the model has never seen, so it extrapolates into high-risk by default. Not an architecture flaw: a per-city normalisation and distribution-shift problem. English cities like Leeds and Birmingham, which share London’s morphological history, transfer far better; re-fitting the pipeline on Barcelona produces a contextually plausible spread of its own.',
         ],
         media: [
-          { type: 'image', src: 'projects/urban-risk/cross-city.webp', caption: 'The same model on London, Barcelona, and Rome — the reading breaks where the morphology diverges.' },
+          { type: 'image', src: 'projects/urban-risk/cross-city.webp', caption: 'The same model on London, Barcelona, and Rome: the reading breaks where the morphology diverges.' },
           { type: 'image', src: 'projects/urban-risk/shap.webp', caption: 'SHAP: London’s high-risk drivers stay in-distribution; the Eixample’s do not.' },
         ],
       },
@@ -157,9 +157,9 @@ const _projects = [
     date: '2026-06-18',
     title: 'lEgoarCh',
     subtitle:
-      'From a one-sentence prompt to a priced, buildable LEGO set — generative AI proposes the form, deterministic computation proves it stands.',
+      'From a one-sentence prompt to a priced, buildable LEGO set: generative AI proposes the form, deterministic computation proves it stands.',
     year: '2026',
-    module: 'Generative AI Seminar — MaCAD, IAAC',
+    module: 'Generative AI Seminar · MaCAD, IAAC',
     team: ['Charles Abi Chahine', 'Emilie El Chidiac'],
     tools: ['FLUX.2 + LoRA', 'TRELLIS-2', 'ComfyUI', 'Python'],
     tag: 'AI',
@@ -172,13 +172,13 @@ const _projects = [
       blog: 'https://blog.iaac.net/legoarch-behind-the-sets/',
     },
     intro: [
-      'You type a building, and a minute later a real LEGO set is sitting on a shelf: rendered, modelled, brick-built, priced, and catalog-legal. Most "AI makes LEGO" demos stop at a gorgeous render — but a render is a promise, not a product. lEgoarCh builds the downstream half: the machinery that forces the dream to obey real bricks, real colours, and real gravity.',
+      'You type a building, and a minute later a real LEGO set is sitting on a shelf: rendered, modelled, brick-built, priced, and catalog-legal. Most "AI makes LEGO" demos stop at a gorgeous render, but a render is a promise, not a product. lEgoarCh builds the downstream half: the machinery that forces the dream to obey real bricks, real colours, and real gravity.',
     ],
     sections: [
       {
         heading: 'One sentence, five moves',
         body: [
-          'The pipeline runs text prompt → FLUX render → TRELLIS 3D mesh → voxelize → legolize → a priced, buildable set. The front half is generative and probabilistic — it invents the form. The back half is deterministic — it proves the form stands. The handoff in the middle is the entire idea.',
+          'The pipeline runs text prompt → FLUX render → TRELLIS 3D mesh → voxelize → legolize → a priced, buildable set. The front half is generative and probabilistic: it invents the form. The back half is deterministic: it proves the form stands. The handoff in the middle is the entire idea.',
         ],
         media: [
           { type: 'image', src: 'projects/legoarch/pipeline.svg', caption: 'The whole pipeline on one line: three probabilistic boxes, then three deterministic ones.' },
@@ -188,7 +188,7 @@ const _projects = [
       {
         heading: 'A LoRA that speaks LEGO',
         body: [
-          'Base FLUX.2 does not speak fluent LEGO Architecture — ask for a LEGO building and you get something vaguely blocky. So we trained a LoRA on the visual grammar of real LEGO Architecture sets and swept its strength from 0 to 1.5: at 0 the render is a plain building, at 1.0 the studs and brick seams snap in. The LEGO-ness genuinely lives in the fine-tune, not in the words.',
+          'Base FLUX.2 does not speak fluent LEGO Architecture: ask for a LEGO building and you get something vaguely blocky. So we trained a LoRA on the visual grammar of real LEGO Architecture sets and swept its strength from 0 to 1.5: at 0 the render is a plain building, at 1.0 the studs and brick seams snap in. The LEGO-ness genuinely lives in the fine-tune, not in the words.',
         ],
         media: [
           { type: 'image', src: 'projects/legoarch/slide-lora.webp', caption: 'Same prompt, same seed, only the LoRA strength changes. 1.0 wins.' },
@@ -198,7 +198,7 @@ const _projects = [
       {
         heading: 'From one photo to a whole object',
         body: [
-          'TRELLIS-2 takes the single render and completes the full 3D form — openly guessing the unseen back from everything it knows about how buildings behave. Then the deterministic half begins: the mesh is voxelized onto plate-height layers (bricks are not cubes, so the mesh is pre-stretched 2.5× vertically), and colours are sampled and exposure-matched back to the original render.',
+          'TRELLIS-2 takes the single render and completes the full 3D form: openly guessing the unseen back from everything it knows about how buildings behave. Then the deterministic half begins: the mesh is voxelized onto plate-height layers (bricks are not cubes, so the mesh is pre-stretched 2.5× vertically), and colours are sampled and exposure-matched back to the original render.',
         ],
         media: [
           { type: 'image', src: 'projects/legoarch/mesh-sagrada.webp', caption: 'The TRELLIS mesh: a couple hundred thousand triangles with a wrapped texture.' },
@@ -208,7 +208,7 @@ const _projects = [
       {
         heading: 'The legolizer: where buildable gets earned',
         body: [
-          'The computational centrepiece contains no AI at all. A split-and-merge solver covers each layer with the largest legal bricks that fit — full-height bricks first, then plates, then smooth tiles — with a slope pass that bevels staircases (to our knowledge the first open implementation of a method published in 2019) and a running-bond penalty that offsets seams the way a real bricklayer would.',
+          'The computational centrepiece contains no AI at all. A split-and-merge solver covers each layer with the largest legal bricks that fit, full-height bricks first, then plates, then smooth tiles, with a slope pass that bevels staircases (to our knowledge the first open implementation of a method published in 2019) and a running-bond penalty that offsets seams the way a real bricklayer would.',
           'Colours snap to the nearest real LEGO colour measured in CIEDE2000, the perceptual standard, not naive RGB distance. Every footprint is a real BrickLink part: 44 parts and 48 colours cross-validated between Rebrickable and LDraw into 1,598 legal combinations. Buildable means every piece goes in a cart.',
         ],
         media: [
@@ -219,7 +219,7 @@ const _projects = [
       {
         heading: 'A set you can keep',
         body: [
-          'The output is a complete product: box art, a build booklet, a priced parts list, and a shelf that keeps every set you have generated — re-roll the render, re-tune the bricks, reopen any set.',
+          'The output is a complete product: box art, a build booklet, a priced parts list, and a shelf that keeps every set you have generated. Re-roll the render, re-tune the bricks, reopen any set.',
         ],
         media: [
           { type: 'image', src: 'projects/legoarch/sagrada-box.webp', caption: 'Box art, generated per set.' },
@@ -234,9 +234,9 @@ const _projects = [
     date: '2026-03-25',
     title: 'Breathing Mass',
     subtitle:
-      'A hyperbuilding for Santiago conceived as a vertical lung — a tower that captures, cleans, and redistributes the city’s polluted air through a breathing core, resolved as a topology-optimized structure and a performance-driven facade.',
+      'A hyperbuilding for Santiago conceived as a vertical lung: a tower that captures, cleans, and redistributes the city’s polluted air through a breathing core, resolved as a topology-optimized structure and a performance-driven facade.',
     year: '2026',
-    module: 'BIMSC Studio — MaCAD, IAAC',
+    module: 'BIMSC Studio · MaCAD, IAAC',
     team: ['Charles Abi Chahine', 'Ramy Ayoub', 'Hani Karime'],
     tools: ['Rhino', 'Grasshopper', 'Alpaca', 'Speckle'],
     tag: 'GH',
@@ -248,13 +248,13 @@ const _projects = [
       blog: 'https://blog.iaac.net/breathing-mass-hb01-structural-facade/',
     },
     intro: [
-      'Breathing Mass is a vertical ecosystem in Santiago where architecture, wind, and energy converge. The Hyper Lung captures, cleans, and redistributes polluted air through a breathing core, turning the tower into living infrastructure that breathes with the city. Within a larger hyperbuilding studio, our team owned its structure and facade — translating the lung analogy into a self-braced skeleton and an adaptive skin, every form justified by data and published to the program and data teams through Speckle.',
+      'Breathing Mass is a vertical ecosystem in Santiago where architecture, wind, and energy converge. The Hyper Lung captures, cleans, and redistributes polluted air through a breathing core, turning the tower into living infrastructure that breathes with the city. Within a larger hyperbuilding studio, our team owned its structure and facade: translating the lung analogy into a self-braced skeleton and an adaptive skin, every form justified by data and published to the program and data teams through Speckle.',
     ],
     sections: [
       {
-        heading: 'The alveolar spine — a lung analogy',
+        heading: 'The alveolar spine: a lung analogy',
         body: [
-          'The core of the building is defined by the Alveolar Spine. Taking inspiration from the human lung, we developed a porous structural core that mirrors the function of the bronchi — a spine that carries load and moves air at the same time. The concept is not decorative; it is the organising logic for both the structure and the way the tower breathes.',
+          'The core of the building is defined by the Alveolar Spine. Taking inspiration from the human lung, we developed a porous structural core that mirrors the function of the bronchi: a spine that carries load and moves air at the same time. The concept is not decorative; it is the organising logic for both the structure and the way the tower breathes.',
         ],
         media: [
           { type: 'image', src: 'projects/breathing-mass/lung-analogy.webp', caption: 'From bronchi to a porous structural core: the lung analogy driving the spine.' },
@@ -263,7 +263,7 @@ const _projects = [
       {
         heading: 'A self-braced skeleton',
         body: [
-          'The structure rests on the core: each volume is plugged onto it, so load transfers from volume to core to foundation. Three cores form a triangle that turns vertical mass into a self-braced system. Using Alpaca we measured the stress at the points connecting the core to the volumes, ran a structural optimization to remove unnecessary material, and transformed the resulting voxels into a lattice — dense at high-load junctions, tapered where the loads fall away. The optimization cuts the primary structure from roughly 1,650 to 235 tonnes.',
+          'The structure rests on the core: each volume is plugged onto it, so load transfers from volume to core to foundation. Three cores form a triangle that turns vertical mass into a self-braced system. Using Alpaca we measured the stress at the points connecting the core to the volumes, ran a structural optimization to remove unnecessary material, and transformed the resulting voxels into a lattice: dense at high-load junctions, tapered where the loads fall away. The optimization cuts the primary structure from roughly 1,650 to 235 tonnes.',
         ],
         media: [
           { type: 'image', src: 'projects/breathing-mass/structure.webp', caption: 'Self-braced structural system: load transfer from plugged volumes through the triangulated cores.' },
@@ -280,7 +280,7 @@ const _projects = [
         ],
       },
       {
-        heading: 'The breathing core — an environmental machine',
+        heading: 'The breathing core: an environmental machine',
         body: [
           'The core is where the tower earns its name. A water-cascade system, electrostatic precipitation for air purification, and Climeworks-style capture pull CO₂ and particulates from ambient air, cleaning it before it is redistributed through the spine and stored back into the ground. The structure and the environmental system are one and the same object.',
         ],
@@ -291,7 +291,7 @@ const _projects = [
       {
         heading: 'Fixed vs. adaptive facade',
         body: [
-          'The skin operates in two modes depending on the program behind it. A pattern derived from mashrabiya logic becomes a performative facade geometry — an adaptive, dynamic system where it needs to breathe and respond, and a fixed, collated system where it does not. Wind direction and radiation set the pattern; the same grammar reads as both a static and a moving skin.',
+          'The skin operates in two modes depending on the program behind it. A pattern derived from mashrabiya logic becomes a performative facade geometry: an adaptive, dynamic system where it needs to breathe and respond, and a fixed, collated system where it does not. Wind direction and radiation set the pattern; the same grammar reads as both a static and a moving skin.',
         ],
         media: [
           { type: 'image', src: 'projects/breathing-mass/facade-pattern.webp', caption: 'From mashrabiya inspiration to a performative facade geometry.' },
@@ -301,7 +301,7 @@ const _projects = [
       {
         heading: 'The tower',
         body: [
-          'Assembled, the system reads as a stack of plugged volumes around a breathing spine — a tower that behaves less like an object and more like a piece of the city’s respiratory infrastructure.',
+          'Assembled, the system reads as a stack of plugged volumes around a breathing spine: a tower that behaves less like an object and more like a piece of the city’s respiratory infrastructure.',
         ],
         media: [
           { type: 'image', src: 'projects/breathing-mass/cover.webp', caption: 'The Hyper Lung against the Andes.' },
@@ -316,9 +316,9 @@ const _projects = [
     date: '2025-12-22',
     title: 'The Huddle',
     subtitle:
-      'A wind-adaptive research & education hub with expedition basecamp in Punta Arenas, Chile — discrete modules aggregated against a perpetually windy subpolar climate.',
+      'A wind-adaptive research & education hub with expedition basecamp in Punta Arenas, Chile: discrete modules aggregated against a perpetually windy subpolar climate.',
     year: '2025/26',
-    module: 'ACESD Studio — MaCAD, IAAC',
+    module: 'ACESD Studio · MaCAD, IAAC',
     team: ['Charles Abi Chahine', 'Emilie El Chidiac', 'María Sánchez Domínguez', 'Lakzhmy Mari Zaro'],
     tools: ['Rhino', 'Grasshopper', 'Wasp', 'Kangaroo', 'Speckle'],
     tag: 'GH',
@@ -347,7 +347,7 @@ const _projects = [
       {
         heading: 'A kit of parts',
         body: [
-          'The module’s form merges the logic of the semispheric kawis of the region’s native tribes — a compact, continuous shape that echoes both traditions while naturally optimizing wind flow and minimizing resistance. A topological map organizes the program for 1,000 users at 100 m² per user into private, semi-private, and public groups, and two Kangaroo workflows translate that conceptual map into real constraints and measures.',
+          'The module’s form merges the logic of the semispheric kawis of the region’s native tribes: a compact, continuous shape that echoes both traditions while naturally optimizing wind flow and minimizing resistance. A topological map organizes the program for 1,000 users at 100 m² per user into private, semi-private, and public groups, and two Kangaroo workflows translate that conceptual map into real constraints and measures.',
         ],
         media: [
           { type: 'image', src: 'projects/huddle/axonometric-zoom.webp', caption: 'The kit of parts, aggregated.' },
@@ -356,7 +356,7 @@ const _projects = [
       {
         heading: 'The aggregation',
         body: [
-          'Wasp aggregates the kit of parts under a rule layout grouped by part and space type, converging on a massing that huddles the program together — public space at the sheltered heart, expedition functions at the edge.',
+          'Wasp aggregates the kit of parts under a rule layout grouped by part and space type, converging on a massing that huddles the program together: public space at the sheltered heart, expedition functions at the edge.',
         ],
         media: [
           { type: 'image', src: 'projects/huddle/axonometric.webp', caption: 'Aggregation axonometric.' },
@@ -371,9 +371,9 @@ const _projects = [
     date: '2025-12-13',
     title: 'The Luminous Stratum',
     subtitle:
-      'A “volume of sedimented light” inserted into Cairo’s historic fabric — an independent lattice that hovers within a market void, filtering the harsh sun without ever touching the historic walls.',
+      'A “volume of sedimented light” inserted into Cairo’s historic fabric: an independent lattice that hovers within a market void, filtering the harsh sun without ever touching the historic walls.',
     year: '2025',
-    module: 'Complex Forming — MaCAD, IAAC',
+    module: 'Complex Forming · MaCAD, IAAC',
     team: ['Charles Abi Chahine'],
     tools: ['Rhino', 'Grasshopper', 'Kangaroo'],
     tag: 'GH',
@@ -385,13 +385,13 @@ const _projects = [
       blog: 'https://blog.iaac.net/the-luminous-stratum/',
     },
     intro: [
-      'In the dense historic fabric of Cairo, light is both a blessing and a burden. The Luminous Stratum proposes a new architectural language that negotiates this relationship — a “volume of sedimented light” that mimics the city’s stratification while filtering the harsh sun. Designed for the Complex Forming seminar, it is an independent system of stacked lamellas that hovers within the void of the Bab Al-Luk historic market, leaving the original structure untouched.',
+      'In the dense historic fabric of Cairo, light is both a blessing and a burden. The Luminous Stratum proposes a new architectural language that negotiates this relationship: a “volume of sedimented light” that mimics the city’s stratification while filtering the harsh sun. Designed for the Complex Forming seminar, it is an independent system of stacked lamellas that hovers within the void of the Bab Al-Luk historic market, leaving the original structure untouched.',
     ],
     sections: [
       {
         heading: 'More than a roof',
         body: [
-          'The system is deliberately independent: it revitalizes the market below without touching the historic walls. Voids are cut into the geometry precisely so the new form pulls away from its context, respecting the constraint of independence. It reads as a continuous volume that nests within the void — a porous buffer that protects the atrium without sealing it off.',
+          'The system is deliberately independent: it revitalizes the market below without touching the historic walls. Voids are cut into the geometry precisely so the new form pulls away from its context, respecting the constraint of independence. It reads as a continuous volume that nests within the void: a porous buffer that protects the atrium without sealing it off.',
         ],
         media: [
           { type: 'image', src: 'projects/luminous-stratum/concept.webp', caption: 'A volume of sedimented light: an independent system layered above the untouched historic market.' },
@@ -411,7 +411,7 @@ const _projects = [
       {
         heading: 'Geometry becomes function',
         body: [
-          'Vertical faces become gradient frosted louvers that control sun glare; horizontal faces become structural lamellas that serve as shelving and walkable surfaces. The architectural elements all materialize simultaneously from the relaxed mesh — the form-finding is the generator, resolving the complex geometry into louvers, lamellas, and paths in one unified move. The system is modular, repeated along the market hall; for the last vault, different anchor points turn the workflow into a continuous staircase connecting the two levels.',
+          'Vertical faces become gradient frosted louvers that control sun glare; horizontal faces become structural lamellas that serve as shelving and walkable surfaces. The architectural elements all materialize simultaneously from the relaxed mesh: the form-finding is the generator, resolving the complex geometry into louvers, lamellas, and paths in one unified move. The system is modular, repeated along the market hall; for the last vault, different anchor points turn the workflow into a continuous staircase connecting the two levels.',
         ],
         media: [
           { type: 'image', src: 'projects/luminous-stratum/iterations.webp', caption: 'Iterating vertical loads and louver/lamella domains to balance shading against structure.' },
@@ -420,7 +420,7 @@ const _projects = [
       {
         heading: 'An occupiable lattice',
         body: [
-          'Form-finding is rarely linear. I tested vertical loads from a shallow 15% to a steep 75%, and calibrated the domains for the frosted louvers and structural lamellas to tune porosity — the balance between sun shading and structural integrity. The selected iteration uses a 35% vertical load, giving the optimal vault height and spatial clearance for the functional layers below. The result is an occupiable lattice of filtered light that respects the past while embracing a computational future.',
+          'Form-finding is rarely linear. I tested vertical loads from a shallow 15% to a steep 75%, and calibrated the domains for the frosted louvers and structural lamellas to tune porosity: the balance between sun shading and structural integrity. The selected iteration uses a 35% vertical load, giving the optimal vault height and spatial clearance for the functional layers below. The result is an occupiable lattice of filtered light that respects the past while embracing a computational future.',
         ],
         media: [
           { type: 'image', src: 'projects/luminous-stratum/section.webp', caption: 'Section: an independent system hovering within the void, holding its distance from the historic walls.' },
@@ -434,9 +434,9 @@ const _projects = [
     date: '2026-03-22',
     title: 'FacadeIQ',
     subtitle:
-      'An interactive tool that syncs facade design with live financial feasibility — linking geometry to real-time cost and efficiency so typologies can be prototyped against budget as they are drawn.',
+      'An interactive tool that syncs facade design with live financial feasibility: linking geometry to real-time cost and efficiency so typologies can be prototyped against budget as they are drawn.',
     year: '2026',
-    module: 'Cloud Data Management — MaCAD, IAAC',
+    module: 'Cloud Data Management · MaCAD, IAAC',
     team: ['Charles Abi Chahine'],
     tools: ['Web app', 'Computational design', 'Data'],
     tag: 'WEB',
@@ -449,7 +449,7 @@ const _projects = [
       blog: 'https://blog.iaac.net/facadeiq-facade-feasibility-estimator/',
     },
     intro: [
-      'FacadeIQ is an interactive computational tool that synchronizes facade design with real-time financial feasibility. By linking geometric parameters — building footprint, floor count, balcony depth — to live cost metrics, it gives immediate feedback on project value and efficiency ratios, letting designers prototype typologies while checking aesthetic ambition against budgetary thresholds.',
+      'FacadeIQ is an interactive computational tool that synchronizes facade design with real-time financial feasibility. By linking geometric parameters, building footprint, floor count, balcony depth, to live cost metrics, it gives immediate feedback on project value and efficiency ratios, letting designers prototype typologies while checking aesthetic ambition against budgetary thresholds.',
     ],
     sections: [
       {
@@ -466,9 +466,9 @@ const _projects = [
     date: '2026-06-25',
     title: 'Analyzing Narkomfin Through Its Graph',
     subtitle:
-      'The Narkomfin Building rebuilt as a spatial graph — centrality and community detection recover Ginzburg’s vertical living cells from topology alone, and a GraphSAGE classifier reads room types the plan cannot show.',
+      'The Narkomfin Building rebuilt as a spatial graph: centrality and community detection recover Ginzburg’s vertical living cells from topology alone, and a GraphSAGE classifier reads room types the plan cannot show.',
     year: '2026',
-    module: 'Graph Machine Learning — MaCAD, IAAC',
+    module: 'Graph Machine Learning · MaCAD, IAAC',
     team: ['Charles Abi Chahine', 'Emilie El Chidiac', 'Lakzhmy Mari Zaro', 'María Sánchez Domínguez'],
     tools: ['Python', 'GraphSAGE', 'Graph ML'],
     tag: 'ML',
@@ -481,7 +481,7 @@ const _projects = [
       blog: 'https://blog.iaac.net/analyzing-narkomfin-through-its-graph/',
     },
     intro: [
-      'The Narkomfin Building (Moscow, 1930) is reconstructed as a spatial graph to analyse what floor plans cannot show. Grid sampling and stair stitching connect both apartment types into weighted networks; closeness and betweenness centrality expose the corridor as the building’s sole topological spine. Community detection recovers Ginzburg’s intended vertical living cells from topology alone, and a GraphSAGE room-type classifier scores 68% on the communal Type K layout — confirming the building deliberately breaks domestic spatial conventions.',
+      'The Narkomfin Building (Moscow, 1930) is reconstructed as a spatial graph to analyse what floor plans cannot show. Grid sampling and stair stitching connect both apartment types into weighted networks; closeness and betweenness centrality expose the corridor as the building’s sole topological spine. Community detection recovers Ginzburg’s intended vertical living cells from topology alone, and a GraphSAGE room-type classifier scores 68% on the communal Type K layout: confirming the building deliberately breaks domestic spatial conventions.',
     ],
     sections: [
       {
@@ -500,9 +500,9 @@ const _projects = [
     date: '2026-03-17',
     title: 'Hyperbuilding 01 · Integrative Modeling',
     subtitle:
-      'A data-driven parametric skyscraper complex inspired by the lung — three towers shaped by a deterministic Grasshopper script, with a lattice core, plug-in volumes, and an adaptive facade of 67,218 panels, documented through Speckle and Revit.',
+      'A data-driven parametric skyscraper complex inspired by the lung: three towers shaped by a deterministic Grasshopper script, with a lattice core, plug-in volumes, and an adaptive facade of 67,218 panels, documented through Speckle and Revit.',
     year: '2026',
-    module: 'Integrative Modeling — MaCAD, IAAC',
+    module: 'Integrative Modeling · MaCAD, IAAC',
     team: ['Ramy Ayoub', 'Charles Abi Chahine', 'Hani Karime'],
     tools: ['Grasshopper', 'Speckle', 'Revit'],
     tag: 'BIM',
@@ -514,7 +514,7 @@ const _projects = [
       blog: 'https://blog.iaac.net/integrative-modeling-hb01-structure-facade/',
     },
     intro: [
-      'Hyperbuilding 01 is a data-driven parametric skyscraper complex inspired by the lung’s bronchiole system. Three towers — 600m, 500m, and 400m — are shaped by a deterministic Grasshopper script that balances program requirements against environmental pressures. The complex features a performance-optimized lattice core, modular plug-in volumes, and an adaptive facade of 67,218 panels, fixed or climate-responsive, all documented and published through Speckle and Revit.',
+      'Hyperbuilding 01 is a data-driven parametric skyscraper complex inspired by the lung’s bronchiole system. Three towers, 600m, 500m, and 400m, are shaped by a deterministic Grasshopper script that balances program requirements against environmental pressures. The complex features a performance-optimized lattice core, modular plug-in volumes, and an adaptive facade of 67,218 panels, fixed or climate-responsive, all documented and published through Speckle and Revit.',
     ],
     sections: [
       {
@@ -532,9 +532,9 @@ const _projects = [
     date: '2026-03-14',
     title: 'Hyperbuilding 01 · Collaborative Workflow',
     subtitle:
-      'An automated Speckle pipeline that fires on every model push — traversing Grasshopper and Rhino geometry, extracting structured properties, and exporting to Excel and Google Sheets, so architectural analytics become repeatable instead of manual.',
+      'An automated Speckle pipeline that fires on every model push: traversing Grasshopper and Rhino geometry, extracting structured properties, and exporting to Excel and Google Sheets, so architectural analytics become repeatable instead of manual.',
     year: '2026',
-    module: 'Collaborative Workflows — MaCAD, IAAC',
+    module: 'Collaborative Workflows · MaCAD, IAAC',
     team: ['Ramy Ayoub', 'Hani Karime', 'Charles Abi Chahine'],
     tools: ['Speckle Automate', 'Grasshopper', 'Python'],
     tag: 'BIM',
@@ -547,7 +547,7 @@ const _projects = [
       blog: 'https://blog.iaac.net/collaborative-workflow-structure-facade-hb01/',
     },
     intro: [
-      'The structure-and-facade team built an automated pipeline on Speckle Automate that triggers whenever a new model version is pushed. It traverses nested geometry collections from Grasshopper and Rhino, extracts structured properties, and exports formatted data to Excel and Google Sheets simultaneously — eliminating manual extraction from 3D models and making architectural analytics automatic, repeatable, and structured.',
+      'The structure-and-facade team built an automated pipeline on Speckle Automate that triggers whenever a new model version is pushed. It traverses nested geometry collections from Grasshopper and Rhino, extracts structured properties, and exports formatted data to Excel and Google Sheets simultaneously: eliminating manual extraction from 3D models and making architectural analytics automatic, repeatable, and structured.',
     ],
     sections: [
       {
@@ -565,9 +565,9 @@ const _projects = [
     date: '2025-12-12',
     title: 'Revitalizing the Tsukiji Fish Market',
     subtitle:
-      'An environmental analysis of a 19-hectare redevelopment on Tokyo’s former Tsukiji market — reading the city’s climate and the building’s behaviour with Ladybug, Infrared, and Galapagos to drive formal change.',
+      'An environmental analysis of a 19-hectare redevelopment on Tokyo’s former Tsukiji market: reading the city’s climate and the building’s behaviour with Ladybug, Infrared, and Galapagos to drive formal change.',
     year: '2025',
-    module: 'Environmental Analysis — MaCAD, IAAC',
+    module: 'Environmental Analysis · MaCAD, IAAC',
     team: ['María Sánchez Domínguez', 'Charles Abi Chahine', 'Emilie El Chidiac', 'Lakzhmy Mari Zaro'],
     tools: ['Ladybug', 'Galapagos', 'Grasshopper'],
     tag: 'ENV',
@@ -598,9 +598,9 @@ const _projects = [
     date: '2025-12-18',
     title: 'The Clebsch Pavilion',
     subtitle:
-      'A pavilion built on the Clebsch Diagonal Cubic — Crystallon lattices and Alpaca analysis, with evolutionary solvers minimizing mass and deflection across nine iterations, in glass-reinforced recycled PET.',
+      'A pavilion built on the Clebsch Diagonal Cubic: Crystallon lattices and Alpaca analysis, with evolutionary solvers minimizing mass and deflection across nine iterations, in glass-reinforced recycled PET.',
     year: '2025',
-    module: 'Structural Optimization — MaCAD, IAAC',
+    module: 'Structural Optimization · MaCAD, IAAC',
     team: ['Charles Abi Chahine', 'Mahmoud Fathi'],
     tools: ['Crystallon', 'Alpaca', 'Grasshopper'],
     tag: 'GH',
@@ -612,7 +612,7 @@ const _projects = [
       blog: 'https://blog.iaac.net/the-clebsch-pavilion/',
     },
     intro: [
-      'The Clebsch Pavilion explores the intersection of algebraic geometry and structural optimization. Centred on the Clebsch Diagonal Cubic — a surface known for its geometric stability — it uses Crystallon for lattice generation and Alpaca for structural analysis. Working in Glass Reinforced Recycled PET, the team ran evolutionary solvers to minimize mass and deflection across nine design iterations.',
+      'The Clebsch Pavilion explores the intersection of algebraic geometry and structural optimization. Centred on the Clebsch Diagonal Cubic, a surface known for its geometric stability, it uses Crystallon for lattice generation and Alpaca for structural analysis. Working in Glass Reinforced Recycled PET, the team ran evolutionary solvers to minimize mass and deflection across nine design iterations.',
     ],
     sections: [
       {
@@ -633,7 +633,7 @@ const _projects = [
     subtitle:
       'A Complex Forming study that develops a playscape from puffer-inspired geometry, iterated step by step into an inhabitable landscape.',
     year: '2025',
-    module: 'Complex Forming — MaCAD, IAAC',
+    module: 'Complex Forming · MaCAD, IAAC',
     team: ['Charles Abi Chahine'],
     tools: ['Rhino', 'Grasshopper'],
     tag: 'GH',
@@ -662,7 +662,7 @@ const _projects = [
     subtitle:
       'A Complex Forming study that resolves an undulating surface into a fabricable, 3D-printed chair, developed through geometry iterations and print trials.',
     year: '2025',
-    module: 'Complex Forming — MaCAD, IAAC',
+    module: 'Complex Forming · MaCAD, IAAC',
     team: ['Charles Abi Chahine'],
     tools: ['Rhino', 'Grasshopper', 'Dendro'],
     tag: 'GH',
@@ -690,9 +690,9 @@ const _projects = [
     date: '2025-11-10',
     title: 'The Cross-Cap House',
     subtitle:
-      'A Complex Forming study developing an architecture on the cross-cap — a non-orientable, self-intersecting surface — through iterative geometry.',
+      'A Complex Forming study developing an architecture on the cross-cap, a non-orientable, self-intersecting surface, through iterative geometry.',
     year: '2025',
-    module: 'Complex Forming — MaCAD, IAAC',
+    module: 'Complex Forming · MaCAD, IAAC',
     team: ['Charles Abi Chahine'],
     tools: ['Rhino', 'Grasshopper'],
     tag: 'GH',
@@ -702,7 +702,7 @@ const _projects = [
     award: null,
     links: {},
     intro: [
-      'The Cross-Cap House is a form-finding exercise from the Complex Forming seminar at IAAC. It develops an architecture on the cross-cap — a non-orientable, self-intersecting surface — through iterative geometry and low-poly studies.',
+      'The Cross-Cap House is a form-finding exercise from the Complex Forming seminar at IAAC. It develops an architecture on the cross-cap, a non-orientable, self-intersecting surface, through iterative geometry and low-poly studies.',
     ],
     sections: [
       {
@@ -720,7 +720,7 @@ const _projects = [
     date: '2024-05-12',
     title: 'Marsception 2024',
     subtitle:
-      'An international competition imagining architecture for life on Mars — our entry, with Emilie El Chidiac, was selected among the Top 50.',
+      'An international competition imagining architecture for life on Mars: our entry, with Emilie El Chidiac, was selected among the Top 50.',
     year: '2024',
     module: 'International Competition',
     team: ['Charles Abi Chahine', 'Emilie El Chidiac'],
@@ -749,10 +749,10 @@ const _projects = [
     date: '2024-01-18',
     title: 'Verve, City Walk',
     subtitle:
-      'A residential development at City Walk in Dubai, a Meraas project — design and documentation produced at SOMA, where I worked as a Design Architect.',
+      'A residential development at City Walk in Dubai, a Meraas project: design and documentation produced at SOMA, where I worked as a Design Architect.',
     year: '2023–2024',
     module: 'SOMA · Design Architect',
-    team: ['SOMA — office project'],
+    team: ['SOMA: office project'],
     tools: ['Rhino', 'Revit', 'Adobe Suite'],
     tag: 'ARCH',
     toolsShort: 'PRACTICE',
@@ -782,7 +782,7 @@ const _projects = [
       'A tower project on Plot 42, developed at SOMA where I worked as a Design Architect.',
     year: '2024',
     module: 'SOMA · Design Architect',
-    team: ['SOMA — office project'],
+    team: ['SOMA: office project'],
     tools: ['Rhino', 'Revit', 'Adobe Suite'],
     tag: 'ARCH',
     toolsShort: 'PRACTICE',
@@ -800,9 +800,9 @@ const _projects = [
     date: '2023-05-22',
     title: 'Anfeh',
     subtitle:
-      'My bachelor final-year thesis at LAU — reimagining the coastal town of Anfeh in North Lebanon through its landscape of salt ponds, fishing, and olives.',
+      'My bachelor final-year thesis at LAU: reimagining the coastal town of Anfeh in North Lebanon through its landscape of salt ponds, fishing, and olives.',
     year: '2023',
-    module: 'B.Arch Final Year Project — LAU',
+    module: 'B.Arch Final Year Project: LAU',
     team: ['Charles Abi Chahine'],
     tools: ['Architecture', 'Urban design'],
     tag: 'ARCH',

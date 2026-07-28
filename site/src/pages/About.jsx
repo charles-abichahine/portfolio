@@ -254,7 +254,7 @@ export default function About() {
               transform={`translate(${lonToX(p.lon)} ${latToY(p.lat)})`}
               role="button"
               tabIndex={0}
-              aria-label={`${p.name} — ${p.cities}`}
+              aria-label={`${p.name}, ${p.cities}`}
               className="cursor-pointer outline-none"
               onPointerEnter={() => openPlace(p.id)}
               onPointerLeave={scheduleClose}
@@ -295,10 +295,9 @@ export default function About() {
             Architect first, then the software behind the architecture<span className="text-accent">.</span>
           </h1>
           <p className="mt-4 max-w-[56ch] text-[0.8rem] font-light leading-[1.8] text-soft">
-            Architect from Lebanon, based in Beirut. LAU and Kent State, then practice across Beirut,
-            Dubai and Kuwait, then the MaCAD master at IAAC in Barcelona. I&rsquo;m interested in roles
-            where architecture and computation meet: computational design, BIM workflows, and the tools
-            that make design teams faster.
+            I trained and practiced as an architect, before going back to learn how to build the
+            tools. Three years across Beirut, Dubai and Kuwait, then the MaCAD master at IAAC. Now I
+            work on both sides: the design, and the machinery that gets it delivered.
           </p>
         </div>
 
@@ -325,7 +324,7 @@ export default function About() {
           <div className="flex flex-col gap-2">
             <p className={`${MONO} text-muted`}>Hover a dot · Click to keep it open</p>
             <p className={`${MONO} text-muted`}>
-              Charles Abi Chahine — Architect · Computational Designer · Beirut
+              Charles Abi Chahine · Architect · Computational Designer · Beirut
             </p>
           </div>
           <div className="flex flex-col gap-2 md:items-end md:text-right">
