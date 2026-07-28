@@ -94,7 +94,7 @@ function ProjectTile({ p, hot, motionOk }) {
       {/* Title under the image, so all nineteen can be read without hovering —
           and mobile has no hover at all. The dot carries the category the pills
           above have already introduced. */}
-      <div className="mt-3 flex items-baseline gap-2.5">
+      <div className="mt-3 flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
         <span
           aria-hidden="true"
           className="h-[7px] w-[7px] shrink-0 -translate-y-px rounded-[2px]"
@@ -106,13 +106,15 @@ function ProjectTile({ p, hot, motionOk }) {
         >
           {p.title}
         </h2>
-        {/* Awarded work earns a mark. Always the accent, never the category
-            colour — a distinction should read as itself, not as its group.
-            title/sr-only carry the actual award, which has no room in the row. */}
+        {/* The award, named. Always the accent, never the category colour — a
+            distinction should read as itself, not as its group. Its own line
+            until lg, inline after: a tile narrower than about 340px cannot hold
+            the longest title and the longest award on one line, and it is the
+            title that gets cut. */}
         {p.award && (
-          <span className="shrink-0 text-[0.7rem] leading-none text-accent" title={p.award}>
-            <span aria-hidden="true">★</span>
-            <span className="sr-only">Awarded: {p.award}</span>
+          <span className={`order-last w-full shrink-0 lg:order-none lg:w-auto ${MONO} text-accent`}>
+            <span className="sr-only">Awarded: </span>
+            {p.award}
           </span>
         )}
         <span className={`ml-auto shrink-0 tabular-nums ${MONO} text-muted`}>{p.year}</span>

@@ -67,9 +67,8 @@ export default function Project() {
     metaBits.push(
       <span
         key="award"
-        className="inline-flex items-center gap-1.5 rounded-full border border-accent/40 px-2.5 py-0.5 text-accent"
+        className="inline-flex items-center rounded-full border border-accent/40 px-2.5 py-0.5 text-accent"
       >
-        <span className="text-[0.72em]" aria-hidden="true">★</span>
         {project.award}
       </span>,
     )

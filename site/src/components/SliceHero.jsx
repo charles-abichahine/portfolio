@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
 import Logo from './Logo.jsx'
 
 /*
@@ -210,9 +209,19 @@ function makeSlice(ctx, W, H, carry) {
     const i = r * cols + c
     return field[i] * (1 - fx) * (1 - fy) + field[i + 1] * fx * (1 - fy) + field[i + cols] * (1 - fx) * fy + field[i + cols + 1] * fx * fy
   }
-  function frame(fctx, w, h, t, pointer, pal) {
+  /*
+   * wear (0..1) is how far the landing has been lifted off the print bed. The
+   * drawing un-builds as it goes: infill first, then the inner shells, leaving
+   * a bare outer perimeter by the time it clears the seam. It is the inverse of
+   * the build-in fade, so the piece is laid down on arrival and taken apart on
+   * the way out rather than merely scrolling away.
+   */
+  function frame(fctx, w, h, t, pointer, pal, wear = 0) {
     const mt = t * 0.0013
     const build = easeOut(Math.min(1, t / 1400))
+    const keepShell = 1 - 0.75 * wear
+    const keepInner = Math.max(0, 1 - wear * 1.25)
+    const keepInfill = Math.max(0, 1 - wear * 1.6)
     dep.s = lerp(dep.s, pointer.active ? 1 : 0, 0.06)
     if (pointer.active) { dep.x = lerp(dep.x, pointer.x, 0.12); dep.y = lerp(dep.y, pointer.y, 0.12) }
     const mn = evalField(mt)
@@ -226,32 +235,41 @@ function makeSlice(ctx, W, H, carry) {
       const inset = spacing * 0.55
       for (let s = 0; s < 3; s++) {
         const L = -s * inset
-        fctx.strokeStyle = s === 0 ? `rgba(${pal.line},${pal.shell * build})` : `rgba(${pal.lineSoft},${pal.inner * build})`
+        fctx.strokeStyle =
+          s === 0
+            ? `rgba(${pal.line},${pal.shell * build * keepShell})`
+            : `rgba(${pal.lineSoft},${pal.inner * build * keepInner})`
         fctx.lineWidth = (s === 0 ? 1.3 : 1) * pal.weight
         fctx.beginPath()
         isoPath(fctx, field, cols, rows, cell, L)
         fctx.stroke()
       }
-      const wallInset = 3 * inset + 2
-      const step = 4
-      const ca = Math.cos(infAng)
-      const sa = Math.sin(infAng)
-      const cx = w / 2
-      const cy = h / 2
-      const Lr = Math.hypot(w, h)
-      fctx.strokeStyle = `rgba(${pal.lineSoft},${pal.infill * build})`
-      fctx.lineWidth = pal.weight
-      fctx.beginPath()
-      for (let off = -Lr; off <= Lr; off += spacing) {
-        let prev = false
-        for (let d = -Lr; d <= Lr; d += step) {
-          const x = cx + ca * d - sa * off
-          const y = cy + sa * d + ca * off
-          if (x < -2 || y < -2 || x > w + 2 || y > h + 2) { prev = false; continue }
-          if (sdfAt(x, y) < -wallInset) { if (!prev) fctx.moveTo(x, y); else fctx.lineTo(x, y); prev = true } else prev = false
+      // The infill is by far the heaviest pass. Once it has faded out there is
+      // nothing to see, so skip the walk rather than stroke it at zero alpha —
+      // that is the whole cost of a frame back, exactly while the page is
+      // scrolling and wants it most.
+      if (keepInfill > 0.01) {
+        const wallInset = 3 * inset + 2
+        const step = 4
+        const ca = Math.cos(infAng)
+        const sa = Math.sin(infAng)
+        const cx = w / 2
+        const cy = h / 2
+        const Lr = Math.hypot(w, h)
+        fctx.strokeStyle = `rgba(${pal.lineSoft},${pal.infill * build * keepInfill})`
+        fctx.lineWidth = pal.weight
+        fctx.beginPath()
+        for (let off = -Lr; off <= Lr; off += spacing) {
+          let prev = false
+          for (let d = -Lr; d <= Lr; d += step) {
+            const x = cx + ca * d - sa * off
+            const y = cy + sa * d + ca * off
+            if (x < -2 || y < -2 || x > w + 2 || y > h + 2) { prev = false; continue }
+            if (sdfAt(x, y) < -wallInset) { if (!prev) fctx.moveTo(x, y); else fctx.lineTo(x, y); prev = true } else prev = false
+          }
         }
+        fctx.stroke()
       }
-      fctx.stroke()
     }
     // erase where the name & island must stay legible
     fctx.globalCompositeOperation = 'destination-out'
@@ -268,7 +286,12 @@ function makeSlice(ctx, W, H, carry) {
   }
 }
 
-export default function SliceHero() {
+/*
+ * progressRef: optional ref holding 0..1, how far the landing has been lifted
+ * off the bed. Read live inside the loop rather than taken as a prop, so the
+ * page can drive it from a scroll handler without re-rendering the canvas.
+ */
+export default function SliceHero({ progressRef }) {
   const sectionRef = useRef(null)
   const canvasRef = useRef(null)
   const regenRef = useRef(() => {})
@@ -310,8 +333,11 @@ export default function SliceHero() {
     let start = 0
     let scene = null
     const pointer = { x: -1, y: -1, active: false }
+    // Read live off the ref: the landing drives this from a scroll handler, and
+    // routing it through props would re-render the canvas sixty times a second.
+    const wear = () => progressRef?.current ?? 0
     redrawRef.current = () => {
-      if (scene) scene.frame(ctx, W, H, reduce ? 1e6 : performance.now() - start, pointer, palRef.current)
+      if (scene) scene.frame(ctx, W, H, reduce ? 1e6 : performance.now() - start, pointer, palRef.current, wear())
     }
 
     function size() {
@@ -325,7 +351,7 @@ export default function SliceHero() {
     }
     function loop() {
       const t = performance.now() - start
-      scene.frame(ctx, W, H, t, pointer, palRef.current)
+      scene.frame(ctx, W, H, t, pointer, palRef.current, wear())
       if (visible && !reduce) raf = requestAnimationFrame(loop)
       else raf = 0
     }
@@ -335,14 +361,14 @@ export default function SliceHero() {
       size()
       scene = makeSlice(ctx, W, H, carry)
       start = carry ? performance.now() - 2000 : performance.now() // skip the build-in fade on resize
-      if (reduce) scene.frame(ctx, W, H, 1e6, pointer, palRef.current)
+      if (reduce) scene.frame(ctx, W, H, 1e6, pointer, palRef.current, wear())
       else loop()
     }
     regenRef.current = () => {
       if (!scene) return
       scene.regen()
       start = performance.now()
-      if (reduce) scene.frame(ctx, W, H, 1e6, pointer, palRef.current)
+      if (reduce) scene.frame(ctx, W, H, 1e6, pointer, palRef.current, wear())
       else if (!raf) loop()
     }
 
@@ -361,7 +387,7 @@ export default function SliceHero() {
 
     const onMotionPref = () => {
       reduce = mq.matches
-      if (reduce) { if (raf) cancelAnimationFrame(raf); raf = 0; if (scene) scene.frame(ctx, W, H, 1e6, pointer, palRef.current) } else if (!raf) { start = performance.now() - 2000; loop() }
+      if (reduce) { if (raf) cancelAnimationFrame(raf); raf = 0; if (scene) scene.frame(ctx, W, H, 1e6, pointer, palRef.current, wear()) } else if (!raf) { start = performance.now() - 2000; loop() }
     }
     mq.addEventListener('change', onMotionPref)
 
@@ -397,15 +423,16 @@ export default function SliceHero() {
       section.removeEventListener('pointerup', onLeave)
       section.removeEventListener('pointercancel', onLeave)
     }
-  }, [])
+  }, [progressRef])
 
-  // touch-none lets a finger drag deposit material instead of the browser
-  // claiming the gesture as a scroll — the landing doesn't scroll anyway.
+  // The landing scrolls now, so a finger drag has to stay a scroll: touch-none
+  // would eat the very gesture the page is built around. Material is deposited
+  // by the mouse; on touch, a tap still re-slices.
   return (
     <section
       ref={sectionRef}
       onClick={() => regenRef.current()}
-      className="relative h-[100svh] w-full touch-none overflow-hidden"
+      className="relative h-[100svh] w-full overflow-hidden"
       style={{ backgroundColor: pal.bg }}
     >
       <canvas ref={canvasRef} className="absolute inset-0 z-0 h-full w-full" aria-hidden="true" />
@@ -437,14 +464,16 @@ export default function SliceHero() {
             >
               design, computation, and the work of getting it built.
             </p>
-            <Link
-              to="/work"
-              onClick={(e) => e.stopPropagation()}
-              className="mt-6 inline-flex items-center gap-1.5 font-mono text-[0.62rem] lowercase tracking-[0.18em] transition-opacity hover:opacity-70"
+            {/* An instruction, not a link. The work is one screen down rather
+                than one click away, so this points at the gesture that gets
+                there; a second route to /work sitting here would only compete
+                with the scroll it is asking for. */}
+            <p
+              className="mt-6 inline-flex items-center gap-1.5 font-mono text-[0.62rem] lowercase tracking-[0.18em]"
               style={{ color: pal.red }}
             >
-              view selected work <span aria-hidden="true">→</span>
-            </Link>
+              scroll to view selected work <span aria-hidden="true">↓</span>
+            </p>
           </div>
         </div>
       </div>

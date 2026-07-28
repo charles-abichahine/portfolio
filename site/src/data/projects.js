@@ -16,7 +16,7 @@ const _projects = [
     toolsShort: 'PYTHON · SENSORY AI',
     cover: 'projects/sensi/cover.webm',
     category: 'Computation & AI',
-    award: 'MaCAD Award 2026',
+    award: 'MaCAD 2026 Winner',
     links: {
       github: 'https://github.com/sclebow/AIA26_Studio/tree/main/team_02',
       blog: 'https://blog.iaac.net/sensi-making-comfort-a-design-layer/',
@@ -166,7 +166,7 @@ const _projects = [
     toolsShort: 'FLUX · TRELLIS · PYTHON',
     cover: 'projects/legoarch/cover.webm',
     category: 'Computation & AI',
-    award: null,
+    award: 'Jury Award',
     links: {
       github: 'https://github.com/hi-em/genai-legoarch',
       blog: 'https://blog.iaac.net/legoarch-behind-the-sets/',
@@ -325,7 +325,7 @@ const _projects = [
     toolsShort: 'GH · WASP · KANGAROO',
     cover: 'projects/huddle/persp-01.webp',
     category: 'Design & Research',
-    award: null,
+    award: 'Studio Award',
     links: {
       blog: 'https://blog.iaac.net/the-huddle-wind-adaptive-research-hub-in-punta-arenas-chile/',
     },
@@ -718,7 +718,7 @@ const _projects = [
   {
     slug: 'marception',
     date: '2024-05-12',
-    title: 'Marsception 2024',
+    title: 'Rings of Mars: Ring 4000',
     subtitle:
       'An international competition imagining architecture for life on Mars: our entry, with Emilie El Chidiac, was selected among the Top 50.',
     year: '2024',
@@ -729,7 +729,7 @@ const _projects = [
     toolsShort: 'COMPETITION',
     cover: 'projects/marception/cover.webp',
     category: 'Design & Research',
-    award: 'Top 50',
+    award: 'Top 50 · Volume Zero',
     links: {},
     intro: [
       'Marsception 2024 was an international competition imagining architecture for life on Mars. Developed with Emilie El Chidiac, our entry was selected among the Top 50.',
