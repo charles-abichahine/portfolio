@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import DataField from '../components/DataField.jsx'
 import { BELTS } from '../data/belts.js'
 import { asset } from '../data/projects.js'
-import { contact } from '../data/cv.js'
+import { contact, summary } from '../data/cv.js'
 
 /*
  * The landing.
@@ -128,14 +128,18 @@ export default function Home() {
               'radial-gradient(ellipse at center, var(--color-paper) 0%, color-mix(in srgb, var(--color-paper) 82%, transparent) 52%, color-mix(in srgb, var(--color-paper) 0%, transparent) 100%)',
           }}
         />
-        <h1 className="text-[clamp(2rem,4.4vw,3.25rem)] font-extralight leading-[1.03] tracking-[-0.022em]">
+        {/* font-light, not lighter: Space Grotesk stops at 300, and asking for a
+            weight it does not have just gets 300 with the browser guessing. */}
+        <h1 className="text-[clamp(2rem,4.4vw,3.25rem)] font-light leading-[1.03] tracking-[-0.024em]">
           Charles Abi Chahine<span className="text-accent">.</span>
         </h1>
         <p className="mt-3.5 font-mono text-[0.72rem] lowercase tracking-[0.08em] text-soft">
           architect · computational designer
         </p>
-        <p className="mt-5 text-[clamp(0.88rem,1.1vw,0.95rem)] font-light lowercase text-soft">
-          design, computation, and the work of getting it built.
+        {/* The one sentence on the landing, so it is set as one: the serif here
+            is what tells you the rest of the site has writing in it. */}
+        <p className="mt-5 font-serif text-[clamp(0.95rem,1.2vw,1.05rem)] leading-[1.6] text-soft">
+          {summary}
         </p>
         {/* No scroll cue on a phone: the page is one screen there, so there is
             nothing below to scroll to. The rule stays as the fan's origin. */}

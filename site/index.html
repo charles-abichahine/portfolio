@@ -50,6 +50,23 @@
     />
     <meta name="twitter:image" content="https://charlesabichahine.com/og-image.png" />
     <!--
+      The two faces on screen the instant anything renders: the sans that sets
+      the name and every heading, and the mono that sets every label. They are
+      declared in a stylesheet that is imported by the JS bundle, so without
+      these hints the browser cannot even discover them until the module graph
+      has been parsed. Preloading moves both downloads to the very start of the
+      page load and removes the swap that would otherwise land mid-read.
+
+      The serif is deliberately not here: it sets body copy, which no route shows
+      above the fold, and preloading it would compete with these two for the same
+      first bytes. crossorigin is required even same-origin — a font is always
+      fetched in CORS mode, and a preload whose mode does not match the eventual
+      request is discarded and fetched a second time.
+    -->
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/space-grotesk-300700.woff2" />
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/ibm-plex-mono-400.woff2" />
+
+    <!--
       Resolve the theme before first paint, or the page renders one theme and
       then snaps to the other once React mounts. Must stay inline and stay in
       <head>: an external file would be another round trip with the flash inside

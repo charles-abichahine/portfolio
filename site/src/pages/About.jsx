@@ -291,10 +291,10 @@ export default function About() {
       <div className="pointer-events-none absolute inset-0 z-[4] flex flex-col justify-between px-5 pb-5 pt-24 sm:px-8 sm:pb-8 lg:px-12">
         <div className="max-w-[58ch] md:max-w-[48%]">
           <p className={`${MONO} mb-4 text-muted`}>About</p>
-          <h1 className="max-w-[28ch] text-balance text-[clamp(1.2rem,1.85vw,1.6rem)] font-extralight leading-[1.32] text-ink">
+          <h1 className="max-w-[28ch] text-balance text-[clamp(1.2rem,1.85vw,1.6rem)] font-light leading-[1.32] text-ink">
             Architect first, then the software behind the architecture<span className="text-accent">.</span>
           </h1>
-          <p className="mt-4 max-w-[56ch] text-[0.8rem] font-light leading-[1.8] text-soft">
+          <p className="mt-4 max-w-[56ch] font-serif text-[0.92rem] leading-[1.75] text-soft">
             I trained and practiced as an architect, before going back to learn how to build the
             tools. Three years across Beirut, Dubai and Kuwait, then the MaCAD master at IAAC. Now I
             work on both sides: the design, and the machinery that gets it delivered.
@@ -388,7 +388,7 @@ export default function About() {
               </dl>
             )}
             {active.note && (
-              <p className="m-0 text-[0.78rem] font-light leading-[1.75] text-soft">{active.note}</p>
+              <p className="m-0 font-serif text-[0.85rem] leading-[1.7] text-soft">{active.note}</p>
             )}
             <Link to="/cv" className={`${MONO} mt-4 inline-block text-muted transition-colors hover:text-accent`}>
               Full record → CV

@@ -1,21 +1,88 @@
 @import "tailwindcss";
 
+/*
+ * Three self-hosted families, latin subset only, 128KB in total.
+ *
+ * Self-hosted rather than loaded from Google's CDN: fonts block first paint, and
+ * a third-party connection on every visit costs a DNS lookup and a TLS handshake
+ * before the first byte of font arrives. These sit on the same origin as the
+ * document, so they start downloading immediately.
+ *
+ * Space Grotesk is one variable file covering 300 to 700 — every sans weight the
+ * site uses for the price of a single request. Spectral and IBM Plex Mono are
+ * not variable, so only the weights actually in use are shipped: Spectral has no
+ * 600 here because headings are sans and body copy never goes past 500.
+ *
+ * font-display: swap everywhere. The fallback renders immediately and is
+ * replaced when the file lands, which is the right trade for a portfolio: text
+ * that is briefly the wrong typeface beats text that is briefly absent.
+ */
+@font-face {
+  font-family: "Space Grotesk";
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url("/fonts/space-grotesk-300700.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Spectral";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/spectral-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Spectral";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/spectral-400-italic.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Spectral";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/spectral-500.woff2") format("woff2");
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/ibm-plex-mono-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/ibm-plex-mono-500.woff2") format("woff2");
+}
+
 @theme {
-  --color-paper: #ffffff;
-  --color-ink: #111110;
-  --color-soft: #55554f;
-  --color-muted: #8a8a82;
-  --color-line: #e6e6e2;
+  /* A cool grey ground rather than pure white. White is not a colour a printed
+     page ever actually is, and at full strength it makes the very quiet marks
+     this site is built on — hairlines, the dot-matrix map, the strand field —
+     fight against a ceiling they can never match. Pulling the ground down two
+     percent gives all of them somewhere to sit. */
+  --color-paper: #f4f5f6;
+  --color-ink: #16181d;
+  --color-soft: #4e535c;
+  --color-muted: #767d88;
+  --color-line: #e0e3e7;
   /* The /about dot-matrix landmass. Deliberately NOT --color-line: a hairline
      border is meant to nearly disappear, but a field of ~2,400 dots is the
      page's ground and has to read as a continuous surface. At line's value the
      map sits at 1.25:1 and looks like blank paper; this is ~2.2:1 — clearly
-     present, still far below the place dots, which is the intended hierarchy. */
-  --color-land: #b0b0a8;
+     present, still far below the place dots, which is the intended hierarchy.
+     Re-solved against the tinted paper: what matters is the ratio, not the
+     value, so the hue moved cool with the ground and the contrast held. */
+  --color-land: #a1a7b0;
   /* Heavy rules (section tops, header underlines). Identical to ink in light —
      but ink flips to a near-white in dark, where a full-strength rule would
      outweigh the heading it sits under, so dark gives it its own quieter value. */
-  --color-rule: #111110;
+  --color-rule: #16181d;
   --color-accent: #d92b1f;
   /* Work-page category colours. Computation & AI reuses the red accent; BIM and
      Design get their own hue so the three groups read at a glance. Lifted in
@@ -26,8 +93,28 @@
      category hues are spoken for, so Practice gets its own: an ochre that reads
      as a fourth group without competing with the red accent. 5.3:1 on paper. */
   --color-amber: #a2571a;
-  --font-sans: "Helvetica Neue", Helvetica, Arial, ui-sans-serif, system-ui, sans-serif;
-  --font-mono: Consolas, "Cascadia Code", "SF Mono", ui-monospace, monospace;
+  /*
+   * Three voices, each with one job.
+   *
+   * The stack this replaced named "Helvetica Neue" first, which on Windows —
+   * where most recruiters will open this — resolves to Arial. Every visitor was
+   * getting a different typeface from the one the site was designed in, and none
+   * of them were getting one that was chosen.
+   *
+   * sans  Space Grotesk. Headings, navigation, project titles. Drawn from
+   *       grotesque proportions but with the corners cut flat, which reads as
+   *       drafted rather than neutral.
+   * serif Spectral. Anything that is a sentence: the bio, the project writing,
+   *       the CV. A serif at reading size is the single biggest reason a page
+   *       feels considered rather than administrative, and it is what separates
+   *       the prose from the interface around it.
+   * mono  IBM Plex Mono. Labels, counts, years, metadata. Not a code font
+   *       borrowed for the look — a text mono with real italics and a proper
+   *       text colour, which is what a drafting annotation actually wants.
+   */
+  --font-sans: "Space Grotesk", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-serif: "Spectral", Georgia, "Times New Roman", serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Consolas, "SF Mono", monospace;
 }
 
 /*
@@ -44,12 +131,12 @@
  */
 html[data-theme="dark"] {
   --color-paper: #131317;
-  --color-ink: #ecece6;
-  --color-soft: #a8a8a2;
-  --color-muted: #82827a;
+  --color-ink: #e9ebef;
+  --color-soft: #a4aab4;
+  --color-muted: #7d838e;
   --color-line: #2e2e34;
   --color-land: #4a4a56;
-  --color-rule: #4a4a52;
+  --color-rule: #474d57;
   --color-accent: #f0554a;
   --color-blue: #4c8dff;
   --color-green: #3fb950;
@@ -82,6 +169,7 @@ html[data-theme-switching] *::after {
     color: var(--color-ink);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     /* Stated explicitly so scrollbars and any UA-drawn control stay light when a
        dark-OS visitor chooses the light theme. The dark block overrides it. */
     color-scheme: light;
@@ -90,15 +178,40 @@ html[data-theme-switching] *::after {
     background: var(--color-accent);
     color: #fff;
   }
+  /*
+   * Light text on a dark ground optically thins, and a serif thins worst of all
+   * because the strokes it loses are the thin ones the letterform is built from.
+   * Spectral 400 on the dark paper reads a weight lighter than the same file
+   * does on the light one, so dark takes the 500 and the two grounds end up
+   * looking like the same typeface. The sans is unaffected: Space Grotesk has no
+   * thin strokes to lose.
+   */
+  html[data-theme="dark"] .font-serif {
+    font-weight: 500;
+  }
 }
 
-/* Small uppercase monospace label — the drafting-room voice. */
+/* Small uppercase monospace label — the drafting-room voice.
+   Retuned for IBM Plex Mono, which sets wider than the Consolas it replaced:
+   the size and tracking both come down a step so a label occupies about the
+   same width as before, and the weight goes up one so it does not go faint at
+   0.66rem. */
 @utility label-mono {
   font-family: var(--font-mono);
-  font-size: 0.68rem;
-  letter-spacing: 0.14em;
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: 0.11em;
   text-transform: uppercase;
 }
+
+/*
+ * The serif is applied with `font-serif` at each place that sets a sentence,
+ * and the rule for where is: prose gets the serif, everything else does not.
+ * A paragraph, a bio, a project description, a CV bullet — serif. A list of
+ * software names, a course title, a count, a label — sans or mono. It is the
+ * difference between something written and something recorded, and holding to
+ * it is what stops the page reading as two typefaces used at random.
+ */
 
 /* Cover reveal: on the /work index a hovered project's animated cover fades in
    over its static poster, so the GIF projects come alive on interaction. */

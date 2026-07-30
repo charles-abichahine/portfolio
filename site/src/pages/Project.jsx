@@ -89,7 +89,9 @@ export default function Project() {
           {project.title}
           <span className="text-accent">.</span>
         </h1>
-        <p className="mb-6 max-w-[62ch] text-lg leading-relaxed text-soft">{project.subtitle}</p>
+        <p className="mb-6 max-w-[62ch] font-serif text-[1.2rem] leading-[1.65] text-soft">
+          {project.subtitle}
+        </p>
 
         {metaBits.length > 0 && (
           <div className="label-mono flex flex-wrap items-center gap-x-4 gap-y-3">
@@ -119,7 +121,10 @@ export default function Project() {
           </div>
         )}
 
-        <dl className="mb-10 mt-10 grid grid-cols-2 gap-x-6 gap-y-5 border-t border-rule pt-5 font-mono text-xs sm:grid-cols-4">
+        {/* 0.7rem rather than text-xs: IBM Plex Mono sets noticeably wider than
+            the Consolas it replaced, and at 0.75rem a four-name team ran to
+            three lines in a column sized for two. */}
+        <dl className="mb-10 mt-10 grid grid-cols-2 gap-x-6 gap-y-5 border-t border-rule pt-5 font-mono text-[0.7rem] sm:grid-cols-4">
           {[
             ['YEAR', project.year],
             ['MODULE', project.module],
@@ -160,7 +165,9 @@ export default function Project() {
 
       <div className="mx-auto max-w-3xl">
         {project.intro.map((p) => (
-          <p key={p.slice(0, 32)} className="pt-10 text-lg leading-relaxed text-soft">{p}</p>
+          <p key={p.slice(0, 32)} className="pt-10 font-serif text-[1.12rem] leading-[1.75] text-soft">
+            {p}
+          </p>
         ))}
 
         {project.sections.map((s, i) => (
@@ -170,7 +177,9 @@ export default function Project() {
             </div>
             <h2 className="mb-4 text-2xl font-bold tracking-tight">{s.heading}</h2>
             {s.body.map((p) => (
-              <p key={p.slice(0, 32)} className="mb-4 leading-relaxed text-soft">{p}</p>
+              <p key={p.slice(0, 32)} className="mb-4 font-serif text-[1.02rem] leading-[1.75] text-soft">
+                {p}
+              </p>
             ))}
             <div className="flex flex-col gap-6 pt-4">
               {s.media.map((m) => (
