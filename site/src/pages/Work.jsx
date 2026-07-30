@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { asset, projects } from '../data/projects.js'
+import { BELTS, BELT_BY_LABEL, beltFor } from '../data/belts.js'
 import { contact } from '../data/cv.js'
 
 // An animated cover rests on its static first-frame poster, so the index is a
@@ -14,17 +15,17 @@ const videoFor = (p, ext) => p.cover.replace(/cover\.webm$/, `cover.${ext}`)
 
 const MONO = 'font-mono text-[0.56rem] uppercase tracking-[0.16em]'
 
-// Fixed order, independent of the data — the filter bar must not reshuffle when
+// The same four belts the landing groups by, in the same order, so pressing a
+// count there arrives here on a page that agrees with the one it came from.
+// Practice is the fourth: it has no category of its own in projects.js, which is
+// why the grouping lives in belts.js rather than in the project records.
+// Fixed order, independent of the data, so the filter bar does not reshuffle when
 // a project is added.
-const CATEGORIES = ['Computation & AI', 'BIM & Workflows', 'Design & Research']
+const CATEGORIES = BELTS.map((b) => b.label)
 
-// The three categories, each with its own hue. It carries on the filter pill and
-// on the dot beside every title, so the grouping reads without a legend.
-const CATEGORY_COLOR = {
-  'Computation & AI': 'var(--color-accent)',
-  'BIM & Workflows': 'var(--color-blue)',
-  'Design & Research': 'var(--color-green)',
-}
+// Each belt's hue carries on the filter pill and on the dot beside every title,
+// so the grouping reads without a legend.
+const CATEGORY_COLOR = Object.fromEntries(BELTS.map((b) => [b.label, b.color]))
 
 // One radius for every surface on this page — tile, pill, scrubber. On the 4px
 // scrubber bar the browser clamps it to a pill, which is why it can stay a
@@ -36,7 +37,7 @@ const R = 'rounded-[10px]'
 const FRAME = `relative aspect-[4/3] w-full overflow-hidden bg-line lg:h-[clamp(250px,38vh,400px)] lg:w-auto ${R}`
 
 function ProjectTile({ p, hot, motionOk }) {
-  const color = CATEGORY_COLOR[p.category]
+  const color = beltFor(p).color
   const animate = motionOk && isAnimated(p)
   // mounted: the element exists and is fetching. ready: it can paint a frame.
   const [mounted, setMounted] = useState(false)
@@ -124,7 +125,12 @@ function ProjectTile({ p, hot, motionOk }) {
 }
 
 export default function Work() {
-  const [filter, setFilter] = useState('All')
+  // The homepage's three category strands land here already filtered, so the
+  // wire genuinely leads somewhere rather than dropping you at the top of the
+  // full index. Anything unrecognised falls back to All.
+  const [params] = useSearchParams()
+  const asked = params.get('category')
+  const [filter, setFilter] = useState(CATEGORIES.includes(asked) ? asked : 'All')
   // Which tile the cursor is over. Held in state rather than left to :hover
   // because a browser only re-evaluates :hover when the pointer moves — see the
   // effect below.
@@ -139,8 +145,11 @@ export default function Work() {
   const fadeRRef = useRef(null)
   const syncRef = useRef(() => {})
 
+  // A filtered view uses the belt's own order, which puts awarded projects first.
+  // That is what makes the two covers you were looking at on the landing the two
+  // that lead the strip here. 'All' stays newest-first: it is the plain index.
   const filtered = useMemo(
-    () => (filter === 'All' ? projects : projects.filter((p) => p.category === filter)),
+    () => (filter === 'All' ? projects : (BELT_BY_LABEL[filter]?.items ?? projects)),
     [filter]
   )
 

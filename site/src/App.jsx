@@ -15,6 +15,8 @@ function App() {
   // sit inside min-h-screen: a 100vh wrapper around a 100svh child is taller than
   // the visual viewport on mobile, which hands the page a phantom scrollbar.
   // '/work' exactly — the project pages under /work/:slug still scroll normally.
+  // The landing supplies its own footer like the others, and a min-h-screen
+  // wrapper around its 200svh body would add a third screen of nothing under it.
   const fullBleed = pathname === '/' || pathname === '/about' || pathname === '/work'
 
   return (

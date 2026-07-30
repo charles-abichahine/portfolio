@@ -6,8 +6,8 @@ import Logo from './Logo.jsx'
  * Dynamic Island — the site's whole navigation, persistent on every page.
  * A rounded glass pill that stays dark in both themes: it is an object floating
  * over the page rather than part of the page surface, so it keeps its own
- * material the way the SliceHero keeps its dark ground. Its colours are
- * deliberately hardcoded rather than routed through the theme tokens.
+ * material regardless of the ground it is over. Its colours are deliberately
+ * hardcoded rather than routed through the theme tokens.
  * Holds the logo + name (→ landing), the three destinations with a sliding
  * indicator under the active/hovered one, and the theme toggle. It expands by
  * default, morphs compact once scrolled, and re-expands on hover.

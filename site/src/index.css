@@ -22,20 +22,25 @@
      dark (below) the way accent is, so each stays legible on both grounds. */
   --color-blue: #1f6feb;
   --color-green: #1a7f37;
+  /* The fourth belt on the landing, the pre-MaCAD professional work. The three
+     category hues are spoken for, so Practice gets its own: an ochre that reads
+     as a fourth group without competing with the red accent. 5.3:1 on paper. */
+  --color-amber: #a2571a;
   --font-sans: "Helvetica Neue", Helvetica, Arial, ui-sans-serif, system-ui, sans-serif;
   --font-mono: Consolas, "Cascadia Code", "SF Mono", ui-monospace, monospace;
 }
 
 /*
- * Dark theme. Only the interior pages flip: the SliceHero and the Dynamic
- * Island are deliberately-dark objects that keep their own palette in both
- * themes, so their colours are intentionally not routed through these tokens.
+ * Dark theme. Every page flips, including the landing: the data field is drawn
+ * from these tokens rather than from a palette of its own, so it is ink on paper
+ * in light and lit strands on a dark ground in dark. The Dynamic Island is the
+ * one exception, a deliberately-dark object whose colours are intentionally not
+ * routed through these tokens.
  * data-theme is set by the inline script in index.html before first paint.
  *
- * Not an inversion — the ramp is drawn separately so hairlines stay visible and
- * body copy stays comfortable. paper sits just above the hero's #0e0e12 so the
- * hero remains the deepest surface on the site. accent is lifted and slightly
- * desaturated: #d92b1f is 3.8:1 here and shimmers, #f0554a is 5.4:1 and doesn't.
+ * Not an inversion: the ramp is drawn separately so hairlines stay visible and
+ * body copy stays comfortable. accent is lifted and slightly desaturated,
+ * because #d92b1f is 3.8:1 here and shimmers where #f0554a is 5.4:1 and doesn't.
  */
 html[data-theme="dark"] {
   --color-paper: #131317;
@@ -48,6 +53,7 @@ html[data-theme="dark"] {
   --color-accent: #f0554a;
   --color-blue: #4c8dff;
   --color-green: #3fb950;
+  --color-amber: #e0954a;
   color-scheme: dark;
 }
 

@@ -1,322 +1,249 @@
-import { useEffect, useRef } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import SliceHero from '../components/SliceHero.jsx'
-import { asset, projects } from '../data/projects.js'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
+import DataField from '../components/DataField.jsx'
+import { BELTS } from '../data/belts.js'
+import { asset } from '../data/projects.js'
 import { contact } from '../data/cv.js'
 
 /*
- * The landing, as a print.
+ * The landing.
  *
- * The page itself is an ordinary document: the slice field for a screen, then a
- * red seam, then the eight most recent projects laid out on the print bed. The
- * field un-builds as it scrolls past the seam — infill first, then the inner
- * shells — so the artwork is taken apart at the print head and the work is what
- * the head leaves behind.
+ * Exactly two screens and then it stops. The first is the name, centred, with a
+ * cue. The second is the four belts. Everything is absolutely positioned inside
+ * one 200svh box, including the footer, so the document is exactly that tall and
+ * there is nothing to scroll past: the belts frame is the end of the page.
  *
- * The bed is drawn in /work's own language: same corner radius, same 4/3 frame,
- * same caption under the image, same greyscale that lifts on hover. Which is
- * what makes the transition cheap — the tiles never change their appearance,
- * only where they are.
+ * Between them runs one uninterrupted fan, no gates and nothing to read. Belt
+ * length no longer shows volume, because each belt is capped at two projects to
+ * keep the frame; the count in the header carries that instead and links to the
+ * rest on /work. That cap is also what stops this page being a second copy of
+ * /work: eight projects here, all nineteen there.
  *
- * That transition is spent on intent rather than on scroll distance. Ask for the
- * work — the nav pill, the link under the bed, the one in the name block, any
- * link to /work at all — and the bed lifts and lays itself on its side: the
- * front row travels into the horizontal strip /work is already built as, the
- * back row falls away, /work's header and scrubber arrive underneath, and only
- * then does the address change. The last frame of this page is the first frame
- * of that one.
- *
- * Below lg, and under prefers-reduced-motion, the link is just a link: a phone
- * has no filmstrip to land on, and an animation nobody asked for is exactly what
- * the reduced-motion preference is asking not to see.
+ * The name is not pinned. It is centred on the first screen and scrolls away
+ * like any other block: the field is what stays, the type is what leaves.
  */
-
-// Eight: one full 4×2 bed, and as it happens everything from the current year.
-// Deliberately a slice of the sorted list rather than a filter on the year — the
-// bed has to stay eight whatever gets added next.
-const BED = projects.slice(0, 8)
-
-const isAnimated = (p) => p.cover.endsWith('.webm')
-const posterFor = (p) => (isAnimated(p) ? p.cover.replace(/cover\.webm$/, 'poster.webp') : p.cover)
-
-const CATEGORY_COLOR = {
-  'Computation & AI': 'var(--color-accent)',
-  'BIM & Workflows': 'var(--color-blue)',
-  'Design & Research': 'var(--color-green)',
-}
 
 const MONO = 'font-mono text-[0.56rem] uppercase tracking-[0.16em]'
 
-// /work's measurements, so the tiles land on them exactly. The strip height is
-// the same clamp its tiles are built with; the gutter and the page inset are the
-// same 24 and 40. Change them there and they have to change here.
-const STRIP_GAP = 24
-const STRIP_INSET = 40
-const stripHeight = (H) => Math.max(250, Math.min(H * 0.38, 400))
+// Two per belt, newest first. The header keeps the true count and links onward,
+// so nothing is hidden, it is just not all on the landing.
+const PER_BELT = 2
 
-const LIFT_MS = 620
+// The three animated covers are video. This page shows their stills only.
+const posterFor = (p) =>
+  p.cover.endsWith('.webm') ? p.cover.replace(/cover\.webm$/, 'poster.webp') : p.cover
 
-const canMorph = () =>
-  window.matchMedia('(min-width: 1024px)').matches &&
-  !window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
-function Caption({ p }) {
-  return (
-    <>
-      <span
-        aria-hidden="true"
-        className="h-[7px] w-[7px] shrink-0 -translate-y-px rounded-[2px]"
-        style={{ backgroundColor: CATEGORY_COLOR[p.category] }}
-      />
-      <h2 className="min-w-0 truncate text-[0.82rem] font-medium text-ink transition-colors duration-300 group-hover:text-[var(--c)]">
-        {p.title}
-      </h2>
-      {/* The award, named. A star said only that something had happened; the
-          words are the part worth skimming. Always the accent, never the
-          category colour: a distinction should read as itself, not as its
-          group.
-
-          Its own line until lg, inline after. A tile narrower than about 340px
-          cannot hold the longest title and the longest award on one line, and
-          it is the title that gets cut: "Rings of Mars: Ring 4000" loses the
-          number, which is the half that identifies it. Wrapping costs a line
-          only on the tiles that earned one. */}
-      {p.award && (
-        <span className={`order-last w-full shrink-0 lg:order-none lg:w-auto ${MONO} text-accent`}>
-          <span className="sr-only">Awarded: </span>
-          {p.award}
-        </span>
-      )}
-      <span className={`ml-auto shrink-0 tabular-nums ${MONO} text-muted`}>{p.year}</span>
-    </>
-  )
-}
+// /work groups by the same four belts, so every one of them can open filtered,
+// Practice included. That is what makes pressing a count read as travelling
+// further along the same thing rather than as landing on a different page.
+const beltHref = (belt) => `/work?category=${encodeURIComponent(belt.label)}`
 
 export default function Home() {
-  const navigate = useNavigate()
-  const heroRef = useRef(null)
-  const bedRef = useRef(null)
-  const wearRef = useRef(0)
-  const leaving = useRef(false)
+  const stageRef = useRef(null)
+  const cueRef = useRef(null)
+  const beltsRef = useRef(null)
+  const [metrics, setMetrics] = useState(null)
+  const [focus, setFocus] = useState(null)
 
-  // The field un-builds as the landing scrolls past the seam. Read live by the
-  // canvas loop off the ref, so this never re-renders anything.
+  // The fan runs from the bottom of the cue to the top of the belts, and both of
+  // those depend on content and viewport, so both are measured. Guessing either
+  // put the strands through the cue at short viewports.
   useEffect(() => {
-    const onScroll = () => {
-      const h = heroRef.current?.offsetHeight || window.innerHeight
-      wearRef.current = Math.max(0, Math.min(1, window.scrollY / h))
+    const measure = () => {
+      const stage = stageRef.current
+      const cue = cueRef.current
+      const belts = beltsRef.current
+      if (!stage || !cue || !belts) return
+      const box = stage.getBoundingClientRect()
+      setMetrics((m) => {
+        const next = {
+          w: box.width,
+          originY: cue.getBoundingClientRect().bottom - box.top + 38,
+          beltsTop: belts.getBoundingClientRect().top - box.top,
+        }
+        return m && m.w === next.w && m.originY === next.originY && m.beltsTop === next.beltsTop
+          ? m
+          : next
+      })
     }
-    onScroll()
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
+    measure()
+    const ro = new ResizeObserver(measure)
+    if (stageRef.current) ro.observe(stageRef.current)
+    if (beltsRef.current) ro.observe(beltsRef.current)
+    window.addEventListener('resize', measure)
+    return () => {
+      ro.disconnect()
+      window.removeEventListener('resize', measure)
+    }
   }, [])
 
-  useEffect(() => {
-    // Capture phase, on the document: this has to catch the nav pill in the
-    // Dynamic Island as much as the links on this page, and that pill belongs to
-    // a component the landing has no other hold on.
-    const onClick = (e) => {
-      if (leaving.current) return
-      // Modified clicks are a request for a new tab, not for a transition.
-      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
-      const a = e.target.closest?.('a')
-      if (!a || a.target === '_blank') return
-      if (new URL(a.href, location.href).pathname.replace(/\/$/, '') !== '/work') return
-      if (!canMorph() || !bedRef.current) return
+  const heads = useMemo(() => {
+    if (!metrics || !metrics.w) return null
+    const { w, beltsTop } = metrics
+    // One column on a phone: the belts become four stacked terminals, so the fan
+    // still lands at four points across the width and colour ties each landing
+    // to the terminal below it.
+    const cols = w < 640 ? 1 : BELTS.length
+    // Matches the px-6 / lg:px-10 and gap-x-6 / lg:gap-x-8 on the belts below,
+    // or the caps sit off the columns they are supposed to be feeding.
+    const padX = w >= 1024 ? 40 : 24
+    const gap = w >= 1024 ? 32 : 24
+    const inner = w - padX * 2
+    const colW = (inner - gap * (cols - 1)) / cols
 
-      const tiles = [...bedRef.current.querySelectorAll('[data-tile]')]
-      const rects = tiles.map((el) => el.getBoundingClientRect())
-      // Nothing to lift if the bed has not been reached: a tile flying in from
-      // two screens away is not a transition, it is a distraction.
-      if (rects[0].top > window.innerHeight) return
+    // On a phone the belts are a two by two grid, so only two of the four sit at
+    // the top. The caps land side by side just above the whole block instead, in
+    // the order the belts appear, and colour ties each landing to its belt.
+    const stacked = cols !== BELTS.length
 
-      e.preventDefault()
-      leaving.current = true
-      lift(tiles, rects, () => navigate('/work'))
-    }
-    document.addEventListener('click', onClick, true)
-    return () => document.removeEventListener('click', onClick, true)
-  }, [navigate])
+    return BELTS.map((b, i) => ({
+      id: b.id,
+      x: stacked
+        ? padX + (inner * (i + 0.5)) / BELTS.length
+        : padX + i * (colW + gap) + colW / 2,
+      y: stacked ? beltsTop - 30 : beltsTop,
+      spread: stacked ? (inner / BELTS.length) * 0.6 : colW * 0.94,
+    }))
+  }, [metrics])
 
   return (
-    <>
-      <div ref={heroRef}>
-        <SliceHero progressRef={wearRef} />
+    // One screen on a phone, two from sm up. At 375 a second screen put the
+    // lower belts below the fold, which broke the whole point of the frame
+    // ending the page.
+    <div ref={stageRef} className="relative h-[100svh] sm:h-[200svh]">
+      <DataField originY={metrics?.originY ?? null} heads={heads} focus={focus} />
+
+      {/* Centred on the first screen. The wash is a soft ellipse of the page
+          ground with no edge: the type has to stay legible as it crosses the top
+          of the fan on its way out, and a plate with a border would cut the
+          drawing in half instead. Its horizontal bleed is capped against the
+          viewport, because a flat 70px each side is wider than the page on a
+          phone and pushed the whole document sideways. */}
+      <div className="absolute left-1/2 top-[21svh] z-[2] w-[min(560px,88vw)] -translate-x-1/2 -translate-y-1/2 px-4 text-center sm:top-[50svh]">
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute -inset-x-[min(70px,5vw)] -inset-y-[46px] -z-10"
+          style={{
+            background:
+              'radial-gradient(ellipse at center, var(--color-paper) 0%, color-mix(in srgb, var(--color-paper) 82%, transparent) 52%, color-mix(in srgb, var(--color-paper) 0%, transparent) 100%)',
+          }}
+        />
+        <h1 className="text-[clamp(2rem,4.4vw,3.25rem)] font-extralight leading-[1.03] tracking-[-0.022em]">
+          Charles Abi Chahine<span className="text-accent">.</span>
+        </h1>
+        <p className="mt-3.5 font-mono text-[0.72rem] lowercase tracking-[0.08em] text-soft">
+          architect · computational designer
+        </p>
+        <p className="mt-5 text-[clamp(0.88rem,1.1vw,0.95rem)] font-light lowercase text-soft">
+          design, computation, and the work of getting it built.
+        </p>
+        {/* No scroll cue on a phone: the page is one screen there, so there is
+            nothing below to scroll to. The rule stays as the fan's origin. */}
+        <p ref={cueRef} className={`mx-auto mt-6 w-fit border-t border-line pt-3 text-muted sm:mt-9 ${MONO}`}>
+          <span className="hidden sm:inline">Scroll · </span>19 projects
+          <span className="hidden sm:inline"> ↓</span>
+        </p>
       </div>
 
-      {/* The print head: where the drawing stops and the work starts. */}
-      <div className="relative h-0 border-t border-accent">
-        <span className={`absolute left-6 top-2.5 lg:left-10 ${MONO} text-accent`}>Print head</span>
-        <span className={`absolute right-6 top-2.5 lg:right-10 ${MONO} text-accent`}>
-          Recent work · {String(BED.length).padStart(2, '0')} of {projects.length}
-        </span>
-      </div>
-
-      {/*
-        Exactly one screen, footer included. With the footer outside it the page
-        ran on for its height past the point where everything was already in
-        view: the last stretch of scroll showed nothing new and ended with the
-        Dynamic Island sitting on top of the first row of covers. Pulling the
-        footer inside makes the bottom of the scroll the bottom of the bed, and
-        the top padding is what keeps the island clear of the covers when you
-        get there.
-      */}
-      <section
-        ref={bedRef}
-        className="flex flex-col px-6 pb-10 pt-16 lg:min-h-[100svh] lg:px-10 lg:pb-0 lg:pt-[76px]"
+      {/* The belts, anchored above the footer so the second screen ends the page.
+          Two by two on a phone, four across from sm up. */}
+      <div
+        ref={beltsRef}
+        className="absolute inset-x-0 bottom-[64px] z-[2] grid grid-cols-1 gap-y-3.5 px-6 sm:bottom-[68px] sm:grid-cols-4 sm:gap-x-6 sm:gap-y-0 lg:gap-x-8 lg:px-10"
       >
-        <h1 className="sr-only">Selected work</h1>
-        <div className="flex flex-1 flex-col justify-center">
-        <ul className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-y-9">
-          {BED.map((p) => (
-            <li key={p.slug}>
+        {BELTS.map((belt) => (
+          <section
+            key={belt.id}
+            onMouseEnter={() => setFocus(belt.id)}
+            onMouseLeave={() => setFocus(null)}
+            onFocus={() => setFocus(belt.id)}
+            onBlur={() => setFocus(null)}
+            className="transition-opacity duration-300"
+            style={{ opacity: !focus || focus === belt.id ? 1 : 0.34 }}
+          >
+            {/* The count is the true total, not the two shown, and it is the way
+                to the rest of them. */}
+            <h2 className="border-t pt-2 sm:pt-3" style={{ borderColor: belt.color }}>
               <Link
-                to={`/work/${p.slug}`}
-                data-tile
-                className="group block"
-                style={{ '--c': CATEGORY_COLOR[p.category] }}
+                to={beltHref(belt)}
+                className="flex items-baseline gap-2.5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
               >
-                <span className="block aspect-[4/3] w-full overflow-hidden rounded-[10px] bg-line">
-                  <img
-                    src={asset(posterFor(p))}
-                    alt={p.title}
-                    loading="lazy"
-                    draggable="false"
-                    className="h-full w-full object-cover grayscale transition duration-500 ease-out group-hover:scale-[1.03] group-hover:grayscale-0"
-                  />
+                <span className={MONO} style={{ color: belt.color }}>
+                  {belt.label}
                 </span>
-                <span className="mt-3 flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
-                  <Caption p={p} />
+                <span className={`ml-auto tabular-nums ${MONO} text-muted`}>
+                  {String(belt.items.length).padStart(2, '0')} →
                 </span>
               </Link>
-            </li>
-          ))}
-        </ul>
+            </h2>
 
-          <div className="mt-12 lg:mt-10">
-            <Link
-              to="/work"
-              className="inline-flex items-center gap-1.5 font-mono text-[0.62rem] lowercase tracking-[0.18em] text-accent transition-opacity hover:opacity-70"
-            >
-              all {projects.length} projects <span aria-hidden="true">→</span>
-            </Link>
-          </div>
-        </div>
+            <ul className="mt-2 grid grid-cols-1 gap-y-5 sm:mt-4">
+              {belt.items.slice(0, PER_BELT).map((p, i) => (
+                // Only the lead project on a phone. Dropping the second is what
+                // buys the height for one screen, and it also stops the landing
+                // being a partial copy of /work there.
+                <li key={p.slug} className={i === 0 ? '' : 'hidden sm:block'}>
+                  <Link to={`/work/${p.slug}`} className="group flex items-center gap-3 sm:block">
+                    {/* A row on a phone, a stacked card from sm up. Capped in svh
+                        as well as by the column, so two covers plus a header
+                        always fit the frame even on a wide, short window where
+                        the column alone would be too tall. */}
+                    <div className="aspect-[4/3] w-[62px] shrink-0 overflow-hidden rounded-[6px] bg-line sm:w-full sm:max-h-[26svh] sm:rounded-[8px]">
+                      <img
+                        src={asset(posterFor(p))}
+                        alt={p.title}
+                        loading="lazy"
+                        draggable="false"
+                        className="h-full w-full object-cover grayscale transition duration-500 ease-out group-hover:scale-[1.03] group-hover:grayscale-0"
+                      />
+                    </div>
+                    <span className="block min-w-0 flex-1 sm:mt-2">
+                      <span className="flex items-baseline gap-2">
+                        <span
+                          className="min-w-0 truncate text-[0.82rem] font-medium leading-snug transition-colors duration-300 group-hover:text-[var(--c)]"
+                          style={{ '--c': belt.color }}
+                        >
+                          {p.title}
+                        </span>
+                        <span className={`ml-auto shrink-0 tabular-nums ${MONO} text-muted`}>
+                          {p.year}
+                        </span>
+                      </span>
+                      {/* The award, named. Always the accent, never the belt
+                          colour: a distinction should read as itself, not as its
+                          group, which is the same rule /work follows. The line is
+                          reserved whether or not there is an award, so all four
+                          belts stay aligned side by side. */}
+                      {/* The reserved line keeps the four sm+ columns aligned;
+                          stacked on a phone there is nothing to align to, so it
+                          only takes space when there is an award to show. */}
+                      <span
+                        className={`mt-1 block leading-[1.35] sm:mt-1.5 sm:min-h-[1.35em] ${MONO} text-accent`}
+                      >
+                        {p.award && (
+                          <>
+                            <span className="sr-only">Awarded: </span>
+                            {p.award}
+                          </>
+                        )}
+                      </span>
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))}
+      </div>
 
-        <footer className="mt-12 flex shrink-0 flex-wrap items-center justify-between gap-x-6 gap-y-3 py-6 lg:mt-0">
-          <p className={`${MONO} text-muted`}>Selected Work · Charles Abi Chahine</p>
-          <nav className="flex gap-5">
-            <a className={`${MONO} text-muted transition-colors hover:text-accent`} href={`mailto:${contact.email}`}>Email</a>
-            <a className={`${MONO} text-muted transition-colors hover:text-accent`} href={contact.linkedin} target="_blank" rel="noreferrer">LinkedIn</a>
-            <a className={`${MONO} text-muted transition-colors hover:text-accent`} href={contact.github} target="_blank" rel="noreferrer">GitHub</a>
-          </nav>
-        </footer>
-      </section>
-    </>
-  )
-}
-
-/*
- * The lift. Clones ride over the page rather than the tiles themselves moving:
- * taking the real ones out of flow would collapse the grid behind them, and the
- * reflow would be the most visible thing on screen. The clones carry their own
- * markup, so radius, caption and type all travel unchanged — the transition is
- * position and nothing else.
- *
- * Driven by the Web Animations API rather than CSS transitions. A transition
- * only fires if the browser has computed the starting style before the ending
- * one, which for a node created and mutated in the same task is a race — and one
- * the wash lost, so the old page stayed visible underneath the whole flight.
- * An animation with explicit keyframes cannot lose that race, and its `finished`
- * promise is a better cue for the route change than a timer guessing at it.
- */
-function lift(tiles, rects, done) {
-  const H = window.innerHeight
-  const sh = stripHeight(H)
-  const sw = (sh * 4) / 3
-  // Where /work's own flex column settles the strip: centred in the viewport,
-  // less the three pixels its scrubber and footer pull it up by. Measured rather
-  // than derived, and constant at every viewport height tested.
-  const top = (H - sh) / 2 - 3
-
-  const stage = document.createElement('div')
-  stage.dataset.lift = ''
-  stage.style.cssText = 'position:fixed;inset:0;z-index:40;pointer-events:none'
-
-  // The page dissolves to paper under the clones, so everything that is not
-  // making the journey leaves quietly instead of scrolling or blinking out.
-  const wash = document.createElement('div')
-  wash.style.cssText = 'position:absolute;inset:0;background:var(--color-paper);opacity:0'
-  stage.appendChild(wash)
-
-  const flyers = tiles.map((el, i) => {
-    const r = rects[i]
-    const node = el.cloneNode(true)
-    node.removeAttribute('href')
-    const box = document.createElement('div')
-    box.dataset.flyer = i
-    box.style.cssText = `position:absolute;left:${r.left}px;top:${r.top}px;width:${r.width}px`
-    box.appendChild(node)
-    stage.appendChild(box)
-    return box
-  })
-
-  // /work's header and scrubber, arriving under the strip the tiles are forming.
-  const arriving = document.createElement('div')
-  arriving.style.cssText = 'position:absolute;inset:0;opacity:0'
-  arriving.innerHTML = `
-    <div style="position:absolute;left:${STRIP_INSET}px;top:78px;display:flex;gap:14px;align-items:baseline;
-      font-family:var(--font-mono);font-size:.56rem;text-transform:uppercase;letter-spacing:.16em">
-      <span style="color:var(--color-ink)">Work</span>
-      <span style="color:var(--color-muted);font-variant-numeric:tabular-nums">${projects.length} Projects</span>
+      <footer className="absolute inset-x-0 bottom-0 z-[2] flex flex-wrap items-center justify-between gap-x-6 gap-y-2 px-6 pb-5 lg:px-10">
+        <p className={`${MONO} text-muted`}>19 projects · 4 belts · 2023–2026</p>
+        <nav className="flex gap-5">
+          <a className={`${MONO} text-muted transition-colors hover:text-accent`} href={`mailto:${contact.email}`}>Email</a>
+          <a className={`${MONO} text-muted transition-colors hover:text-accent`} href={contact.linkedin} target="_blank" rel="noreferrer">LinkedIn</a>
+          <a className={`${MONO} text-muted transition-colors hover:text-accent`} href={contact.github} target="_blank" rel="noreferrer">GitHub</a>
+        </nav>
+      </footer>
     </div>
-    <div style="position:absolute;left:${STRIP_INSET}px;right:${STRIP_INSET}px;top:${top + sh + 64}px;
-      height:4px;border-radius:999px;background:var(--color-line)">
-      <span style="position:absolute;left:0;top:0;height:100%;width:210px;border-radius:999px;background:var(--color-soft)"></span>
-    </div>`
-  stage.appendChild(arriving)
-
-  document.body.appendChild(stage)
-
-  const hold = { fill: 'forwards', easing: 'ease-out' }
-  wash.animate([{ opacity: 0 }, { opacity: 1 }], { ...hold, duration: 200 })
-  arriving.animate([{ opacity: 0 }, { opacity: 1 }], { ...hold, duration: 240, delay: LIFT_MS - 260 })
-
-  const travelling = flyers.map((box, i) => {
-    if (i >= 4) {
-      // The back row's places on the strip are all off the right edge. Rather
-      // than send it through the front row to get there, it falls away.
-      return box.animate(
-        [
-          { opacity: 1, transform: 'none' },
-          { opacity: 0, transform: 'translateY(26px)' },
-        ],
-        { ...hold, duration: 300 }
-      )
-    }
-    const r = rects[i]
-    return box.animate(
-      [
-        { left: `${r.left}px`, top: `${r.top}px`, width: `${r.width}px` },
-        { left: `${STRIP_INSET + i * (sw + STRIP_GAP)}px`, top: `${top}px`, width: `${sw}px` },
-      ],
-      { ...hold, duration: LIFT_MS, easing: 'cubic-bezier(.4,0,.2,1)' }
-    )
-  })
-
-  // Whichever arrives first, and only once. `finished` is the accurate cue, but
-  // an animation in a tab the browser has stopped compositing never finishes at
-  // all — and the fallback is the difference between a transition and a visitor
-  // stranded behind a white overlay with no way back.
-  let spent = false
-  const land = () => {
-    if (spent) return
-    spent = true
-    done()
-    // Left standing until the next route has painted, so the strip it hands
-    // over to is already underneath and the swap has nothing to show.
-    setTimeout(() => stage.remove(), 120)
-  }
-  Promise.all(travelling.map((a) => a.finished)).then(land, land)
-  setTimeout(land, LIFT_MS + 220)
+  )
 }
