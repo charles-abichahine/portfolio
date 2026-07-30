@@ -232,10 +232,14 @@ const html = `<!doctype html>
    * than "2025–2026". Stacking is free here: every entry runs at least three
    * lines, so the second date sits inside height the row already had.
    */
-  .when { flex: 0 0 8mm; color: #d92b1f; font-variant-numeric: tabular-nums;
+  .when { flex: 0 0 10mm; color: #d92b1f; font-variant-numeric: tabular-nums;
           letter-spacing: 0.02em; padding-top: 1pt; }
   .range { display: inline-flex; flex-direction: column; align-items: center; }
-  .tick { width: 0.35mm; height: 1.8mm; background: #d92b1f; margin: 0.6mm 0; }
+  /* 0.2mm is 0.76px, which matches the 0.8px hairline the section rules use.
+     It was 0.35mm, or 1.31px, so the date rule sat 1.65x heavier than every
+     other rule in the document: the width was given in mm and the hairlines in
+     px, and the two drifted. On the page they already agree, both being 1px. */
+  .tick { width: 0.2mm; height: 1.8mm; background: #d92b1f; margin: 0.6mm 0; }
   /* Nothing closes an ongoing role, so the rule runs on past where the second
      year would have sat. That overrun is what reads as still running. */
   .tick.open { height: 3mm; }
@@ -286,6 +290,7 @@ const html = `<!doctype html>
     <div>${esc(contact.email)}</div>
     <div>${esc(short(contact.linkedin))}</div>
     <div>${esc(short(contact.github))}</div>
+    <div>${esc(short(contact.site))}</div>
   </div>
 </header>
 

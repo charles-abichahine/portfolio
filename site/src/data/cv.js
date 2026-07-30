@@ -25,6 +25,18 @@ export const contact = {
   email: 'charles.abichahine@gmail.com',
   linkedin: 'https://www.linkedin.com/in/CharlesAbiChahine',
   github: 'https://github.com/charles-abichahine',
+  /*
+   * The site, last in the PDF's contact block and nowhere on the web, where the
+   * reader is already here.
+   *
+   * It matters because of what the download is: one page that has been cut down
+   * to four project names, sent on and printed. Without this a reader can reach
+   * the inbox, the LinkedIn and the repositories but not the work itself, and
+   * cutting detail from a CV is only a fair trade when the full version is one
+   * line away. Stored as a full URL like the others; the generator strips the
+   * protocol for print.
+   */
+  site: 'https://charlesabichahine.com',
 }
 
 // Sits under the name on both the page and the PDF. Shared rather than typed
@@ -108,7 +120,7 @@ export const education = [
 
 export const experience = [
   {
-    dates: '2024–',
+    dates: 'Aug 24–',
     role: 'Design Technology Architect',
     firm: 'Dynamic Solution Co.',
     where: 'Kuwait',
@@ -127,7 +139,7 @@ export const experience = [
     ],
   },
   {
-    dates: '2023–2024',
+    dates: 'Aug 23–Jul 24',
     role: 'Design Architect',
     firm: 'SOMA',
     where: 'Beirut / Dubai',
@@ -143,7 +155,7 @@ export const experience = [
     ],
   },
   {
-    dates: '2023',
+    dates: 'Jun 23–Aug 23',
     role: 'BIM Modeler',
     firm: 'BIM International',
     where: 'Beirut',
@@ -152,7 +164,7 @@ export const experience = [
     ],
   },
   {
-    dates: '2022–',
+    dates: 'Jan 22–',
     role: 'Design Architect',
     firm: 'Self-employed',
     where: 'Hybrid',
@@ -161,7 +173,7 @@ export const experience = [
     ],
   },
   {
-    dates: '2022',
+    dates: 'Jun 22–Aug 22',
     role: 'Architectural Intern',
     firm: 'Jemma Chidiac Architects',
     where: 'Beirut',

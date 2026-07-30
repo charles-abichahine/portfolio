@@ -69,9 +69,17 @@ function Section({ label, children }) {
 
           right-[0.1em] trims the trailing letter-spacing, which is added after
           the last character and would otherwise run the red past the final
-          letter. */}
-      <div className="relative mb-6 pt-4 before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-line">
-        <h2 className="relative inline-block font-mono text-[0.86rem] font-medium uppercase tracking-[0.1em] text-soft before:absolute before:left-0 before:right-[0.1em] before:-top-4 before:h-px before:bg-accent">
+          letter.
+
+          The wrapper is flex, not a plain block. As an inline-block the heading
+          sat in a line box whose 24px line-height exceeded its own 20.64px box,
+          and the leftover leading split above and below it, pushing it 2px down
+          and taking its rule off the hairline with it. A flex item is not in a
+          line box, so -top-4 lands exactly on pt-4. The print version never had
+          this because there the span and its parent share a font size and there
+          is no leftover to split. */}
+      <div className="relative mb-6 flex pt-4 before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-line">
+        <h2 className="relative font-mono text-[0.86rem] font-medium uppercase tracking-[0.1em] text-soft before:absolute before:left-0 before:right-[0.1em] before:-top-4 before:h-px before:bg-accent">
           {label}
         </h2>
       </div>
