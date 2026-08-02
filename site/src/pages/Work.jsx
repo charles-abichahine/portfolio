@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
+import ProjectLink from '../components/ProjectLink.jsx'
 import { asset, projects } from '../data/projects.js'
 import { BELTS, BELT_BY_LABEL, beltFor } from '../data/belts.js'
 import { contact } from '../data/cv.js'
@@ -60,7 +61,7 @@ function ProjectTile({ p, hot, motionOk }) {
   const playing = mounted && ready
 
   return (
-    <Link to={`/work/${p.slug}`} data-slug={p.slug} className={`block ${R}`}>
+    <ProjectLink slug={p.slug} data-slug={p.slug} className={`block ${R}`}>
       <div className={FRAME}>
         <img
           src={asset(posterFor(p))}
@@ -120,7 +121,7 @@ function ProjectTile({ p, hot, motionOk }) {
         )}
         <span className={`ml-auto shrink-0 tabular-nums ${MONO} text-muted`}>{p.year}</span>
       </div>
-    </Link>
+    </ProjectLink>
   )
 }
 

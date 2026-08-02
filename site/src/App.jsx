@@ -4,7 +4,11 @@ import DynamicIsland from './components/DynamicIsland.jsx'
 import Footer from './components/Footer.jsx'
 
 function App() {
-  const { pathname } = useLocation()
+  const location = useLocation()
+  // The overlay leaves the index mounted underneath, so what is on screen is
+  // the background route, not the URL. Everything below keys off that.
+  const background = location.state?.background
+  const pathname = background?.pathname ?? location.pathname
   // Braces matter: without them the arrow implicitly returns scrollTo()'s value,
   // which React treats as a cleanup function and calls on the next navigation —
   // crashing with "X is not a function" in browsers where scrollTo returns non-undefined.

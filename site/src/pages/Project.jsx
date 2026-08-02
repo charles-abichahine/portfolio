@@ -1,17 +1,22 @@
 import { Fragment } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import ProjectLink from '../components/ProjectLink.jsx'
 import { asset, getProject, projects } from '../data/projects.js'
 
 function Media({ item }) {
-  // A demo someone chooses to watch: give it controls and load only metadata.
+  // A demo someone chooses to watch: give it controls and a poster, and fetch
+  // nothing until it is pressed. The poster is the frame beside it, same naming
+  // as the loops, so the page shows a still instead of a black rectangle.
   if (item.type === 'video') {
     return (
       <video
         src={asset(item.src)}
+        poster={asset(item.src.replace(/\.[a-z0-9]+$/i, '-poster.webp'))}
         controls
         muted
         playsInline
-        preload="metadata"
+        preload="none"
+        aria-label={item.caption}
         className="w-full border border-line"
       />
     )
@@ -41,6 +46,15 @@ function Media({ item }) {
   )
 }
 
+/*
+ * The full project page, at /work/:slug.
+ *
+ * It briefly had an `overlay` variant for rendering inside the card over the
+ * index. That is gone: the card is ProjectCard now, built from the gallery and
+ * the record rather than from this page squeezed into a box. This is what a
+ * shared link, a refresh and a crawler get, and it is the only thing that shows
+ * the section writing.
+ */
 export default function Project() {
   const { slug } = useParams()
   const project = getProject(slug)
@@ -163,45 +177,68 @@ export default function Project() {
         )}
       </header>
 
-      <div className="mx-auto max-w-3xl">
+      {/*
+       * The prose is held to a reading measure and the media is not.
+       *
+       * Everything used to sit in one max-w-3xl column, which is what made this
+       * read as a blog: a text column with pictures dropped into it. Measured,
+       * every figure rendered at 768px, exactly the width of a paragraph, on a
+       * 1152px page whose cover was 1104px. So the poster was 44% wider than the
+       * evidence, and a screenshot of a dense software interface at 768px shows
+       * a recruiter nothing they can read.
+       *
+       * Now the body stays at 68ch and the media takes the full column, half as
+       * wide again. The work is the page; the writing annotates it.
+       */}
+      <div className="mx-auto max-w-[68ch]">
         {project.intro.map((p) => (
           <p key={p.slice(0, 32)} className="pt-10 font-serif text-[1.12rem] leading-[1.75] text-soft">
             {p}
           </p>
         ))}
-
-        {project.sections.map((s, i) => (
-          <section key={s.heading} className="pt-14">
-            <div className="label-mono mb-3 flex items-baseline gap-4 border-t border-line pt-5 text-muted">
-              <span className="text-accent">{String(i + 1).padStart(2, '0')}</span>
-            </div>
-            <h2 className="mb-4 text-2xl font-bold tracking-tight">{s.heading}</h2>
-            {s.body.map((p) => (
-              <p key={p.slice(0, 32)} className="mb-4 font-serif text-[1.02rem] leading-[1.75] text-soft">
-                {p}
-              </p>
-            ))}
-            <div className="flex flex-col gap-6 pt-4">
-              {s.media.map((m) => (
-                <figure key={m.src}>
-                  <Media item={m} />
-                  <figcaption className="label-mono pt-2 leading-relaxed text-muted normal-case tracking-normal">
-                    {m.caption}
-                  </figcaption>
-                </figure>
-              ))}
-            </div>
-          </section>
-        ))}
       </div>
 
+      {project.sections.map((s, i) => (
+        <section key={s.heading} className="mt-16 border-t border-line pt-6">
+          {/* Number and heading in a rail on the left, so the sections can be
+              scanned without reading them. Below lg it stacks, where a 14rem
+              column would leave the prose too narrow to be worth it. */}
+          <div className="grid gap-x-10 gap-y-3 lg:grid-cols-[14rem_1fr]">
+            <h2 className="lg:sticky lg:top-24 lg:self-start">
+              <span className="label-mono block text-accent">{String(i + 1).padStart(2, '0')}</span>
+              <span className="mt-2 block text-xl font-bold tracking-tight">{s.heading}</span>
+            </h2>
+            <div className="max-w-[68ch]">
+              {s.body.map((p) => (
+                <p key={p.slice(0, 32)} className="mb-4 font-serif text-[1.02rem] leading-[1.75] text-soft">
+                  {p}
+                </p>
+              ))}
+            </div>
+          </div>
+
+          {/* Outside the grid, so it takes the whole column rather than the
+              fraction the prose left over. */}
+          <div className="mt-8 flex flex-col gap-8">
+            {s.media.map((m) => (
+              <figure key={m.src}>
+                <Media item={m} />
+                <figcaption className="label-mono pt-2 leading-relaxed text-muted normal-case tracking-normal">
+                  {m.caption}
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </section>
+      ))}
+
       <nav className="label-mono mt-16 flex justify-between border-t border-rule pt-5">
-        <Link to={`/work/${prev.slug}`} className="text-muted transition-colors hover:text-accent">
+        <ProjectLink slug={prev.slug} className="text-muted transition-colors hover:text-accent">
           ← {prev.title}
-        </Link>
-        <Link to={`/work/${next.slug}`} className="text-muted transition-colors hover:text-accent">
+        </ProjectLink>
+        <ProjectLink slug={next.slug} className="text-muted transition-colors hover:text-accent">
           {next.title} →
-        </Link>
+        </ProjectLink>
       </nav>
     </article>
   )

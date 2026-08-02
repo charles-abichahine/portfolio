@@ -1,5 +1,5 @@
 import { Fragment } from 'react'
-import { Link } from 'react-router-dom'
+import ProjectLink from '../components/ProjectLink.jsx'
 import {
   awards,
   education,
@@ -10,9 +10,7 @@ import {
   splitDates,
   summary,
 } from '../data/cv.js'
-
 const base = import.meta.env.BASE_URL
-
 /*
  * One column.
  *
@@ -33,7 +31,6 @@ const base = import.meta.env.BASE_URL
  * as much CV. The cap is still there so a long bullet does not run the width of
  * a wide monitor.
  */
-
 /*
  * The bullet marker, a round point rather than the chevron it replaced.
  *
@@ -46,7 +43,6 @@ const base = import.meta.env.BASE_URL
 function Dot() {
   return <span aria-hidden="true" className="mt-[0.6em] h-1 w-1 shrink-0 rounded-full bg-muted" />
 }
-
 function Section({ label, children }) {
   return (
     <section className="mb-12">
@@ -54,23 +50,19 @@ function Section({ label, children }) {
           are the only six words a reader scans to navigate the document, so they
           are the one place the mono voice should carry weight rather than
           recede. text-soft rather than muted for the same reason.
-
           The rule above runs full width as a hairline, with an accent segment
           over its first stretch exactly as long as the word beneath it. The red
           measures the title, so it changes length section to section instead of
           being a fixed decoration.
-
           That length cannot come from a gradient stop: it would have to be
           written per section and would drift the moment a label was renamed. It
           comes from the heading being inline-block, which makes it the width of
           its own text by definition. The wrapper carries the full-width
           hairline; the heading's rule is pulled up by the wrapper's padding to
           land on it, so -top-4 has to stay in step with pt-4.
-
           right-[0.1em] trims the trailing letter-spacing, which is added after
           the last character and would otherwise run the red past the final
           letter.
-
           The wrapper is flex, not a plain block. As an inline-block the heading
           sat in a line box whose 24px line-height exceeded its own 20.64px box,
           and the leftover leading split above and below it, pushing it 2px down
@@ -87,7 +79,6 @@ function Section({ label, children }) {
     </section>
   )
 }
-
 /*
  * The place sits on the title line rather than on its own line under it. Two
  * lines per entry became one, which is eight lines across the document and the
@@ -107,7 +98,6 @@ function EntryHead({ title, place }) {
     </h3>
   )
 }
-
 /*
  * Dates in a gutter from sm up, stacked above on a phone.
  *
@@ -160,7 +150,6 @@ function Entry({ dates, children }) {
     </div>
   )
 }
-
 export default function CV() {
   // pt-28, not py-16: the fixed nav island ends 59px down the viewport and the
   // name was starting at 64, which read as the two colliding.
@@ -201,7 +190,6 @@ export default function CV() {
           Download PDF ↓
         </a>
       </header>
-
       <Section label="Education">
         {education.map((ed) => (
           <Entry key={ed.school} dates={ed.dates}>
@@ -226,12 +214,12 @@ export default function CV() {
                           things you can click, so the colour doubles as the link
                           affordance. Deliberately not the section or entry
                           titles, which are structure rather than substance. */}
-                      <Link
-                        to={`/work/${w.slug}`}
+                      <ProjectLink
+                        slug={w.slug}
                         className="text-ink underline decoration-line underline-offset-4 transition-colors hover:decoration-accent hover:text-accent"
                       >
                         {w.name}
-                      </Link>
+                      </ProjectLink>
                       , {w.text.trim()}
                     </span>
                   </li>
@@ -241,7 +229,6 @@ export default function CV() {
           </Entry>
         ))}
       </Section>
-
       <Section label="Experience">
         {experience.map((job) => (
           <Entry key={job.firm + job.dates} dates={job.dates}>
@@ -260,7 +247,6 @@ export default function CV() {
           </Entry>
         ))}
       </Section>
-
       <Section label="Skills">
         {/*
          * One grid for every row, not a grid per row. The label column is
@@ -286,7 +272,6 @@ export default function CV() {
           ))}
         </div>
       </Section>
-
       <Section label="Awards">
         {awards.map((a) => (
           <div key={a.text} className="mb-3 grid gap-1 last:mb-0 sm:grid-cols-[3.5rem_1fr] sm:gap-5">
@@ -295,7 +280,6 @@ export default function CV() {
           </div>
         ))}
       </Section>
-
       {/* No Contact section. The site footer already carries email, LinkedIn and
           GitHub on every page including this one, and the PDF puts the same
           three in its top right corner, so a third copy at the bottom of the

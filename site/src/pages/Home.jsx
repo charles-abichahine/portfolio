@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+import ProjectLink from '../components/ProjectLink.jsx'
 import DataField from '../components/DataField.jsx'
 import { BELTS } from '../data/belts.js'
 import { asset } from '../data/projects.js'
@@ -187,7 +188,7 @@ export default function Home() {
                 // buys the height for one screen, and it also stops the landing
                 // being a partial copy of /work there.
                 <li key={p.slug} className={i === 0 ? '' : 'hidden sm:block'}>
-                  <Link to={`/work/${p.slug}`} className="group flex items-center gap-3 sm:block">
+                  <ProjectLink slug={p.slug} className="group flex items-center gap-3 sm:block">
                     {/* A row on a phone, a stacked card from sm up. Capped in svh
                         as well as by the column, so two covers plus a header
                         always fit the frame even on a wide, short window where
@@ -232,7 +233,7 @@ export default function Home() {
                         )}
                       </span>
                     </span>
-                  </Link>
+                  </ProjectLink>
                 </li>
               ))}
             </ul>
