@@ -477,7 +477,7 @@ const _projects = [
     category: 'Computation & AI',
     award: null,
     links: {
-      github: 'https://github.com/charles-abichahine/GraphML_G02',
+      github: 'https://github.com/charles-abichahine/G02-narkomfin-graph',
       blog: 'https://blog.iaac.net/analyzing-narkomfin-through-its-graph/',
     },
     intro: [
