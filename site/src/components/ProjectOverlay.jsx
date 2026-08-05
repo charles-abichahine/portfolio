@@ -6,20 +6,17 @@ import { getProject } from '../data/projects.js'
 /*
  * A project opened over the index, rather than replacing it.
  *
- * The route is real: the URL is /work/:slug either way, so a link can be shared,
- * the sitemap is unaffected, and a crawler or a direct visit gets the full page.
- * What decides which you see is `background` in the location state, set only by
- * the tiles on /work. With it, the router keeps /work mounted and renders this
- * on top; without it, Project renders as a page as it always did.
+ * The route is real: the URL is /work/:slug, so a link can be shared and the
+ * sitemap is unaffected. It is also the only way a project is shown. There is no
+ * page behind this any more.
  *
- * Closing navigates back to the background location rather than history.back(),
- * because the background carries the category filter and the index should
- * reopen as you left it.
+ * Closing navigates to the background location rather than history.back(),
+ * because the background carries the category filter and the index should reopen
+ * as you left it. A direct visit has no state to carry, so it falls back to the
+ * plain index: back() there would leave the site.
  *
- * What the card shows is not the page in a box. It is the cover and every piece
- * of section media as one gallery, the two paragraphs of description, and the
- * record: enough that the card is the project rather than a trailer for it. The
- * page still exists at the same URL for a shared link, a refresh or a crawler.
+ * The card is the cover and every piece of section media as one gallery, the
+ * description, and the record.
  */
 export default function ProjectOverlay() {
   const navigate = useNavigate()
@@ -30,7 +27,7 @@ export default function ProjectOverlay() {
   const cardRef = useRef(null)
   const returnTo = useRef(null)
 
-  const close = () => navigate(`${background.pathname}${background.search ?? ''}`)
+  const close = () => navigate(`${background?.pathname ?? '/work'}${background?.search ?? ''}`)
 
   useEffect(() => {
     // Remember what had focus so it can be handed back on close, and move focus

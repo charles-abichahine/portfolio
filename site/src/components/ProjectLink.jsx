@@ -9,8 +9,9 @@ import { Link, useLocation } from 'react-router-dom'
  * Opening a project is therefore a single interaction across the site rather
  * than "a card here, a page there" depending on which link you happened to hit.
  *
- * Every route still works on its own. The state only exists on a click, so a
- * shared link, a refresh or a crawler gets the full page.
+ * Every route still works on its own. The state only exists on a click; without
+ * it the router synthesises the index as the background, so a shared link, a
+ * refresh or a crawler gets the same card over the same index.
  *
  * From inside an open card the existing background is passed through rather than
  * replaced. Without that, moving prev/next would stack a card on a card and
