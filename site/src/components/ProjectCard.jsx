@@ -1,29 +1,25 @@
 import { useEffect, useMemo, useState } from 'react'
+import MediaFrame from './MediaFrame.jsx'
+import MediaLightbox from './MediaLightbox.jsx'
 import { asset } from '../data/projects.js'
 import { beltFor } from '../data/belts.js'
 
 /*
  * The gallery, flattened out of the project record.
  *
- * The cover leads, then every piece of section media in the order it appears on
- * the page. Each item carries the section it came from, which is the only thing
- * left holding the shape of the project once the card stopped linking to it: the
- * captions alone would read as a pile of pictures.
+ * Every piece of section media, in the order the sections put it. Each item
+ * carries the section it came from, which is the only thing left holding the
+ * shape of the project: the captions alone would read as a pile of pictures.
  *
- * Posters are derived the same two ways Project.jsx derives them, because they
- * are named two different ways in the data: a cover is `cover.webm` beside
+ * The cover is deliberately not here. It is the tile you clicked to open the
+ * card, so leading with it spends the first frame showing you what you just
+ * pressed, and for the Huddle it appeared twice because its cover is also one of
+ * its section images.
+ *
+ * Posters are named two ways in the data: a cover is `cover.webm` beside
  * `poster.webp`, a section loop is `x.webm` beside `x-poster.webp`.
  */
 function galleryFor(project) {
-  const animated = project.cover.endsWith('.webm')
-  const cover = {
-    kind: animated ? 'loop' : 'image',
-    src: project.cover,
-    poster: animated ? project.cover.replace(/cover\.webm$/, 'poster.webp') : null,
-    section: 'Cover',
-    caption: '',
-  }
-
   const evidence = project.sections.flatMap((s, i) =>
     s.media.map((m) => ({
       kind: m.type,
@@ -36,89 +32,52 @@ function galleryFor(project) {
     })),
   )
 
-  // The Huddle uses one of its own section images as its cover, so without this
-  // it appears twice in the strip. The duplicate's caption is worth keeping —
-  // the cover has none — so it moves onto the cover rather than being dropped
-  // with it.
-  const twice = evidence.find((e) => e.src === cover.src)
-  if (twice) cover.caption = twice.caption
+  if (evidence.length > 0) return evidence
 
-  return [cover, ...evidence.filter((e) => e.src !== cover.src)]
+  // Soma Stratus carries no section media at all. Without this its gallery is
+  // empty and there is nothing to draw, so it falls back to the cover.
+  const animated = project.cover.endsWith('.webm')
+  return [
+    {
+      kind: animated ? 'loop' : 'image',
+      src: project.cover,
+      poster: animated ? project.cover.replace(/cover\.webm$/, 'poster.webp') : null,
+      section: 'Cover',
+      caption: '',
+    },
+  ]
 }
 
 /*
- * Contained, never cropped.
+ * Why the well is 19/11.
  *
- * The cover can be cropped, and is, on the index. The evidence cannot: it is
- * SHAP plots, correlation matrices, Kohonen maps and pipeline diagrams, at
- * aspect ratios from 0.55 to 3.17, and a crop of a chart is a lie. So the well
- * is a fixed frame and the media sits inside it at whatever shape it is.
+ * The media is contained, never cropped, so the frame's own shape decides how
+ * much of it is wasted: an item of aspect r inside a well of aspect A covers
+ * min(r,A)/max(r,A) of it. Measured across all 76 items the median is 1.87, not
+ * the 1.60 this used to be. The work skews wide, seven panoramas against seven
+ * portraits. At 19/11 the average item covers 82% of the well rather than 78%,
+ * and widening the column from 632 to 760 put about 41% more pixels on screen.
+ *
+ * It is still not native size. Nothing here is: 54% on average. That is what
+ * MediaLightbox is for.
  */
-function Frame({ item, title }) {
-  if (item.kind === 'loop') {
-    const stem = item.src.replace(/\.webm$/, '')
-    return (
-      <video
-        // Keyed, or React reuses the element between items and swapping
-        // <source> children does not reload a video.
-        key={item.src}
-        autoPlay
-        muted
-        loop
-        playsInline
-        poster={asset(item.poster)}
-        aria-label={item.caption || title}
-        className="max-h-full max-w-full"
-      >
-        <source src={asset(item.src)} type="video/webm" />
-        <source src={asset(`${stem}.mp4`)} type="video/mp4" />
-      </video>
-    )
-  }
-
-  if (item.kind === 'video') {
-    // A real poster, extracted from the video itself, rather than the #t=0.1
-    // media fragment this used to lean on. That trick asked the browser to seek
-    // a tenth of a second in so the frame was not black, which meant fetching
-    // and decoding video before anything could be seen, and Safari and Firefox
-    // honour the fragment inconsistently. A still is 9 to 33KB and always shows.
-    return (
-      <video
-        key={item.src}
-        src={asset(item.src)}
-        poster={asset(item.poster)}
-        controls
-        muted
-        playsInline
-        preload="none"
-        aria-label={item.caption || title}
-        className="max-h-full max-w-full"
-      />
-    )
-  }
-
-  return (
-    <img
-      key={item.src}
-      src={asset(item.src)}
-      alt={item.caption || title}
-      className="max-h-full max-w-full object-contain"
-    />
-  )
-}
 
 const WELL = 'bg-[color-mix(in_srgb,var(--color-line)_45%,var(--color-paper))]'
 
 export default function ProjectCard({ project, onClose }) {
   const items = useMemo(() => galleryFor(project), [project])
   const [at, setAt] = useState(0)
+  const [full, setFull] = useState(false)
   const color = beltFor(project).color
   const many = items.length > 1
   const item = items[at]
 
   // Moving prev/next between projects is gone, but the card is still reused if
   // the slug ever changes under it.
-  useEffect(() => setAt(0), [project.slug])
+  useEffect(() => {
+    setAt(0)
+    setFull(false)
+  }, [project.slug])
 
   useEffect(() => {
     if (!many) return
@@ -141,15 +100,35 @@ export default function ProjectCard({ project, onClose }) {
 
   return (
     <div
-      className="grid h-auto max-h-full w-full max-w-[1180px] grid-cols-1 overflow-hidden rounded-[14px] border border-line bg-paper p-3.5 shadow-[0_24px_80px_-20px_rgba(0,0,0,0.45)] lg:grid-cols-[632px_40px_minmax(0,1fr)] lg:p-6"
+      className="grid h-auto max-h-full w-full max-w-[1180px] grid-cols-1 overflow-hidden rounded-[14px] border border-line bg-paper p-3.5 shadow-[0_24px_80px_-20px_rgba(0,0,0,0.45)] lg:grid-cols-[760px_40px_minmax(0,1fr)] lg:p-6"
       style={{ '--c': color }}
     >
       {/* ── the gallery ───────────────────────────────────────────────────── */}
       <div className="flex min-w-0 flex-col">
         <div
-          className={`relative flex aspect-[16/9] shrink-0 items-center justify-center overflow-hidden rounded-[10px] border border-line lg:aspect-[16/10] ${WELL}`}
+          // The aspect sets the height, and on a short screen that height is more
+          // than there is. The card is overflow-hidden, so what happens then is
+          // not a scrollbar but the record silently disappearing off the bottom:
+          // at 1280x660 it was cut 45px below the card edge. The cap is the well
+          // giving the height back. 270px is everything else in the column —
+          // caption, strip, gaps, card padding, and the 40px the backdrop keeps
+          // on each side.
+          className={`relative flex aspect-[16/9] shrink-0 items-center justify-center overflow-hidden rounded-[10px] border border-line lg:aspect-[19/11] lg:max-h-[calc(100vh-270px)] ${WELL}`}
         >
-          <Frame item={item} title={project.title} />
+          <MediaFrame item={item} title={project.title} />
+
+          {/* The way to native size. Everything in here is drawn smaller than it
+              was made, so this is not a flourish: it is how a plot becomes
+              readable. Top right, out of the arrows' way. */}
+          <button
+            type="button"
+            onClick={() => setFull(true)}
+            aria-label="View full size"
+            title="View full size"
+            className="absolute right-2.5 top-2.5 flex h-[34px] w-[34px] items-center justify-center rounded-full border border-line bg-paper/80 text-[0.95rem] text-ink transition-colors hover:border-[var(--c)] hover:text-[var(--c)]"
+          >
+            ⤢
+          </button>
 
           {many && (
             <>
@@ -249,8 +228,8 @@ export default function ProjectCard({ project, onClose }) {
       <div aria-hidden="true" />
 
       {/* ── the rail ──────────────────────────────────────────────────────── */}
-      <div className="flex min-w-0 flex-col max-lg:mt-3.5">
-        <div className="label-mono flex items-center gap-2.5">
+      <div className="flex min-w-0 flex-col max-lg:mt-3.5 lg:min-h-0">
+        <div className="label-mono flex shrink-0 items-center gap-2.5">
           <span
             aria-hidden="true"
             className="h-[7px] w-[7px] shrink-0 rounded-[2px]"
@@ -266,29 +245,38 @@ export default function ProjectCard({ project, onClose }) {
           </button>
         </div>
 
-        <h2 className="mt-3 text-[1.55rem] font-bold leading-[1.12] tracking-tight lg:mt-3.5 lg:text-[1.9rem]">
+        <h2 className="mt-3 shrink-0 text-[1.55rem] font-bold leading-[1.12] tracking-tight lg:mt-3.5 lg:text-[1.9rem]">
           {project.title}
           <span className="text-accent">.</span>
         </h2>
 
         {/*
-         * The subtitle is never cut: the longest in the data runs to five lines
-         * here. The intro is, and how much depends on the height you have. Six
-         * lines is what 720px of laptop leaves once the gallery, the subtitle
-         * and the record have taken theirs; a 900px screen gets nine. Writing
-         * the ceiling as one fixed number would mean either overflowing the
-         * tight case or short-changing everyone above it.
+         * The only thing on the card that scrolls, and only from lg up.
+         *
+         * The writing used to be clamped to a line count that depended on how
+         * tall the screen was: six lines at 720px, nine above 800, two below.
+         * Three tiers, each hand-fitted to the longest project, and every one of
+         * them a thing that starts silently truncating the day a subtitle or a
+         * team list gets longer. Worse, when the sums were wrong the card did
+         * not scroll, it clipped, and the record disappeared off the bottom
+         * without a scrollbar to say so.
+         *
+         * Giving this one box the overflow removes that whole class of problem.
+         * The title above it and the record below it stay put, so nothing
+         * scannable can be scrolled out of sight; the prose is what moves.
          */}
-        <p className="mt-2.5 line-clamp-3 font-serif text-[1.02rem] leading-[1.55] lg:mt-3 lg:line-clamp-5">
-          {project.subtitle}
-        </p>
-        <p className="mt-2.5 line-clamp-3 font-serif text-[0.9rem] leading-[1.62] text-soft lg:mt-3 lg:line-clamp-6 [@media(min-width:1024px)_and_(min-height:800px)]:line-clamp-9">
-          {project.intro[0]}
-        </p>
+        <div className="lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:pr-1.5">
+          <p className="mt-2.5 line-clamp-3 font-serif text-[1.02rem] leading-[1.55] lg:mt-3 lg:line-clamp-none">
+            {project.subtitle}
+          </p>
+          <p className="mt-2.5 line-clamp-3 font-serif text-[0.9rem] leading-[1.62] text-soft lg:mt-3 lg:line-clamp-none">
+            {project.intro[0]}
+          </p>
+        </div>
 
-        {/* Smaller than the page sets it, and pushed to the foot of the rail:
+        {/* Smaller than the page sets it, and pinned to the foot of the rail:
             the writing leads, the record is there to be scanned once. */}
-        <dl className="mt-auto grid grid-cols-2 gap-x-[18px] gap-y-[7px] border-t border-rule pt-3 lg:gap-y-[9px] lg:pt-3.5">
+        <dl className="mt-auto grid shrink-0 grid-cols-2 gap-x-[18px] gap-y-[7px] border-t border-rule pt-3 lg:mt-3 lg:gap-y-[9px] lg:pt-3.5">
           {record.map(([k, v, wide]) => (
             <div key={k} className={wide ? 'col-span-2' : undefined}>
               <dt className="mb-0.5 font-mono text-[0.54rem] font-medium uppercase tracking-[0.14em] text-muted">
@@ -338,6 +326,19 @@ export default function ProjectCard({ project, onClose }) {
           )}
         </dl>
       </div>
+
+      {/* Above the card, not instead of it, so closing lands you back on the
+          same item with the same gallery still open behind. */}
+      {full && (
+        <MediaLightbox
+          items={items}
+          at={at}
+          onStep={step}
+          onClose={() => setFull(false)}
+          title={project.title}
+          color={color}
+        />
+      )}
     </div>
   )
 }
