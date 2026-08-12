@@ -108,10 +108,26 @@ export default function Home() {
   }, [metrics])
 
   return (
-    // One screen on a phone, two from sm up. At 375 a second screen put the
-    // lower belts below the fold, which broke the whole point of the frame
-    // ending the page.
-    <div ref={stageRef} className="relative h-[100svh] sm:h-[200svh]">
+    /*
+     * Two screens everywhere, phones included. This used to collapse to one
+     * screen below sm, which meant a phone got the name and all four belts at
+     * once: no scroll, no fan to speak of, and none of the thing this page is
+     * for. What made that necessary was two projects per belt; at one each the
+     * belts fit the second screen with room over.
+     *
+     * On a phone the height is one screen plus a fixed run rather than two
+     * screens, because two screens of a phone are two very different distances
+     * depending on which way it is held. Portrait gave the fan 760px to cross
+     * and landscape 241px, so the same drawing read as stretched one way and
+     * squashed the other. A fixed run makes it about 470px in both, which is
+     * also why the page gets shorter in portrait and longer in landscape.
+     *
+     * A laptop keeps 200svh: there the two are close enough already.
+     */
+    <div
+      ref={stageRef}
+      className="relative h-[calc(100svh+560px)] sm:h-[200svh] [@media(min-width:640px)_and_(max-height:520px)]:h-[calc(100svh+560px)]"
+    >
       <DataField originY={metrics?.originY ?? null} heads={heads} focus={focus} />
 
       {/* Centred on the first screen. The wash is a soft ellipse of the page
@@ -120,7 +136,7 @@ export default function Home() {
           drawing in half instead. Its horizontal bleed is capped against the
           viewport, because a flat 70px each side is wider than the page on a
           phone and pushed the whole document sideways. */}
-      <div className="absolute left-1/2 top-[21svh] z-[2] w-[min(560px,88vw)] -translate-x-1/2 -translate-y-1/2 px-4 text-center sm:top-[50svh]">
+      <div className="absolute left-1/2 top-[50svh] z-[2] w-[min(560px,88vw)] -translate-x-1/2 -translate-y-1/2 px-4 text-center">
         <span
           aria-hidden="true"
           className="pointer-events-none absolute -inset-x-[min(70px,5vw)] -inset-y-[46px] -z-10"
@@ -142,11 +158,10 @@ export default function Home() {
         <p className="mt-5 font-serif text-[clamp(0.95rem,1.2vw,1.05rem)] leading-[1.6] text-soft">
           {summary}
         </p>
-        {/* No scroll cue on a phone: the page is one screen there, so there is
-            nothing below to scroll to. The rule stays as the fan's origin. */}
+        {/* The cue reads the same everywhere now that a phone has a second
+            screen to scroll to. The rule under it is also the fan's origin. */}
         <p ref={cueRef} className={`mx-auto mt-6 w-fit border-t border-line pt-3 text-muted sm:mt-9 ${MONO}`}>
-          <span className="hidden sm:inline">Scroll · </span>19 projects
-          <span className="hidden sm:inline"> ↓</span>
+          Scroll · 19 projects ↓
         </p>
       </div>
 
@@ -184,10 +199,21 @@ export default function Home() {
 
             <ul className="mt-2 grid grid-cols-1 gap-y-5 sm:mt-4">
               {belt.items.slice(0, PER_BELT).map((p, i) => (
-                // Only the lead project on a phone. Dropping the second is what
-                // buys the height for one screen, and it also stops the landing
-                // being a partial copy of /work there.
-                <li key={p.slug} className={i === 0 ? '' : 'hidden sm:block'}>
+                // Only the lead project on a phone, in either orientation.
+                // Stacked, the second one is what pushed the belts past the
+                // second screen; in landscape it is worse, because a phone on
+                // its side has about 390px of height and two covers per column
+                // put the belt headers above the fold, so the frame leaked onto
+                // the first screen. The height query catches a phone lying down
+                // without touching a tablet, which has the room for both.
+                <li
+                  key={p.slug}
+                  className={
+                    i === 0
+                      ? ''
+                      : 'hidden sm:block [@media(min-width:640px)_and_(max-height:520px)]:hidden'
+                  }
+                >
                   <ProjectLink slug={p.slug} className="group flex items-center gap-3 sm:block">
                     {/* A row on a phone, a stacked card from sm up. Capped in svh
                         as well as by the column, so two covers plus a header
