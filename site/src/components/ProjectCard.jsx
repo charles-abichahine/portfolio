@@ -100,20 +100,38 @@ export default function ProjectCard({ project, onClose }) {
 
   return (
     <div
-      className="grid h-auto max-h-full w-full max-w-[1180px] grid-cols-1 overflow-hidden rounded-[14px] border border-line bg-paper p-3.5 shadow-[0_24px_80px_-20px_rgba(0,0,0,0.45)] lg:grid-cols-[760px_40px_minmax(0,1fr)] lg:p-6"
+      /*
+       * One size, every project.
+       *
+       * The height used to come from whichever column was taller, so a project
+       * with a long intro got a taller card than one with a short intro, and the
+       * card changed shape as you moved between them. A definite height fixes
+       * that: 622px is the gallery column at its intended size, and everything
+       * that varies (the writing, the number of thumbnails) is absorbed inside
+       * rather than pushing the edges out.
+       *
+       * The cap is in viewport units, not max-h-full. A percentage max-height
+       * resolves against the parent's height, and the parent here is centred
+       * rather than stretched, so its height is indefinite and the percentage
+       * silently does nothing: at 1280x660 the card stayed 622px inside 580px of
+       * room. 5rem is the padding the backdrop keeps on each side.
+       */
+      className="grid h-auto max-h-full w-full max-w-[1180px] grid-cols-1 overflow-hidden rounded-[14px] border border-line bg-paper p-3.5 shadow-[0_24px_80px_-20px_rgba(0,0,0,0.45)] lg:h-[622px] lg:max-h-[calc(100vh-5rem)] lg:grid-cols-[760px_40px_minmax(0,1fr)] lg:p-6"
       style={{ '--c': color }}
     >
       {/* ── the gallery ───────────────────────────────────────────────────── */}
-      <div className="flex min-w-0 flex-col">
+      <div className="flex min-w-0 flex-col lg:min-h-0">
         <div
-          // The aspect sets the height, and on a short screen that height is more
-          // than there is. The card is overflow-hidden, so what happens then is
-          // not a scrollbar but the record silently disappearing off the bottom:
-          // at 1280x660 it was cut 45px below the card edge. The cap is the well
-          // giving the height back. 270px is everything else in the column —
-          // caption, strip, gaps, card padding, and the 40px the backdrop keeps
-          // on each side.
-          className={`relative flex aspect-[16/9] shrink-0 items-center justify-center overflow-hidden rounded-[10px] border border-line lg:aspect-[19/11] lg:max-h-[calc(100vh-270px)] ${WELL}`}
+          // The well takes whatever the card has left rather than setting the
+          // height itself. That is what keeps every card the same size: a project
+          // with one thumbnail has no strip, so the well simply grows into the
+          // space instead of the card shrinking. On a short screen it gives
+          // height back the same way, which is what stopped the record being cut
+          // off below the card edge.
+          //
+          // Below lg the card is not a fixed height, so there the aspect still
+          // sets it.
+          className={`relative flex aspect-[16/9] shrink-0 items-center justify-center overflow-hidden rounded-[10px] border border-line lg:aspect-auto lg:min-h-0 lg:shrink lg:flex-1 ${WELL}`}
         >
           <MediaFrame item={item} title={project.title} />
 
