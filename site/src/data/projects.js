@@ -485,12 +485,57 @@ const _projects = [
     ],
     sections: [
       {
-        heading: 'Reading the plan as a network',
+        heading: 'From floor plan to graph',
         body: [],
         media: [
-          { type: 'image', src: 'projects/narkomfin/slide1.webp', caption: 'The building sampled into a weighted spatial graph.' },
-          { type: 'image', src: 'projects/narkomfin/slide2.webp', caption: 'Centrality exposes the corridor as the topological spine.' },
-          { type: 'image', src: 'projects/narkomfin/slide3.webp', caption: 'Community detection recovers the vertical living cells.' },
+          { type: 'image', src: 'projects/narkomfin/exploded.webp', caption: 'Both apartment types exploded by level. Type K is a two-storey duplex, Type F a three-storey unit for singles, and the corridor sits at a different height in each.' },
+          { type: 'image', src: 'projects/narkomfin/graphs.webp', caption: 'Both types sampled on a 0.5-unit grid and stitched across floors at the stairs. Type K is asymmetric, one dense floor and one fragmented; Type F is symmetric, sparse-dense-sparse.' },
+        ],
+      },
+      {
+        heading: 'Closeness: the most accessible point',
+        body: [],
+        media: [
+          { type: 'image', src: 'projects/narkomfin/closeness-k.webp', caption: 'Type K. The hot band runs the length of the L1 corridor and accessibility falls off in one direction only, upward into the rooms.' },
+          { type: 'image', src: 'projects/narkomfin/closeness-f.webp', caption: 'Type F. Closeness peaks on the middle floor and drops both downward and upward, a balanced privacy gradient rather than a one-way one.' },
+        ],
+      },
+      {
+        heading: 'Betweenness: where the traffic goes',
+        body: [],
+        media: [
+          { type: 'image', src: 'projects/narkomfin/betweenness-k.webp', caption: 'Type K. A razor-sharp line along the corridor centreline: every cross-building path passes through one narrow band, and the stair landings are the chokepoints.' },
+          { type: 'image', src: 'projects/narkomfin/betweenness-f.webp', caption: 'Type F. The same spine, carrying double the load. It serves rooms on two floors, so any L1 to L3 journey must cross it.' },
+        ],
+      },
+      {
+        heading: 'Crossing the building',
+        body: [],
+        media: [
+          { type: 'image', src: 'projects/narkomfin/shortest-path.webp', caption: 'A corner-to-corner traversal: an L-shape in Type K, a Z-shape in Type F. The straightened path barely improves on the topological one, because the corridor is too narrow to optimise around.' },
+        ],
+      },
+      {
+        heading: 'A plan that is flat up close',
+        body: [],
+        media: [
+          { type: 'image', src: 'projects/narkomfin/degree.webp', caption: 'Degree centrality is almost uniform, and only the stair cells stand out as outliers. The hierarchy of the building is invisible locally and only emerges at the scale of the whole graph.' },
+        ],
+      },
+      {
+        heading: 'Communities: Ginzburg’s living cells',
+        body: [],
+        media: [
+          { type: 'image', src: 'projects/narkomfin/communities-k.webp', caption: 'Type K. Communities cut perpendicular to the corridor into longitudinal bands, each a corridor segment with the rooms above it. The building self-organises into vertical slices, not floors.' },
+          { type: 'image', src: 'projects/narkomfin/communities-f.webp', caption: 'Type F. The same pattern across three floors: each community spans a corridor segment plus the rooms below and above, which is what Ginzburg designed the units to be.' },
+        ],
+      },
+      {
+        heading: 'Classifying room types from topology',
+        body: [],
+        media: [
+          { type: 'image', src: 'projects/narkomfin/classifier-k.webp', caption: 'GraphSAGE reaches 67.9% on Type K, 55 of 81 rooms. The errors cluster where connectivity is near-identical: living rooms read as kitchens, stairs as storerooms.' },
+          { type: 'image', src: 'projects/narkomfin/classifier-f.webp', caption: '91.3% on Type F, 210 of 230. Sixteen of the twenty errors are kitchens predicted as corridor, a single dominant blind spot.' },
         ],
       },
     ],
