@@ -12,3 +12,6 @@ dist/
 Thumbs.db
 desktop.ini
 *.log
+
+# Scratch file the booklet script writes next to itself while printing.
+site/scripts/.book.tmp.html
