@@ -301,33 +301,28 @@ export default function About() {
           </p>
         </div>
 
-        {/* Chips and footer share one bottom group, so the chips can never land
-            on top of the footer text the way an absolutely-placed row would. */}
-        <div className="flex flex-col gap-3">
-          {/* touch has no hover: a guaranteed way into the five that carry a record */}
-          <div className="pointer-events-auto -mx-1 flex gap-2 overflow-x-auto px-1 pb-1 md:hidden">
-            {places.filter((p) => p.kind !== 'visited').map((p) => (
-              <button
-                key={p.id}
-                type="button"
-                onClick={() => pinPlace(p.id)}
-                className={`${MONO} shrink-0 rounded-full border bg-paper px-3 py-2 ${
-                  p.kind === 'now' ? 'border-accent text-accent' : 'border-line text-muted'
-                }`}
-              >
-                {p.name}
-              </button>
-            ))}
-          </div>
+        {/* The chips are the whole bottom group now. Two lines used to sit under
+            them reading the map — how to work it, and how many countries the
+            eleven are out of. Once the footer became bare type in these same two
+            corners, they were four annotations in one block at the same size in
+            the same voice, with nothing to say which belonged to the page and
+            which to the site.
 
-          {/* Reading the map, and nothing else. The identity line and the contact
-              links that used to sit here were the shared footer's job all along;
-              this page just had no footer to put them in. What is left is the
-              two things that are about the drawing. */}
-          <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
-            <p className={`${MONO} text-muted`}>Hover a dot · Click to keep it open</p>
-            <p className={`${MONO} text-muted`}>11 of 195 countries · red = now</p>
-          </div>
+            touch has no hover, so this stays: a guaranteed way into the five
+            places that carry a record. */}
+        <div className="pointer-events-auto -mx-1 flex gap-2 overflow-x-auto px-1 pb-1 md:hidden">
+          {places.filter((p) => p.kind !== 'visited').map((p) => (
+            <button
+              key={p.id}
+              type="button"
+              onClick={() => pinPlace(p.id)}
+              className={`${MONO} shrink-0 rounded-full border bg-paper px-3 py-2 ${
+                p.kind === 'now' ? 'border-accent text-accent' : 'border-line text-muted'
+              }`}
+            >
+              {p.name}
+            </button>
+          ))}
         </div>
       </div>
 
