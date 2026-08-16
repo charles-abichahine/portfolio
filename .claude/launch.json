@@ -8,6 +8,13 @@
       "cwd": "site",
       "port": 5199,
       "autoPort": false
+    },
+    {
+      "name": "portfolio-phone",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--", "--host"],
+      "cwd": "site",
+      "port": 5174
     }
   ]
 }
