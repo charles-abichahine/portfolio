@@ -1,7 +1,8 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import DynamicIsland from './components/DynamicIsland.jsx'
 import Footer from './components/Footer.jsx'
+import { FooterSlotContext } from './components/footerSlotContext.js'
 
 function App() {
   const location = useLocation()
@@ -15,21 +16,37 @@ function App() {
   useEffect(() => {
     window.scrollTo(0, 0)
   }, [pathname])
-  // Routes that own the whole viewport and supply their own footer. They must not
-  // sit inside min-h-screen: a 100vh wrapper around a 100svh child is taller than
-  // the visual viewport on mobile, which hands the page a phantom scrollbar.
-  // '/work' exactly — the project pages under /work/:slug still scroll normally.
-  // The landing supplies its own footer like the others, and a min-h-screen
-  // wrapper around its 200svh body would add a third screen of nothing under it.
+
+  /*
+   * Routes that fill the viewport rather than flowing down it. They used to be
+   * the routes with no shared footer, each carrying its own; now every route
+   * gets the same one and this only decides how the page above it is sized.
+   *
+   * A full-bleed page is h-full, which resolves against main, which is what is
+   * left after the footer. That is why there is no footer height anywhere in
+   * the CSS: the flex column measures it.
+   */
   const fullBleed = pathname === '/' || pathname === '/about' || pathname === '/work'
 
+  // Held in state rather than a ref so that setting it re-renders and the
+  // portal in FooterSlot finds its target on the pass after the footer mounts.
+  const [slotNode, setSlotNode] = useState(null)
+
   return (
-    <div className={fullBleed ? 'flex flex-col' : 'flex min-h-screen flex-col'}>
+    /*
+     * min-h-[100svh], not min-h-screen. A 100vh wrapper around a 100svh child is
+     * taller than the visual viewport on mobile, which hands the page a phantom
+     * scrollbar; that is why the full-bleed routes used to sit outside the
+     * wrapper entirely. Matching the units lets them come inside it.
+     */
+    <div className="flex min-h-[100svh] flex-col">
       <DynamicIsland />
-      <main className={fullBleed ? '' : 'flex-1'}>
-        <Outlet />
-      </main>
-      {!fullBleed && <Footer />}
+      <FooterSlotContext.Provider value={slotNode}>
+        <main className={fullBleed ? 'flex min-h-0 flex-1 flex-col' : 'flex-1'}>
+          <Outlet />
+        </main>
+        <Footer slotRef={setSlotNode} />
+      </FooterSlotContext.Provider>
     </div>
   )
 }

@@ -4,7 +4,7 @@ import ProjectLink from '../components/ProjectLink.jsx'
 import DataField from '../components/DataField.jsx'
 import { BELTS } from '../data/belts.js'
 import { asset } from '../data/projects.js'
-import { contact, summary } from '../data/cv.js'
+import { summary } from '../data/cv.js'
 
 /*
  * The landing.
@@ -126,7 +126,7 @@ export default function Home() {
      */
     <div
       ref={stageRef}
-      className="relative h-[calc(100svh+560px)] sm:h-[200svh] [@media(min-width:640px)_and_(max-height:520px)]:h-[calc(100svh+560px)]"
+      className="relative h-[calc(100svh+560px-var(--footer-h))] sm:h-[calc(200svh-var(--footer-h))] [@media(min-width:640px)_and_(max-height:520px)]:h-[calc(100svh+560px-var(--footer-h))]"
     >
       <DataField originY={metrics?.originY ?? null} heads={heads} focus={focus} />
 
@@ -169,7 +169,7 @@ export default function Home() {
           Two by two on a phone, four across from sm up. */}
       <div
         ref={beltsRef}
-        className="absolute inset-x-0 bottom-[64px] z-[2] grid grid-cols-1 gap-y-3.5 px-6 sm:bottom-[68px] sm:grid-cols-4 sm:gap-x-6 sm:gap-y-0 lg:gap-x-8 lg:px-10"
+        className="absolute inset-x-0 bottom-6 z-[2] grid grid-cols-1 gap-y-3.5 px-6 sm:bottom-7 sm:grid-cols-4 sm:gap-x-6 sm:gap-y-0 lg:gap-x-8 lg:px-10"
       >
         {BELTS.map((belt) => (
           <section
@@ -267,14 +267,11 @@ export default function Home() {
         ))}
       </div>
 
-      <footer className="absolute inset-x-0 bottom-0 z-[2] flex flex-wrap items-center justify-between gap-x-6 gap-y-2 px-6 pb-5 lg:px-10">
-        <p className={`${MONO} text-muted`}>19 projects · 4 belts · 2023–2026</p>
-        <nav className="flex gap-5">
-          <a className={`${MONO} text-muted transition-colors hover:text-accent`} href={`mailto:${contact.email}`}>Email</a>
-          <a className={`${MONO} text-muted transition-colors hover:text-accent`} href={contact.linkedin} target="_blank" rel="noreferrer">LinkedIn</a>
-          <a className={`${MONO} text-muted transition-colors hover:text-accent`} href={contact.github} target="_blank" rel="noreferrer">GitHub</a>
-        </nav>
-      </footer>
+      {/* Nothing in the footer's middle. The count used to sit there, but the
+          capsule it now takes is an object on the page rather than a line in a
+          band, and an object has to earn its place: /work and /cv put a file in
+          theirs, and this one was restating a number the cue at the top of the
+          page and the four belt headers below it both already give. */}
     </div>
   )
 }

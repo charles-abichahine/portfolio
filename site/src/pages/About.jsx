@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { contact } from '../data/cv.js'
+import FooterSlot from '../components/FooterSlot.jsx'
 import { DOT_R, LAND_PATH, VIEWBOX, byId, latToY, lonToX, places, threads } from '../data/places.js'
 
 const base = import.meta.env.BASE_URL
@@ -177,7 +177,7 @@ export default function About() {
   const pinPlace = (id) => { clearClose(); pinnedRef.current = true; setActiveId(id) }
 
   return (
-    <div ref={stageRef} className="relative h-[100svh] w-full overflow-hidden bg-paper">
+    <div ref={stageRef} className="relative min-h-0 w-full flex-1 overflow-hidden bg-paper">
       <svg
         ref={svgRef}
         viewBox={`${VIEWBOX.x} ${VIEWBOX.y} ${VIEWBOX.w} ${VIEWBOX.h}`}
@@ -320,31 +320,13 @@ export default function About() {
             ))}
           </div>
 
+          {/* Reading the map, and nothing else. The identity line and the contact
+              links that used to sit here were the shared footer's job all along;
+              this page just had no footer to put them in. What is left is the
+              two things that are about the drawing. */}
           <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
-          <div className="flex flex-col gap-2">
             <p className={`${MONO} text-muted`}>Hover a dot · Click to keep it open</p>
-            <p className={`${MONO} text-muted`}>
-              Charles Abi Chahine · Architect · Computational Designer · Beirut
-            </p>
-          </div>
-          <div className="flex flex-col gap-2 md:items-end md:text-right">
-            <button
-              type="button"
-              aria-pressed={showLand}
-              onClick={() => setShowLand((v) => !v)}
-              className={`${MONO} pointer-events-auto text-muted transition-colors hover:text-accent`}
-            >
-              Map · {showLand ? 'on' : 'off'}
-            </button>
             <p className={`${MONO} text-muted`}>11 of 195 countries · red = now</p>
-            {/* Work / About / CV already live in the Dynamic Island a few inches
-                above, so this carries contact only. */}
-            <nav className="pointer-events-auto flex flex-wrap gap-5">
-              <a className={`${MONO} text-muted transition-colors hover:text-accent`} href={`mailto:${contact.email}`}>Email</a>
-              <a className={`${MONO} text-muted transition-colors hover:text-accent`} href={contact.linkedin} target="_blank" rel="noreferrer">LinkedIn</a>
-              <a className={`${MONO} text-muted transition-colors hover:text-accent`} href={contact.github} target="_blank" rel="noreferrer">GitHub</a>
-            </nav>
-          </div>
           </div>
         </div>
       </div>
@@ -396,6 +378,18 @@ export default function About() {
           </>
         )}
       </div>
+      {/* This page's contribution to the shared footer: the one control that is
+          about the drawing rather than about the site. */}
+      <FooterSlot>
+        <button
+          type="button"
+          aria-pressed={showLand}
+          onClick={() => setShowLand((v) => !v)}
+          className="chrome-label text-[0.56rem] text-muted transition-colors hover:text-accent"
+        >
+          Map · {showLand ? 'on' : 'off'}
+        </button>
+      </FooterSlot>
     </div>
   )
 }
