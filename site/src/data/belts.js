@@ -15,7 +15,7 @@ import { projects } from './projects.js'
  * Rings of Mars (`marception`) is an international competition, not professional
  * practice, so it stays in Design & Research.
  */
-const PRACTICE = ['soma-verve', 'soma-stratus', 'lau-anfeh']
+const PRACTICE = ['saria', 'lau-anfeh']
 
 export const BELTS = [
   {

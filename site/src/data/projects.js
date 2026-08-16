@@ -790,55 +790,35 @@ const _projects = [
     ],
   },
   {
-    slug: 'soma-verve',
-    date: '2024-01-18',
-    title: 'Verve, City Walk',
+    slug: 'saria',
+    // The SD1 set in the source folder is dated 2024-03-15; the CV puts the
+    // SOMA role at Aug 23 to Jul 24.
+    date: '2024-03-15',
+    title: 'Saria, Dubai Maritime City',
     subtitle:
-      'A residential development at City Walk in Dubai, a Meraas project: design and documentation produced at SOMA, where I worked as a Design Architect.',
-    year: '2023–2024',
+      'A residential tower at Dubai Maritime City, taken from pre-concept to design development at SOMA: parametric facade iterations, then the BIM model for delivery.',
+    year: '2024',
     module: 'SOMA · Design Architect',
     team: ['SOMA: office project'],
-    tools: ['Rhino', 'Revit', 'Adobe Suite'],
+    tools: ['Rhino', 'Grasshopper', 'Revit'],
     tag: 'ARCH',
     toolsShort: 'PRACTICE',
-    cover: 'projects/soma-verve/cover.webp',
+    cover: 'projects/saria/cover.webp',
     category: 'Design & Research',
     award: null,
     links: {},
     intro: [
-      'Verve is a residential development at City Walk in Dubai, a Meraas project. I worked on it as a Design Architect at SOMA, contributing to its design and documentation.',
+      'Saria is a residential tower on the water at Dubai Maritime City, with the Dubai skyline behind it. I took it from pre-concept through to design development as a Design Architect at SOMA: parametric facade iterations in Rhino and Grasshopper, then the BIM model for delivery.',
     ],
     sections: [
       {
         heading: 'At SOMA',
         body: [],
         media: [
-          { type: 'image', src: 'projects/soma-verve/spread2.webp', caption: 'From the City Walk portfolio.' },
-          { type: 'image', src: 'projects/soma-verve/spread3.webp', caption: 'From the City Walk portfolio.' },
+          { type: 'image', src: 'projects/saria/terraces.webp', caption: 'Terraces and the crowning pergola, from the project renders.' },
         ],
       },
     ],
-  },
-  {
-    slug: 'soma-stratus',
-    date: '2024-04-23',
-    title: 'Stratus, Plot 42',
-    subtitle:
-      'A tower project on Plot 42, developed at SOMA where I worked as a Design Architect.',
-    year: '2024',
-    module: 'SOMA · Design Architect',
-    team: ['SOMA: office project'],
-    tools: ['Rhino', 'Revit', 'Adobe Suite'],
-    tag: 'ARCH',
-    toolsShort: 'PRACTICE',
-    cover: 'projects/soma-stratus/cover.webp',
-    category: 'Design & Research',
-    award: null,
-    links: {},
-    intro: [
-      'Stratus is a tower project on Plot 42, developed at SOMA. I contributed to it as a Design Architect.',
-    ],
-    sections: [],
   },
   {
     slug: 'lau-anfeh',
