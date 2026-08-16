@@ -1,4 +1,5 @@
 import { Fragment } from 'react'
+import FooterSlot from '../components/FooterSlot.jsx'
 import ProjectLink from '../components/ProjectLink.jsx'
 import {
   awards,
@@ -182,10 +183,20 @@ export default function CV() {
           </p>
           <p className="mt-5 font-serif text-[1.05rem] leading-[1.5] text-soft">{summary}</p>
         </div>
+        {/* The filter pills' grammar, at a primary action's size.
+            This was the only square-cornered control on the site — every other
+            bordered thing has a radius, from the 10px filter pills to the card's
+            14px — so it read as a button borrowed from somewhere else.
+            Filled rather than outlined because that is already how this site
+            says "this is the one": /work's active filter is its colour filled
+            with paper type, and on a page whose whole job is handing over a
+            file, the file is the one. 10px is the pills' radius, written out
+            because it now appears in three files; worth a token if a fourth
+            wants it. */}
         <a
           href={`${base}cv.pdf`}
           download="Charles-Abi-Chahine-CV.pdf"
-          className="label-mono shrink-0 border border-ink px-5 py-3 transition-colors hover:border-accent hover:text-accent"
+          className="shrink-0 whitespace-nowrap rounded-[10px] border border-ink bg-ink px-5 py-3 font-mono text-[0.6rem] uppercase leading-none tracking-[0.14em] text-paper transition-colors hover:border-accent hover:bg-accent"
         >
           Download PDF ↓
         </a>
@@ -284,6 +295,20 @@ export default function CV() {
           GitHub on every page including this one, and the PDF puts the same
           three in its top right corner, so a third copy at the bottom of the
           page was the same information a scroll further away. */}
+
+      {/* The download, again, in the middle of the shared footer. This is the
+          one page long enough that the button in its header is two screens
+          behind you by the time you have read to the end, which is also the
+          moment you are most likely to want the file. */}
+      <FooterSlot>
+        <a
+          href={`${base}cv.pdf`}
+          download="Charles-Abi-Chahine-CV.pdf"
+          className="chrome-label text-[0.56rem] text-muted transition-colors hover:text-accent"
+        >
+          CV (PDF) ↓
+        </a>
+      </FooterSlot>
     </div>
   )
 }
