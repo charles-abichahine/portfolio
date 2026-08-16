@@ -63,8 +63,11 @@ export const places = [
   },
   {
     id: 'kuwait', name: 'Kuwait', kind: 'lived', lon: 47.6, lat: 29.3,
-    cities: 'Kuwait City', tag: 'Worked · 2023–, remote since',
-    stints: [['2023–', 'Dynamic Solution Co', 'Project Architect, on site then remote']],
+    // Kept in step with cv.js, which is the record that gets maintained: the
+    // role there is Design Technology Architect from Aug 24, not the Project
+    // Architect from 2023 this used to say. The firm's own full stop included.
+    cities: 'Kuwait City', tag: 'Worked · 2024–, remote since',
+    stints: [['2024–', 'Dynamic Solution Co.', 'Design Technology Architect, on site then remote']],
   },
   {
     id: 'spain', name: 'Spain', kind: 'lived', lon: -3.7, lat: 40.4,
