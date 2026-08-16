@@ -122,6 +122,27 @@ const OFF_WORLD = [VIEWBOX.x + VIEWBOX.w - 12, VIEWBOX.y + 8]
 
 const YEAR_TICKS = [2018, 2020, 2022, 2024, 2026]
 
+/*
+ * Lanes, so overlapping posts do not paint over each other.
+ *
+ * Eight stints on one line came out as a single stripe, and the overlaps are the
+ * part worth seeing: Kuwait and Barcelona run together, and a term in Ohio
+ * interrupts a Beirut degree. Greedy assignment, earliest start first — each
+ * stint takes the first lane whose last occupant has already ended.
+ */
+const LANES = (() => {
+  const ends = []
+  return TIMELINE.map((t) => {
+    let lane = ends.findIndex((e) => e <= t.from)
+    if (lane === -1) lane = ends.length
+    ends[lane] = t.to
+    return { ...t, lane }
+  })
+})()
+const LANE_COUNT = Math.max(...LANES.map((l) => l.lane)) + 1
+const LANE_H = 3
+const LANE_GAP = 3
+
 export default function About() {
   const wrapRef = useRef(null)
   const stageRef = useRef(null)
@@ -339,27 +360,51 @@ export default function About() {
          * and it grows as the year passes over it.
          */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[3] px-5 pb-6 sm:px-8 lg:px-12">
-          <div className="relative h-[3px] w-full rounded-full bg-line">
-            {TIMELINE.map((t) => (
+          <div
+            className="relative w-full"
+            style={{ height: LANE_COUNT * LANE_H + (LANE_COUNT - 1) * LANE_GAP }}
+          >
+            {/* An empty lane still reads as a track. */}
+            {Array.from({ length: LANE_COUNT }, (_, i) => (
+              <span
+                key={`lane-${i}`}
+                className="absolute inset-x-0 rounded-full bg-line"
+                style={{ top: i * (LANE_H + LANE_GAP), height: LANE_H }}
+              />
+            ))}
+            {LANES.map((t) => (
               <span
                 key={`${t.name}-${t.from}`}
-                className="absolute top-0 h-[3px] rounded-full"
+                className="absolute rounded-full"
                 style={{
                   left: `${tx(t.from)}%`,
                   width: `${Math.max(0, tx(Math.min(t.to, year)) - tx(t.from))}%`,
+                  top: t.lane * (LANE_H + LANE_GAP),
+                  height: LANE_H,
                   backgroundColor: `var(--color-${t.belt})`,
-                  opacity: t.from > year ? 0 : 0.85,
+                  opacity: t.from > year ? 0 : 0.9,
                 }}
               />
             ))}
+            {/* The marker crosses every lane, because the year is one year for
+                all of them. */}
             <span
-              className="absolute top-1/2 h-[9px] w-[9px] -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-accent bg-paper"
-              style={{ left: `${tx(year)}%` }}
+              className="absolute -top-1 w-px bg-accent"
+              style={{ left: `${tx(year)}%`, height: LANE_COUNT * (LANE_H + LANE_GAP) + 2 }}
             />
           </div>
-          <div className="mt-2.5 flex justify-between">
+
+          {/* Absolutely placed at their own years. These used to be a flex row
+              with justify-between, which spaces labels evenly and has nothing to
+              do with time: 2026 sat at 99% of the rail while the year itself is
+              at 93%, so no bar ended where its label said it did. */}
+          <div className="relative mt-3 h-[9px]">
             {YEAR_TICKS.map((y) => (
-              <span key={y} className={`${MONO} tabular-nums text-muted`}>
+              <span
+                key={y}
+                className={`${MONO} absolute -translate-x-1/2 tabular-nums text-muted`}
+                style={{ left: `${tx(y)}%` }}
+              >
                 {y}
               </span>
             ))}
