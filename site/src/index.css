@@ -244,6 +244,14 @@ html[data-theme-switching] *::after {
   text-transform: uppercase;
 }
 
+/* Wide and short: a phone lying down, and anything else with more width than
+   height to spare. Stacking anything above anything else fails here — a 16/9
+   well over a column of text wants 431px of a 342px card — so the layouts that
+   stack below lg put their two halves side by side instead. Not a width query,
+   because a 768px tablet held upright is wide and has all the height in the
+   world; it is the ratio that decides. */
+@custom-variant wide-short (@media (min-width: 700px) and (max-height: 560px));
+
 /* The chrome's voice, shared by the island and the band.
    Size is deliberately not set here: the two ends of the page speak at
    different volumes — navigation is something you look for, a colophon is

@@ -34,8 +34,10 @@ function galleryFor(project) {
 
   if (evidence.length > 0) return evidence
 
-  // Soma Stratus carries no section media at all. Without this its gallery is
-  // empty and there is nothing to draw, so it falls back to the cover.
+  // A project may carry no section media at all, and then its gallery is empty
+  // and there is nothing to draw, so it falls back to the cover. Stratus was the
+  // one that needed this and it is gone, but the shape of the record still
+  // allows a project with nothing but a cover.
   const animated = project.cover.endsWith('.webm')
   return [
     {
@@ -116,7 +118,7 @@ export default function ProjectCard({ project, onClose }) {
        * silently does nothing: at 1280x660 the card stayed 622px inside 580px of
        * room. 5rem is the padding the backdrop keeps on each side.
        */
-      className="grid h-auto max-h-full w-full max-w-[1180px] grid-cols-1 overflow-hidden rounded-[14px] border border-line bg-paper p-3.5 shadow-[0_24px_80px_-20px_rgba(0,0,0,0.45)] lg:h-[622px] lg:max-h-[calc(100vh-5rem)] lg:grid-cols-[760px_40px_minmax(0,1fr)] lg:p-6"
+      className="grid h-[calc(100svh-1.5rem)] max-h-full w-full max-w-[1180px] grid-cols-1 grid-rows-[auto_auto_minmax(0,1fr)] overflow-hidden rounded-[14px] border border-line bg-paper p-3.5 shadow-[0_24px_80px_-20px_rgba(0,0,0,0.45)] sm:h-[calc(100svh-3rem)] wide-short:grid-cols-[minmax(0,1.55fr)_24px_minmax(0,1fr)] wide-short:grid-rows-[minmax(0,1fr)] lg:h-[622px] lg:max-h-[calc(100vh-5rem)] lg:grid-cols-[760px_40px_minmax(0,1fr)] lg:grid-rows-[minmax(0,1fr)] lg:p-6"
       style={{ '--c': color }}
     >
       {/* ── the gallery ───────────────────────────────────────────────────── */}
@@ -131,7 +133,7 @@ export default function ProjectCard({ project, onClose }) {
           //
           // Below lg the card is not a fixed height, so there the aspect still
           // sets it.
-          className={`relative flex aspect-[16/9] shrink-0 items-center justify-center overflow-hidden rounded-[10px] border border-line lg:aspect-auto lg:min-h-0 lg:shrink lg:flex-1 ${WELL}`}
+          className={`relative flex aspect-[16/9] max-h-[30svh] shrink-0 items-center justify-center overflow-hidden rounded-[10px] border border-line wide-short:aspect-auto wide-short:max-h-none wide-short:min-h-0 wide-short:shrink wide-short:flex-1 lg:aspect-auto lg:max-h-none lg:min-h-0 lg:shrink lg:flex-1 ${WELL}`}
         >
           <MediaFrame item={item} title={project.title} />
 
@@ -172,8 +174,21 @@ export default function ProjectCard({ project, onClose }) {
 
         {/* Two lines of caption, always reserved and never exceeded, so the card
             is exactly as tall on item 11 as on item 1. A box that grew with the
-            caption would resize the whole card under the cursor as you step. */}
-        <div className="mt-2.5 flex h-[40px] shrink-0 items-start gap-4 lg:mt-3 lg:h-[52px]">
+            caption would resize the whole card under the cursor as you step.
+
+            A floor, not a ceiling. It was a fixed 40 here and 52 at lg, and a
+            two-line caption needs 55 — label 12.5, its own top margin 4, two
+            lines at 0.86rem over 1.4 leading for 38.5 — so the caption overflowed
+            by 15px and the position strip drew straight through its second line.
+            Reserving 56 instead fixed three projects and not Breathing Mass,
+            whose section heading is long enough to wrap the label to two lines
+            as well. No constant covers that: the height depends on text nobody
+            is going to keep an eye on. min-h reserves the common case, so the
+            box does not jump for a one-line caption, and yields when the words
+            need more. It is safe to yield now because the card's own height is
+            fixed — a taller caption takes its room from the rail's scroll, not
+            from the card's edges. */}
+        <div className="mt-2.5 flex min-h-[56px] shrink-0 items-start gap-4 lg:mt-3">
           <div className="min-w-0">
             <p className="font-mono text-[0.58rem] font-medium uppercase tracking-[0.13em] text-[var(--c)]">
               {item.section}
@@ -246,8 +261,8 @@ export default function ProjectCard({ project, onClose }) {
       <div aria-hidden="true" />
 
       {/* ── the rail ──────────────────────────────────────────────────────── */}
-      <div className="flex min-w-0 flex-col max-lg:mt-3.5 lg:min-h-0">
-        <div className="label-mono flex shrink-0 items-center gap-2.5">
+      <div className="flex min-h-0 min-w-0 flex-col max-lg:mt-3.5 wide-short:mt-0 wide-short:overflow-y-auto wide-short:overscroll-contain">
+        <div className="label-mono flex shrink-0 items-center gap-2.5 wide-short:sticky wide-short:top-0 wide-short:z-10 wide-short:bg-paper wide-short:pb-1.5">
           <span
             aria-hidden="true"
             className="h-[7px] w-[7px] shrink-0 rounded-[2px]"
@@ -283,18 +298,18 @@ export default function ProjectCard({ project, onClose }) {
          * The title above it and the record below it stay put, so nothing
          * scannable can be scrolled out of sight; the prose is what moves.
          */}
-        <div className="lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:pr-1.5">
-          <p className="mt-2.5 line-clamp-3 font-serif text-[1.02rem] leading-[1.55] lg:mt-3 lg:line-clamp-none">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1.5 wide-short:flex-none wide-short:overflow-visible">
+          <p className="mt-2.5 font-serif text-[1.02rem] leading-[1.55] lg:mt-3">
             {project.subtitle}
           </p>
-          <p className="mt-2.5 line-clamp-3 font-serif text-[0.9rem] leading-[1.62] text-soft lg:mt-3 lg:line-clamp-none">
+          <p className="mt-2.5 font-serif text-[0.9rem] leading-[1.62] text-soft lg:mt-3">
             {project.intro[0]}
           </p>
         </div>
 
         {/* Smaller than the page sets it, and pinned to the foot of the rail:
             the writing leads, the record is there to be scanned once. */}
-        <dl className="mt-auto grid shrink-0 grid-cols-2 gap-x-[18px] gap-y-[7px] border-t border-rule pt-3 lg:mt-3 lg:gap-y-[9px] lg:pt-3.5">
+        <dl className="mt-auto grid shrink-0 grid-cols-2 wide-short:mt-3 gap-x-[18px] gap-y-[7px] border-t border-rule pt-3 lg:mt-3 lg:gap-y-[9px] lg:pt-3.5">
           {record.map(([k, v, wide]) => (
             <div key={k} className={wide ? 'col-span-2' : undefined}>
               <dt className="mb-0.5 font-mono text-[0.54rem] font-medium uppercase tracking-[0.14em] text-muted">
