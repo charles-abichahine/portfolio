@@ -120,15 +120,45 @@
 /*
  * Dark theme. Every page flips, including the landing: the data field is drawn
  * from these tokens rather than from a palette of its own, so it is ink on paper
- * in light and lit strands on a dark ground in dark. The Dynamic Island is the
- * one exception, a deliberately-dark object whose colours are intentionally not
- * routed through these tokens.
+ * in light and lit strands on a dark ground in dark. The Dynamic Island used to
+ * be the one exception, a deliberately-dark object with hardcoded colours; it is
+ * now built from the chrome tokens below like everything else, so the two ends
+ * of the page flip together.
  * data-theme is set by the inline script in index.html before first paint.
  *
  * Not an inversion: the ramp is drawn separately so hairlines stay visible and
  * body copy stays comfortable. accent is lifted and slightly desaturated,
  * because #d92b1f is 3.8:1 here and shimmers where #f0554a is 5.4:1 and doesn't.
  */
+:root {
+  /* Set from the footer's measured height by Footer.jsx. The landing subtracts
+     it so its second screen still ends where the document does. */
+  --footer-h: 0px;
+
+  /*
+   * The chrome: the island at the top and the band at the bottom. One material,
+   * stated once.
+   *
+   * These are mixed from paper and ink rather than given literal values, and
+   * :root and html[data-theme] are the same element, so a mix written here
+   * re-resolves against the dark ramp the moment the attribute flips. Only the
+   * two things that are not a ratio need restating below: the proportions, which
+   * a dark ground wants slightly stronger, and the lift, which is a shadow and
+   * so cannot be derived from ink at all.
+   *
+   * glass  what the island is made of: paper you can partly see through, since
+   *        it floats over the landing's field and /about's map.
+   * edge   the hairline on both — the island's border and the band's top rule.
+   * wash   the state both use for a current or hovered control: the active nav
+   *        indicator, the theme toggle's hover.
+   * lift   the shadow that separates the island from what it is over.
+   */
+  --chrome-glass: color-mix(in srgb, var(--color-paper) 78%, transparent);
+  --chrome-edge: color-mix(in srgb, var(--color-ink) 13%, transparent);
+  --chrome-wash: color-mix(in srgb, var(--color-ink) 7%, transparent);
+  --chrome-lift: 0 6px 22px color-mix(in srgb, var(--color-ink) 13%, transparent);
+}
+
 html[data-theme="dark"] {
   --color-paper: #131317;
   --color-ink: #e9ebef;
@@ -141,6 +171,16 @@ html[data-theme="dark"] {
   --color-blue: #4c8dff;
   --color-green: #3fb950;
   --color-amber: #e0954a;
+
+  /* A dark ground swallows a translucent surface, so the island's glass carries
+     a little more paper and its edge and wash a little more ink. The lift is the
+     one part with no light-mode counterpart to scale: a shadow on a dark page
+     has to be its own black, not a mix of a near-white ink. */
+  --chrome-glass: color-mix(in srgb, var(--color-paper) 72%, transparent);
+  --chrome-edge: color-mix(in srgb, var(--color-ink) 17%, transparent);
+  --chrome-wash: color-mix(in srgb, var(--color-ink) 12%, transparent);
+  --chrome-lift: 0 8px 30px rgba(0, 0, 0, 0.45);
+
   color-scheme: dark;
 }
 
@@ -203,6 +243,25 @@ html[data-theme-switching] *::after {
   letter-spacing: 0.11em;
   text-transform: uppercase;
 }
+
+/* The chrome's voice, shared by the island and the band.
+   Size is deliberately not set here: the two ends of the page speak at
+   different volumes — navigation is something you look for, a colophon is
+   something you find — and letting each set its own size while the family,
+   weight, case and tracking are fixed here is what makes them the same voice
+   rather than the same label. Tracking is the wide one the band already used:
+   at these sizes it is what stops mono uppercase reading as a cramped stamp. */
+@utility chrome-label {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+/* There is no capsule utility any more. The footer briefly had three of them,
+   in this material, before the footer stopped being furniture altogether — see
+   Footer.jsx. The island is the only object left that wears the chrome tokens,
+   and it wears them inline, so a shared class would have exactly one caller. */
 
 /*
  * The serif is applied with `font-serif` at each place that sets a sentence,

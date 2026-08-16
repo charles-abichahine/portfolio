@@ -4,10 +4,14 @@ import Logo from './Logo.jsx'
 
 /*
  * Dynamic Island — the site's whole navigation, persistent on every page.
- * A rounded glass pill that stays dark in both themes: it is an object floating
- * over the page rather than part of the page surface, so it keeps its own
- * material regardless of the ground it is over. Its colours are deliberately
- * hardcoded rather than routed through the theme tokens.
+ * A rounded glass pill floating over the page. It used to stay dark in both
+ * themes on the argument that an object over the page should keep its own
+ * material; what that actually produced was a page with a theme and one control
+ * without one, and once the footer became a band built from the same tokens the
+ * island was the only element left ignoring the switch. It is now frosted paper:
+ * --chrome-glass over --chrome-edge with --chrome-lift under it, so it is light
+ * on a light page and dark on a dark one, and it shares its type and its
+ * hover/current colours with the band at the other end.
  * Holds the logo + name (→ landing), the three destinations with a sliding
  * indicator under the active/hovered one, and the theme toggle. It expands by
  * default, morphs compact once scrolled, and re-expands on hover.
@@ -117,22 +121,22 @@ export default function DynamicIsland() {
         aria-label="Site"
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => setHover(false)}
-        className="flex items-center gap-1 rounded-full border border-white/10 bg-[rgba(20,20,24,0.75)] px-2 py-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.35)] backdrop-blur-md sm:gap-1.5"
+        className="flex items-center gap-1 rounded-full border border-[var(--chrome-edge)] bg-[var(--chrome-glass)] px-2 py-1.5 shadow-[var(--chrome-lift)] backdrop-blur-md transition-colors sm:gap-1.5"
       >
         {/* Logo only — the wordmark lives in the hero, and dropping it here keeps
             the pill compact enough for the nav links and the theme toggle at any
             width. aria-label carries the name for screen readers. */}
         <Link to="/" className="flex items-center rounded-full px-2 py-1" aria-label="Home, Charles Abi Chahine">
-          <Logo className="h-5 w-auto text-[#f0f0ea]" />
+          <Logo className="h-5 w-auto text-ink" />
         </Link>
-        <span className={`h-4 w-px shrink-0 bg-white/20 transition-opacity duration-300 ${open ? 'opacity-100' : 'opacity-0'}`} />
+        <span className={`h-4 w-px shrink-0 bg-[var(--chrome-edge)] transition-opacity duration-300 ${open ? 'opacity-100' : 'opacity-0'}`} />
         <div
           className="relative flex items-center gap-0.5 overflow-hidden transition-[max-width,opacity] duration-300 ease-out"
           style={{ maxWidth: open ? 360 : 0, opacity: open ? 1 : 0 }}
         >
           <span
             aria-hidden="true"
-            className="absolute top-1/2 -translate-y-1/2 rounded-full bg-white/10 transition-[left,width] duration-300 ease-out"
+            className="absolute top-1/2 -translate-y-1/2 rounded-full bg-[var(--chrome-wash)] transition-[left,width] duration-300 ease-out"
             style={{ left: pill.left, width: pill.width, height: 'calc(100% - 4px)' }}
           />
           {links.map((l) => (
@@ -143,8 +147,12 @@ export default function DynamicIsland() {
               onMouseEnter={() => placePill(l.to)}
               onMouseLeave={() => placePill(activeTo)}
               className={({ isActive }) =>
-                `relative z-[1] whitespace-nowrap rounded-full px-2 py-1.5 font-mono text-[0.66rem] uppercase tracking-[0.08em] transition-colors sm:px-3 sm:text-[0.7rem] sm:tracking-[0.1em] ${
-                  isActive ? 'text-white' : 'text-[#c7c7c0] hover:text-[#e5382b]'
+                /* chrome-label fixes the tracking at the band's wider 0.16em, so
+                   the size comes down a step from what this used to set: the
+                   links occupy about the width they did before and the pill
+                   still fits a 360px phone with the toggle beside it. */
+                `relative z-[1] whitespace-nowrap rounded-full px-2 py-1.5 text-[0.6rem] transition-colors chrome-label sm:px-2.5 sm:text-[0.64rem] ${
+                  isActive ? 'text-ink' : 'text-soft hover:text-accent'
                 }`
               }
             >
@@ -164,7 +172,7 @@ export default function DynamicIsland() {
           type="button"
           onClick={toggleTheme}
           aria-label={dark ? 'Switch to light theme' : 'Switch to dark theme'}
-          className="flex h-[27px] w-[27px] shrink-0 items-center justify-center rounded-full text-[#c7c7c0] transition-colors hover:bg-white/10 hover:text-white focus-visible:bg-white/10 focus-visible:text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/45"
+          className="flex h-[27px] w-[27px] shrink-0 items-center justify-center rounded-full text-soft transition-colors hover:bg-[var(--chrome-wash)] hover:text-ink focus-visible:bg-[var(--chrome-wash)] focus-visible:text-ink focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent"
         >
           <span className="relative block h-[15px] w-[15px]">
             <svg
