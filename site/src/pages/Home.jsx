@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import ProjectLink from '../components/ProjectLink.jsx'
 import DataField from '../components/DataField.jsx'
 import { BELTS } from '../data/belts.js'
-import { asset } from '../data/projects.js'
+import { asset, projects } from '../data/projects.js'
 import { summary } from '../data/cv.js'
 
 /*
@@ -18,7 +18,7 @@ import { summary } from '../data/cv.js'
  * length no longer shows volume, because each belt is capped at two projects to
  * keep the frame; the count in the header carries that instead and links to the
  * rest on /work. That cap is also what stops this page being a second copy of
- * /work: eight projects here, all nineteen there.
+ * /work: eight projects here, all of them there.
  *
  * The name is not pinned. It is centred on the first screen and scrolls away
  * like any other block: the field is what stays, the type is what leaves.
@@ -159,9 +159,11 @@ export default function Home() {
           {summary}
         </p>
         {/* The cue reads the same everywhere now that a phone has a second
-            screen to scroll to. The rule under it is also the fan's origin. */}
+            screen to scroll to. The rule under it is also the fan's origin.
+            The count is read from the data, not typed: it said 19 for a day
+            after two SOMA projects became one, while /work counted 18. */}
         <p ref={cueRef} className={`mx-auto mt-6 w-fit border-t border-line pt-3 text-muted sm:mt-9 ${MONO}`}>
-          Scroll · 19 projects ↓
+          Scroll · {projects.length} projects ↓
         </p>
       </div>
 
