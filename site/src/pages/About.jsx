@@ -1,8 +1,7 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { VIEWBOX, byId, latToY, lonToX, places } from '../data/places.js'
-import { WORLD_RINGS } from '../data/world.js'
-import { INSTRUMENTS, NOW, SITES, START, TIMELINE, TOUCHES, originAt } from '../data/journey.js'
+import { LAND_ROWS, VIEWBOX, byId, latToY, lonToX, places } from '../data/places.js'
+import { NOW, SITES, START, TIMELINE, TOUCHES } from '../data/journey.js'
 
 const base = import.meta.env.BASE_URL
 
@@ -14,73 +13,59 @@ const CLOSE_DELAY = 160
 /*
  * The About page.
  *
- * The world starts unlit and scrolling draws it. Every place he lived, worked or
- * built for reveals the coastline around it, and the reveal stays, so what you
- * end with is not the Earth: it is an archipelago the shape of his reach, and
- * the dark is as truthful as the lit. No Africa. No Australia. Almost no Asia
- * until Tokyo.
+ * The world is paper, not a drawing. The dot matrix sits well under everything
+ * as the texture the strands lie on, and nothing is revealed or drawn as you
+ * arrive: the page is whole the moment it loads.
  *
- * This replaced a page that was the only one on the site you could not scroll,
- * used none of the belt colours, and drew a relocation circuit whose subject was
- * travel while the rest of the site is about work. Scrolling is now the whole
- * interaction: the wheel zoom and the pinch that briefly joined it are gone,
- * because a gesture cannot both pan a map and advance a clock.
+ * The strands are the landing's, and drawn its way rather than merely looking
+ * like it. Every carrier is stroked twice — once as a continuous ink line at
+ * about 8% alpha, then the same path again with a dash of 90 on and 260 off
+ * whose offset advances with time, which is the pulse travelling. Colour is the
+ * exception: roughly one carrier in nine takes its belt hue at rest, and the
+ * others only take colour when you point at the thing they end at. An earlier
+ * version of this page had them flat, static and coloured all the time, which
+ * is the opposite of the drawing it was supposed to match.
  *
- * The three layers, quietest first:
- *   the coastline   where he has been, accumulated
- *   the strands     each project at its site, tied to the desk it was made at
- *   the instruments the work with no site, ringing that desk
+ * Each project's strands run from the desk it was made at to the place it is
+ * about, so the shape on screen is the reach: short hops in Beirut and Dubai,
+ * and from Barcelona a fan to Tokyo, Moscow, London, Santiago and Punta Arenas.
  */
 
-// A region counts as reached within 26 degrees of something he touched. The
-// same radius the old page used for its hover spotlight, driven by time instead.
-const REVEAL_R = 26
+// How many carriers each project gets. Mass is meaning here, as on the landing:
+// a project with more strands is not more important, it is simply drawn thicker
+// so the fan reads as a current rather than as seven lines.
+const PER_SITE = 3
+
+// Rings of Mars has a site, it is simply not on this planet. Its strand leaves
+// the frame rather than pretending to a coordinate.
+const OFF_WORLD = { lon: 168, lat: 78 }
 
 /*
- * Every point of coastline carries the year its region is first reached, worked
- * out once at module load. Drawing a year is then a partition rather than 87,000
- * distance tests, and the results are cached per half year, so scrolling only
- * swaps a string.
+ * Lanes, so overlapping posts do not paint over each other. Eight stints on one
+ * line came out as a single stripe, and the overlaps are the part worth seeing:
+ * Kuwait runs alongside Barcelona, and a term in Ohio interrupts a Beirut
+ * degree. Greedy, earliest start first — each takes the first lane whose last
+ * occupant has ended.
  */
-const RING_YEARS = WORLD_RINGS.map((ring) =>
-  ring.map(([x, y]) => {
-    let best = Infinity
-    for (const t of TOUCHES) {
-      if (Math.hypot(x - lonToX(t.lon), y - latToY(t.lat)) < REVEAL_R && t.yr < best) best = t.yr
-    }
-    return best
-  }),
-)
-
-const coastCache = new Map()
-const coastFor = (year) => {
-  const key = Math.round(year * 2) / 2
-  const hit = coastCache.get(key)
-  if (hit !== undefined) return hit
-  let d = ''
-  WORLD_RINGS.forEach((ring, ri) => {
-    const yrs = RING_YEARS[ri]
-    let run = null
-    for (let i = 0; i <= ring.length; i++) {
-      const on = i < ring.length && yrs[i] <= key
-      if (on && !run) run = [ring[i]]
-      else if (on) run.push(ring[i])
-      else if (run) {
-        if (run.length > 1) d += `M${run.map((p) => `${p[0]} ${p[1]}`).join('L')}`
-        run = null
-      }
-    }
+const LANES = (() => {
+  const ends = []
+  return TIMELINE.map((t) => {
+    let lane = ends.findIndex((e) => e <= t.from)
+    if (lane === -1) lane = ends.length
+    ends[lane] = t.to
+    return { ...t, lane }
   })
-  coastCache.set(key, d)
-  return d
-}
+})()
+const LANE_COUNT = Math.max(...LANES.map((l) => l.lane)) + 1
+const LANE_H = 3
+const LANE_GAP = 3
+const YEAR_TICKS = [2018, 2020, 2022, 2024, 2026]
 
 /*
- * A place appears in the year he reached that place, not the year its region
- * lit. At the reveal radius, Lebanon in 2018 also lights Türkiye, Georgia and
- * Saudi Arabia, so every country he has ever visited was on the map before he
- * had been anywhere. Three degrees matches a touch to its own place and nothing
- * else.
+ * The year a place is first reached. Three degrees, not the wide radius a
+ * region reveal would use: at anything larger a single 2018 touch in Lebanon
+ * also matches Türkiye, Georgia and Saudi Arabia, and every country he has
+ * visited appears before he has been anywhere.
  */
 const PLACE_R = 3
 const PLACE_YEAR = Object.fromEntries(
@@ -95,95 +80,316 @@ const PLACE_YEAR = Object.fromEntries(
   }),
 )
 
-/*
- * A flight path, drawn in map units. The control point sits on the perpendicular
- * at the midpoint, displaced by a fraction of the span and always toward the top
- * of the frame, so every strand bows the same way and they read as one family
- * rather than as separate arcs.
- */
-const strand = (from, to) => {
-  const x1 = lonToX(from[0])
-  const y1 = latToY(from[1])
-  const x2 = to[0]
-  const y2 = to[1]
-  const dx = x2 - x1
-  const dy = y2 - y1
-  const len = Math.hypot(dx, dy) || 1
-  const bow = Math.min(len * 0.2, 26)
-  const nx = -dy / len
-  const ny = dx / len
-  const sgn = ny > 0 ? -1 : 1
-  return `M${x1} ${y1} Q${(x1 + x2) / 2 + nx * bow * sgn} ${(y1 + y2) / 2 + ny * bow * sgn} ${x2} ${y2}`
+// A strand fades in over its first third of a year rather than snapping on.
+const ARRIVE = 0.34
+// Placed at their own years. A flex row with justify-between spaces labels
+// evenly, which has nothing to do with time: 2026 landed at 99% of the rail
+// while the year itself is at 93%.
+const tx = (y) => ((y - START) / (NOW - START)) * 100
+
+function mulberry32(a) {
+  return function () {
+    a |= 0
+    a = (a + 0x6d2b79f5) | 0
+    let t = Math.imul(a ^ (a >>> 15), 1 | a)
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
 }
 
-// Rings of Mars has a site, it is simply not on this planet, so its strand
-// leaves the frame at the top right rather than pretending to a coordinate.
-const OFF_WORLD = [VIEWBOX.x + VIEWBOX.w - 12, VIEWBOX.y + 8]
-
-const YEAR_TICKS = [2018, 2020, 2022, 2024, 2026]
-
-/*
- * Lanes, so overlapping posts do not paint over each other.
- *
- * Eight stints on one line came out as a single stripe, and the overlaps are the
- * part worth seeing: Kuwait and Barcelona run together, and a term in Ohio
- * interrupts a Beirut degree. Greedy assignment, earliest start first — each
- * stint takes the first lane whose last occupant has already ended.
- */
-const LANES = (() => {
-  const ends = []
-  return TIMELINE.map((t) => {
-    let lane = ends.findIndex((e) => e <= t.from)
-    if (lane === -1) lane = ends.length
-    ends[lane] = t.to
-    return { ...t, lane }
-  })
+// The land, as points, once. Rasterised into its own layer at paint time.
+const LAND_PTS = (() => {
+  const out = []
+  for (let j = 0; j < LAND_ROWS.length; j++) {
+    const cy = VIEWBOX.y + j * 2.5
+    for (let i = 0; i < LAND_ROWS[j].length; i++) {
+      if (LAND_ROWS[j][i] === '1') out.push([i * 2.5, cy])
+    }
+  }
+  return out
 })()
-const LANE_COUNT = Math.max(...LANES.map((l) => l.lane)) + 1
-const LANE_H = 3
-const LANE_GAP = 3
 
 export default function About() {
-  const wrapRef = useRef(null)
   const stageRef = useRef(null)
+  const canvasRef = useRef(null)
   const cardRef = useRef(null)
   const pinRefs = useRef({})
   const closeTimer = useRef(null)
 
-  const [year, setYear] = useState(START)
-  const pinnedRef = useRef(false)
+  const [box, setBox] = useState({ w: 0, h: 0 })
   const [activeId, setActiveId] = useState(null)
+  const pinnedRef = useRef(false)
   const active = activeId ? byId[activeId] : null
 
+  // Read live by the canvas loop, so pointing at a project never re-renders.
   /*
-   * Scroll is the clock. The page is deliberately taller than the viewport and
-   * the drawing is sticky inside it, so the distance scrolled maps onto the
-   * years: reading and revealing are the same gesture, and About finally scrolls
-   * like every other page on the site.
+   * The timeline is the clock, and it is the only thing on this page that
+   * scrolls. The page itself does not: it was 300svh with the drawing sticky
+   * inside it, which pushed the footer three screens down and made reading the
+   * page and winding the clock the same gesture whether you wanted it or not.
+   *
+   * It opens at the present, complete, and you wind back. Opening at 2018 meant
+   * arriving at an almost empty screen, which is a poor first impression of a
+   * drawing whose whole point is how much there is by the end.
+   *
+   * The canvas reads the year from a ref so a scrub never re-renders it; the
+   * rail is React and takes a rounded copy.
    */
-  useEffect(() => {
-    const el = wrapRef.current
-    if (!el) return
-    const onScroll = () => {
-      const r = el.getBoundingClientRect()
-      const travel = r.height - window.innerHeight
-      const p = travel > 0 ? Math.min(1, Math.max(0, -r.top / travel)) : 1
-      setYear(START + p * (NOW - START))
-    }
-    onScroll()
-    window.addEventListener('scroll', onScroll, { passive: true })
-    window.addEventListener('resize', onScroll)
-    return () => {
-      window.removeEventListener('scroll', onScroll)
-      window.removeEventListener('resize', onScroll)
-    }
+  const yearRef = useRef(NOW)
+  const [year, setYear] = useState(NOW)
+  const railRef = useRef(null)
+
+  // Read live by the canvas loop, so pointing at a project never re-renders the
+  // drawing; the label beside the rail is React and needs the state copy.
+  const focusRef = useRef(null)
+  const [focusLabel, setFocusLabel] = useState(null)
+
+  const setClock = useCallback((y) => {
+    const clamped = Math.min(NOW, Math.max(START, y))
+    yearRef.current = clamped
+    setYear(Math.round(clamped * 50) / 50)
   }, [])
 
-  const coast = useMemo(() => coastFor(year), [year])
-  const origin = useMemo(() => originAt(year), [year])
-  const shownSites = useMemo(() => SITES.filter((s) => s.yr <= year), [year])
-  const shownInstruments = useMemo(() => INSTRUMENTS.filter((i) => i.yr <= year), [year])
+  /*
+   * Wheel and drag, both on the rail alone. The wheel listener is registered
+   * natively because preventDefault has to hold, and React's onWheel is passive:
+   * without it the page behind would scroll on a trackpad even though there is
+   * nowhere for it to go.
+   */
+  useEffect(() => {
+    const el = railRef.current
+    const stage = stageRef.current
+    if (!el || !stage) return
+    const span = NOW - START
 
+    /*
+     * The wheel is taken on the whole page, not just on the rail. The document
+     * has nothing to scroll — the drawing is one screen and the footer sits
+     * under it — so a scroll gesture would otherwise do nothing at all. Here it
+     * winds the clock, which is the one thing on the page that has a length.
+     * preventDefault has to hold for that, which is why this is a native
+     * listener: React's onWheel is passive.
+     */
+    const onWheel = (e) => {
+      e.preventDefault()
+      const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY
+      setClock(yearRef.current + (d / 400) * span)
+    }
+    const fromX = (clientX) => {
+      const r = el.getBoundingClientRect()
+      setClock(START + ((clientX - r.left) / r.width) * span)
+    }
+    let dragging = false
+    const onDown = (e) => { dragging = true; el.setPointerCapture?.(e.pointerId); fromX(e.clientX) }
+    const onMove = (e) => { if (dragging) fromX(e.clientX) }
+    const onUp = () => { dragging = false }
+
+    stage.addEventListener('wheel', onWheel, { passive: false })
+    el.addEventListener('pointerdown', onDown)
+    el.addEventListener('pointermove', onMove)
+    el.addEventListener('pointerup', onUp)
+    el.addEventListener('pointercancel', onUp)
+    return () => {
+      stage.removeEventListener('wheel', onWheel)
+      el.removeEventListener('pointerdown', onDown)
+      el.removeEventListener('pointermove', onMove)
+      el.removeEventListener('pointerup', onUp)
+      el.removeEventListener('pointercancel', onUp)
+    }
+  }, [setClock])
+
+  useEffect(() => {
+    const el = stageRef.current
+    if (!el) return
+    const measure = () => {
+      const r = el.getBoundingClientRect()
+      setBox((b) => (b.w === r.width && b.h === r.height ? b : { w: r.width, h: r.height }))
+    }
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+
+  /*
+   * The projection, in the stage's own pixels rather than in a viewBox, because
+   * the canvas and the dots have to agree and only one of them can have a
+   * viewBox. Everything positioned on this page goes through X and Y.
+   */
+  const fit = (() => {
+    const { w, h } = box
+    if (!w || !h) return null
+    const top = w < 768 ? 250 : 150
+    const bottom = 70 + LANE_COUNT * (LANE_H + LANE_GAP) + 26
+    const s = Math.min((w - 48) / VIEWBOX.w, (h - top - bottom) / VIEWBOX.h)
+    const ox = (w - VIEWBOX.w * s) / 2
+    const oy = top + (h - top - bottom - VIEWBOX.h * s) / 2
+    return {
+      s,
+      X: (lon) => ox + (lonToX(lon) - VIEWBOX.x) * s,
+      Y: (lat) => oy + (latToY(lat) - VIEWBOX.y) * s,
+    }
+  })()
+
+  /* ---- the drawing ---- */
+  useEffect(() => {
+    const cv = canvasRef.current
+    if (!cv || !fit || !box.w) return
+
+    const { w, h } = box
+    const dpr = Math.min(2, window.devicePixelRatio || 1)
+    cv.width = w * dpr
+    cv.height = h * dpr
+    const ctx = cv.getContext('2d')
+    ctx.scale(dpr, dpr)
+
+    const rnd = mulberry32(7)
+    const carriers = []
+    for (const site of SITES) {
+      const to = site.at ? { lon: site.at[0], lat: site.at[1] } : OFF_WORLD
+      const tx = fit.X(to.lon)
+      const ty = fit.Y(to.lat)
+      for (let k = 0; k < PER_SITE; k++) {
+        const jx = fit.X(site.from[0]) + (rnd() - 0.5) * 7
+        const jy = fit.Y(site.from[1]) + (rnd() - 0.5) * 7
+        const dx = tx - jx
+        const dy = ty - jy
+        const len = Math.hypot(dx, dy) || 1
+        const bow = Math.min(len * 0.22, 140) * (0.85 + rnd() * 0.3)
+        const nx = -dy / len
+        const ny = dx / len
+        const sgn = ny > 0 ? -1 : 1
+        const p = new Path2D()
+        p.moveTo(jx, jy)
+        p.quadraticCurveTo((jx + tx) / 2 + nx * bow * sgn, (jy + ty) / 2 + ny * bow * sgn, tx, ty)
+        carriers.push({
+          path: p,
+          yr: site.yr,
+          slug: site.slug,
+          belt: site.belt,
+          tinted: rnd() < 0.11,
+          weight: 0.6 + rnd() * 0.45,
+          phase: rnd() * 400,
+          speed: 14 + rnd() * 22,
+        })
+      }
+    }
+
+    /*
+     * The palette is read when the theme changes, not every frame:
+     * getComputedStyle forces style resolution, and sixty of those a second is
+     * most of what a canvas this size can afford. The land is rasterised into
+     * its own layer for the same reason — 2,400 arcs a frame is not a texture,
+     * it is a bill.
+     */
+    const readPal = () => {
+      const s = getComputedStyle(document.documentElement)
+      const g = (n) => s.getPropertyValue(n).trim()
+      return {
+        ink: g('--color-ink'),
+        land: g('--color-land'),
+        dark: document.documentElement.getAttribute('data-theme') === 'dark',
+        belt: {
+          accent: g('--color-accent'),
+          blue: g('--color-blue'),
+          green: g('--color-green'),
+          amber: g('--color-amber'),
+        },
+      }
+    }
+
+    let pal = readPal()
+    let landLayer = null
+    const repaint = () => {
+      pal = readPal()
+      landLayer = null
+    }
+    const mo = new MutationObserver(repaint)
+    mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
+
+    let visible = true
+    const io = new IntersectionObserver((rows) => rows.forEach((r) => { visible = r.isIntersecting }), {
+      rootMargin: '160px',
+    })
+    io.observe(cv)
+
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const t0 = performance.now()
+    let raf = 0
+
+    /*
+     * The frame, drawn on demand. Split out of the loop so it can also run once,
+     * synchronously, the moment the canvas exists: requestAnimationFrame does
+     * not fire in a hidden or throttled tab, and without a first paint the page
+     * is a blank rectangle until the tab is looked at.
+     */
+    const draw = (t) => {
+      ctx.clearRect(0, 0, w, h)
+
+      if (!landLayer) {
+        landLayer = document.createElement('canvas')
+        landLayer.width = w * dpr
+        landLayer.height = h * dpr
+        const m = landLayer.getContext('2d')
+        m.scale(dpr, dpr)
+        m.fillStyle = pal.land
+        m.globalAlpha = pal.dark ? 0.17 : 0.22
+        for (const [px, py] of LAND_PTS) {
+          m.beginPath()
+          m.arc(fit.X(px - 180), fit.Y(90 - py), 0.7 * Math.max(1, fit.s), 0, Math.PI * 2)
+          m.fill()
+        }
+      }
+      ctx.drawImage(landLayer, 0, 0, w, h)
+
+      const yr = yearRef.current
+      const f = focusRef.current
+      if (pal.dark) ctx.globalCompositeOperation = 'lighter'
+      for (const c of carriers) {
+        // Nothing before its time, and an arrival is a fade rather than a snap.
+        if (c.yr > yr) continue
+        const arrived = Math.min(1, (yr - c.yr) / ARRIVE)
+        const chosen = f && f.includes(c.slug)
+        ctx.strokeStyle = chosen || c.tinted ? pal.belt[c.belt] : pal.ink
+        ctx.lineWidth = chosen ? c.weight * 1.5 : c.weight
+        const baseA = chosen
+          ? pal.dark
+            ? 0.5
+            : 0.42
+          : f
+            ? 0.028
+            : (pal.dark ? 0.1 : 0.085) * (c.tinted ? 1.6 : 1)
+        ctx.globalAlpha = baseA * arrived
+        ctx.setLineDash([])
+        ctx.stroke(c.path)
+        if (!reduce) {
+          ctx.globalAlpha = (chosen ? baseA * 1.5 : f ? 0.04 : baseA * 1.7) * arrived
+          ctx.setLineDash([90, 260])
+          ctx.lineDashOffset = -(c.phase + t * c.speed)
+          ctx.stroke(c.path)
+        }
+      }
+      ctx.setLineDash([])
+      ctx.globalAlpha = 1
+      ctx.globalCompositeOperation = 'source-over'
+    }
+    // One frame now, then the loop.
+    draw(0)
+    const loop = (now) => {
+      raf = requestAnimationFrame(loop)
+      if (!visible) return
+      draw((now - t0) / 1000)
+    }
+    raf = requestAnimationFrame(loop)
+
+    return () => {
+      cancelAnimationFrame(raf)
+      mo.disconnect()
+      io.disconnect()
+    }
+  }, [box, fit])
+
+  /* ---- the place cards, unchanged in job ---- */
   const clearClose = () => {
     if (closeTimer.current) clearTimeout(closeTimer.current)
     closeTimer.current = null
@@ -203,7 +409,6 @@ export default function About() {
 
   const isNarrow = () => window.matchMedia('(max-width: 767px)').matches
 
-  /* Anchor the card beside its dot, flipping and clamping to stay in frame. */
   const placeCard = useCallback(() => {
     const card = cardRef.current
     const pin = activeId && pinRefs.current[activeId]
@@ -240,224 +445,238 @@ export default function About() {
   const openPlace = (id) => { clearClose(); pinnedRef.current = false; setActiveId(id) }
   const pinPlace = (id) => { clearClose(); pinnedRef.current = true; setActiveId(id) }
 
-  const tx = (y) => ((y - START) / (NOW - START)) * 100
+  const lookAt = (slugs, label) => {
+    focusRef.current = slugs
+    setFocusLabel(label)
+  }
+
+  // Everything made at the desk a post sat at, so pointing at IAAC lights the
+  // five projects that came out of it. This is what ties the rail to the map:
+  // otherwise they are two drawings that happen to share a page.
+  const madeDuring = (t) =>
+    SITES.filter((x) => x.from[0] === t.lon && x.from[1] === t.lat).map((x) => x.slug)
+  const lookAway = () => {
+    focusRef.current = null
+    setFocusLabel(null)
+  }
 
   return (
-    /*
-     * Tall, so there is something to scroll. The drawing sticks to the top of
-     * the viewport while the years pass underneath it, which is what makes the
-     * reveal readable rather than a thing you scroll past.
-     */
-    <div ref={wrapRef} className="relative h-[300svh]">
-      <div ref={stageRef} className="sticky top-0 h-[100svh] overflow-hidden bg-paper">
-        <svg
-          viewBox={`${VIEWBOX.x} ${VIEWBOX.y} ${VIEWBOX.w} ${VIEWBOX.h}`}
-          preserveAspectRatio="xMidYMid meet"
-          className="absolute inset-0 block h-full w-full"
-          onClick={(e) => { if (e.currentTarget === e.target) close() }}
-        >
-          {/* The world he has reached. Everything else is not drawn at all. */}
-          <path
-            d={coast}
-            fill="none"
-            stroke="var(--color-land)"
-            strokeWidth="0.55"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
+    <div ref={stageRef} className="relative min-h-0 w-full flex-1 overflow-hidden bg-paper">
+      <canvas ref={canvasRef} className="absolute inset-0 block h-full w-full" />
 
-          {/* Each project at its site, tied back to the desk it was made at. */}
-          {shownSites.map((s) => (
-            <g key={s.slug}>
-              <path
-                d={strand(s.from, s.at ? [lonToX(s.at[0]), latToY(s.at[1])] : OFF_WORLD)}
-                fill="none"
-                stroke={`var(--color-${s.belt})`}
-                strokeWidth="0.45"
-                strokeDasharray={s.at ? undefined : '1.6 1.6'}
-                opacity={s.at ? 0.55 : 0.35}
-              />
-              <circle
-                cx={s.at ? lonToX(s.at[0]) : OFF_WORLD[0]}
-                cy={s.at ? latToY(s.at[1]) : OFF_WORLD[1]}
-                r="1.3"
-                fill={`var(--color-${s.belt})`}
-                opacity="0.9"
-              />
-            </g>
-          ))}
-
-          {/* The work with no site: it never leaves the desk it was made at. */}
-          {shownInstruments.map((t, i) => {
-            const a = -Math.PI * 0.86 + i * Math.PI * 0.34
-            const cx = lonToX(origin[0]) + Math.cos(a) * 9
-            const cy = latToY(origin[1]) + Math.sin(a) * 9
-            return (
-              <g key={t.slug}>
-                <line
-                  x1={lonToX(origin[0])}
-                  y1={latToY(origin[1])}
-                  x2={cx}
-                  y2={cy}
-                  stroke={`var(--color-${t.belt})`}
-                  strokeWidth="0.3"
-                  opacity="0.35"
-                />
-                <circle cx={cx} cy={cy} r="0.9" fill={`var(--color-${t.belt})`} opacity="0.9" />
-              </g>
-            )
-          })}
-
-          {/* Where the work is being made, this year. */}
-          <circle cx={lonToX(origin[0])} cy={latToY(origin[1])} r="2.1" fill="var(--color-accent)" />
-
+      {/* The dots sit above the canvas as real elements rather than as painted
+          pixels, so a place is still a button a keyboard can reach and a screen
+          reader can name. */}
+      {fit && (
+        <div className="absolute inset-0">
           {places.map((p) => {
             if (PLACE_YEAR[p.id] > year) return null
             const on = activeId === p.id
-            const fill = p.kind === 'now' ? 'fill-accent' : p.kind === 'lived' ? 'fill-ink' : 'fill-soft'
+            const tone = p.kind === 'now' ? 'bg-accent' : p.kind === 'lived' ? 'bg-ink' : 'bg-soft'
+            const size = p.kind === 'now' ? 9 : p.kind === 'lived' ? 7 : 5
             return (
-              <g
+              <button
                 key={p.id}
+                type="button"
                 ref={(el) => { pinRefs.current[p.id] = el }}
-                transform={`translate(${lonToX(p.lon)} ${latToY(p.lat)})`}
-                role="button"
-                tabIndex={0}
                 aria-label={`${p.name}, ${p.cities}`}
-                className="cursor-pointer outline-none"
+                className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full p-[7px] outline-none"
+                style={{ left: fit.X(p.lon), top: fit.Y(p.lat) }}
                 onPointerEnter={() => openPlace(p.id)}
                 onPointerLeave={scheduleClose}
                 onFocus={() => openPlace(p.id)}
                 onBlur={scheduleClose}
-                onClick={(e) => { e.stopPropagation(); pinPlace(p.id) }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pinPlace(p.id) }
-                }}
+                onClick={() => pinPlace(p.id)}
               >
-                <circle r="3.4" fill="transparent" />
-                <circle r={p.kind === 'visited' ? 0.9 : 1.3} className={fill} opacity={on ? 1 : 0.75} />
-              </g>
+                <span
+                  className={`block rounded-full ${tone} transition-opacity`}
+                  style={{ width: size, height: size, opacity: on ? 1 : 0.7 }}
+                />
+              </button>
             )
           })}
-        </svg>
 
-        {/* The lede, unchanged in job: the one thing on the page that is prose. */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-[3] px-5 pt-24 sm:px-8 lg:px-12">
-          <div className="max-w-[58ch] md:max-w-[48%]">
-            <p className={`${MONO} mb-4 text-muted`}>About</p>
-            <h1 className="max-w-[28ch] text-balance text-[clamp(1.2rem,1.85vw,1.6rem)] font-light leading-[1.32] text-ink">
-              Trained to draw buildings, went back for the machinery<span className="text-accent">.</span>
-            </h1>
-            <p className="mt-4 max-w-[56ch] font-serif text-[0.92rem] leading-[1.75] text-soft">
-              Practice across Beirut, Dubai and Kuwait, then the MaCAD master at IAAC. Now I build the
-              tools I used to ask for.
-            </p>
-          </div>
+          {/* Where the work is. Pointing at one lights its strands back to the
+              desk it was made at, which is the whole drawing in one gesture. */}
+          {SITES.map((s) => {
+            if (s.yr > year) return null
+            const to = s.at ? { lon: s.at[0], lat: s.at[1] } : OFF_WORLD
+            const lit = focusLabel === s.name
+            return (
+              <button
+                key={s.slug}
+                type="button"
+                aria-label={`${s.name}, made in ${s.from[0] === 2.17 ? 'Barcelona' : s.from[0] === 55.3 ? 'Dubai' : 'Byblos'}`}
+                className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full p-[7px] outline-none"
+                style={{ left: fit.X(to.lon), top: fit.Y(to.lat) }}
+                onPointerEnter={() => lookAt([s.slug], s.name)}
+                onPointerLeave={lookAway}
+                onFocus={() => lookAt([s.slug], s.name)}
+                onBlur={lookAway}
+              >
+                <span
+                  className="block h-[7px] w-[7px] rounded-full transition-opacity"
+                  style={{ backgroundColor: `var(--color-${s.belt})`, opacity: lit ? 1 : 0.8 }}
+                />
+                <span
+                  className={`${MONO} pointer-events-none absolute left-1/2 top-full -translate-x-1/2 whitespace-nowrap pt-1 transition-opacity`}
+                  style={{ color: `var(--color-${s.belt})`, opacity: lit ? 1 : 0 }}
+                >
+                  {s.name}
+                </span>
+              </button>
+            )
+          })}
         </div>
+      )}
 
-        {/*
-         * The clock, read rather than operated: it reports where the scroll has
-         * got to. Each bar is a post or a degree from the CV, in its belt colour,
-         * and it grows as the year passes over it.
-         */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[3] px-5 pb-6 sm:px-8 lg:px-12">
-          <div
-            className="relative w-full"
-            style={{ height: LANE_COUNT * LANE_H + (LANE_COUNT - 1) * LANE_GAP }}
-          >
-            {/* An empty lane still reads as a track. */}
-            {Array.from({ length: LANE_COUNT }, (_, i) => (
-              <span
-                key={`lane-${i}`}
-                className="absolute inset-x-0 rounded-full bg-line"
-                style={{ top: i * (LANE_H + LANE_GAP), height: LANE_H }}
-              />
-            ))}
-            {LANES.map((t) => (
-              <span
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-[3] px-5 pt-24 sm:px-8 lg:px-12">
+        <div className="max-w-[58ch] md:max-w-[48%]">
+          <p className={`${MONO} mb-4 text-muted`}>About</p>
+          <h1 className="max-w-[28ch] text-balance text-[clamp(1.2rem,1.85vw,1.6rem)] font-light leading-[1.32] text-ink">
+            Trained to draw buildings, went back for the machinery<span className="text-accent">.</span>
+          </h1>
+          <p className="mt-4 max-w-[56ch] font-serif text-[0.92rem] leading-[1.75] text-soft">
+            Practice across Beirut, Dubai and Kuwait, then the MaCAD master at IAAC. Now I build the
+            tools I used to ask for.
+          </p>
+        </div>
+      </div>
+
+      {/*
+        * The career, whole. In the version this replaced the bars grew as you
+        * scrolled, because a clock drove the page; there is no clock now, so the
+        * rail simply reports the record. It stays because it is the one thing
+        * here that shows sequence and overlap, which a map structurally cannot:
+        * Kuwait running alongside Barcelona, Ohio interrupting Byblos.
+        */}
+      {/* Floored rather than rounded on the announced value: NOW is 2026.6, the
+          middle of the present year, and rounding announced the slider as 2027. */}
+      <div
+        ref={railRef}
+        role="slider"
+        tabIndex={0}
+        aria-label="Year"
+        aria-valuemin={START}
+        aria-valuemax={Math.floor(NOW)}
+        aria-valuenow={Math.floor(year)}
+        onKeyDown={(e) => {
+          if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { e.preventDefault(); setClock(yearRef.current - 0.5) }
+          if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { e.preventDefault(); setClock(yearRef.current + 0.5) }
+          if (e.key === 'Home') { e.preventDefault(); setClock(START) }
+          if (e.key === 'End') { e.preventDefault(); setClock(NOW) }
+        }}
+        className="absolute inset-x-0 bottom-0 z-[3] cursor-ew-resize touch-none px-5 pb-6 pt-8 outline-none focus-visible:ring-1 focus-visible:ring-accent sm:px-8 lg:px-12"
+      >
+        <div
+          className="relative w-full"
+          style={{ height: LANE_COUNT * LANE_H + (LANE_COUNT - 1) * LANE_GAP }}
+        >
+          {Array.from({ length: LANE_COUNT }, (_, i) => (
+            <span
+              key={`lane-${i}`}
+              className="absolute inset-x-0 rounded-full bg-line"
+              style={{ top: i * (LANE_H + LANE_GAP), height: LANE_H }}
+            />
+          ))}
+          {LANES.map((t) => {
+            const lit = focusLabel === t.name
+            return (
+              <button
                 key={`${t.name}-${t.from}`}
-                className="absolute rounded-full"
+                type="button"
+                aria-label={`${t.name}, ${t.role}, ${t.dates}`}
+                className="absolute rounded-full outline-none transition-opacity"
                 style={{
                   left: `${tx(t.from)}%`,
                   width: `${Math.max(0, tx(Math.min(t.to, year)) - tx(t.from))}%`,
                   top: t.lane * (LANE_H + LANE_GAP),
                   height: LANE_H,
                   backgroundColor: `var(--color-${t.belt})`,
-                  opacity: t.from > year ? 0 : 0.9,
+                  opacity: t.from > year ? 0 : focusLabel ? (lit ? 1 : 0.25) : 0.85,
                 }}
+                onPointerEnter={() => lookAt(madeDuring(t), t.name)}
+                onPointerLeave={lookAway}
+                onFocus={() => lookAt(madeDuring(t), t.name)}
+                onBlur={lookAway}
               />
-            ))}
-            {/* The marker crosses every lane, because the year is one year for
-                all of them. */}
+            )
+          })}
+          {/* The marker crosses every lane, because the year is one year for
+              all of them. */}
+          <span
+            className="absolute -top-1 w-px bg-accent"
+            style={{ left: `${tx(year)}%`, height: LANE_COUNT * (LANE_H + LANE_GAP) + 2 }}
+          />
+        </div>
+
+        {/* Four coloured bars mean nothing on their own, so the one you are
+            pointing at says what it is. */}
+        <div className="relative mt-3 h-[9px]">
+          {YEAR_TICKS.map((y) => (
             <span
-              className="absolute -top-1 w-px bg-accent"
-              style={{ left: `${tx(year)}%`, height: LANE_COUNT * (LANE_H + LANE_GAP) + 2 }}
-            />
-          </div>
-
-          {/* Absolutely placed at their own years. These used to be a flex row
-              with justify-between, which spaces labels evenly and has nothing to
-              do with time: 2026 sat at 99% of the rail while the year itself is
-              at 93%, so no bar ended where its label said it did. */}
-          <div className="relative mt-3 h-[9px]">
-            {YEAR_TICKS.map((y) => (
-              <span
-                key={y}
-                className={`${MONO} absolute -translate-x-1/2 tabular-nums text-muted`}
-                style={{ left: `${tx(y)}%` }}
-              >
-                {y}
-              </span>
-            ))}
-          </div>
+              key={y}
+              className={`${MONO} absolute -translate-x-1/2 tabular-nums text-muted transition-opacity`}
+              style={{ left: `${tx(y)}%`, opacity: focusLabel ? 0.25 : 1 }}
+            >
+              {y}
+            </span>
+          ))}
+          <span
+            className={`${MONO} absolute left-0 whitespace-nowrap text-ink transition-opacity`}
+            style={{ opacity: focusLabel ? 1 : 0 }}
+          >
+            {focusLabel}
+          </span>
         </div>
+      </div>
 
-        <div
-          ref={cardRef}
-          data-card
-          aria-hidden={!active}
-          className={`absolute z-[7] max-h-[min(440px,68vh)] w-[296px] overflow-auto border border-line bg-paper p-[18px] pb-5 transition-[opacity,transform] duration-200 ease-out motion-reduce:transition-none max-md:inset-x-3.5 max-md:bottom-16 max-md:top-auto max-md:max-h-[52%] max-md:w-auto ${
-            active ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-1 opacity-0'
-          }`}
-          onPointerEnter={clearClose}
-          onPointerLeave={scheduleClose}
-        >
-          {active && (
-            <>
-              <p className={`${MONO} mb-2.5 text-accent`}>{active.tag}</p>
-              <h2 className="mb-1.5 text-[0.98rem] font-light leading-tight text-ink">{active.name}</h2>
-              <p className={`${MONO} mb-3.5 text-muted`}>{active.cities}</p>
-              {active.photo && (
-                <img
-                  src={`${base}${active.photo}`}
-                  alt={active.kind === 'now' ? 'Charles Abi Chahine' : active.name}
-                  width="296"
-                  height="112"
-                  decoding="async"
-                  className="mb-3.5 block h-28 w-full object-cover"
-                />
-              )}
-              {active.stints?.length > 0 && (
-                <dl className="mb-3.5">
-                  {active.stints.map(([years, org, capacity]) => (
-                    <div key={`${years}-${org}`} className="pb-2.5">
-                      <dt className={`${MONO} mb-1 tabular-nums text-muted`}>{years}</dt>
-                      <dd className="m-0 text-[0.78rem] font-light leading-snug text-ink">
-                        {org}
-                        <span className="mt-0.5 block text-muted">{capacity}</span>
-                      </dd>
-                    </div>
-                  ))}
-                </dl>
-              )}
-              {active.note && (
-                <p className="m-0 font-serif text-[0.85rem] leading-[1.7] text-soft">{active.note}</p>
-              )}
-              <Link to="/cv" className={`${MONO} mt-4 inline-block text-muted transition-colors hover:text-accent`}>
-                Full record → CV
-              </Link>
-            </>
-          )}
-        </div>
+      <div
+        ref={cardRef}
+        data-card
+        aria-hidden={!active}
+        className={`absolute z-[7] max-h-[min(440px,68vh)] w-[296px] overflow-auto border border-line bg-paper p-[18px] pb-5 transition-[opacity,transform] duration-200 ease-out motion-reduce:transition-none max-md:inset-x-3.5 max-md:bottom-3.5 max-md:top-auto max-md:max-h-[52%] max-md:w-auto ${
+          active ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-1 opacity-0'
+        }`}
+        onPointerEnter={clearClose}
+        onPointerLeave={scheduleClose}
+      >
+        {active && (
+          <>
+            <p className={`${MONO} mb-2.5 text-accent`}>{active.tag}</p>
+            <h2 className="mb-1.5 text-[0.98rem] font-light leading-tight text-ink">{active.name}</h2>
+            <p className={`${MONO} mb-3.5 text-muted`}>{active.cities}</p>
+            {active.photo && (
+              <img
+                src={`${base}${active.photo}`}
+                alt={active.kind === 'now' ? 'Charles Abi Chahine' : active.name}
+                width="296"
+                height="112"
+                decoding="async"
+                className="mb-3.5 block h-28 w-full object-cover"
+              />
+            )}
+            {active.stints?.length > 0 && (
+              <dl className="mb-3.5">
+                {active.stints.map(([years, org, capacity]) => (
+                  <div key={`${years}-${org}`} className="pb-2.5">
+                    <dt className={`${MONO} mb-1 tabular-nums text-muted`}>{years}</dt>
+                    <dd className="m-0 text-[0.78rem] font-light leading-snug text-ink">
+                      {org}
+                      <span className="mt-0.5 block text-muted">{capacity}</span>
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            )}
+            {active.note && (
+              <p className="m-0 font-serif text-[0.85rem] leading-[1.7] text-soft">{active.note}</p>
+            )}
+            <Link to="/cv" className={`${MONO} mt-4 inline-block text-muted transition-colors hover:text-accent`}>
+              Full record → CV
+            </Link>
+          </>
+        )}
       </div>
     </div>
   )
