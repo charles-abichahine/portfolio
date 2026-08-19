@@ -929,10 +929,35 @@ const _projects = [
     ],
     sections: [
       {
-        heading: 'Iterating the form',
-        body: [],
+        heading: 'Three stages of relaxation',
+        body: [
+          'Nothing here is modelled, it is relaxed. The definition is four groups — input geometry, forces, solvers, visualization — and the forces are all Kangaroo goals: pressure to inflate the meshes, edge lengths to hold them together, soft-body collision to keep them off each other, and a floor to stand them on. Two solvers, BouncySolver and StepSolver, run it at a damping of 0.975.',
+          'The form arrives in three passes: the bodies inflate against the ground and each other; a mesh canopy is hung between the inner posts and pulled taut; then a second, wider canopy spreads to the outer posts.',
+        ],
         media: [
-          { type: 'image', src: 'projects/puffer-playscape/axo.webp', caption: 'Axonometric of a selected iteration.' },
+          { type: 'image', src: 'projects/puffer-playscape/relax-01-inflate.webp', caption: 'Step 01, three frames: the bodies inflating against the floor plane and each other.' },
+          { type: 'image', src: 'projects/puffer-playscape/relax-02-canopy.webp', caption: 'Step 02, three frames: the mesh canopy hung between the inner posts and relaxing taut.' },
+          { type: 'image', src: 'projects/puffer-playscape/relax-03-outer-canopy.webp', caption: 'Step 03, three frames: a second canopy spreading out to the outer posts.' },
+        ],
+      },
+      {
+        heading: 'Two iterations',
+        body: [
+          'Two versions were kept. In the first the canopy sits low and the bodies push up through it, so mesh and inflated form read as one surface. In the second the posts are taller and the canopy is lifted clear, touching only the tallest body.',
+        ],
+        media: [
+          { type: 'image', src: 'projects/puffer-playscape/iteration-01-axo.webp', caption: 'Iteration 01, axonometric: the canopy low, the bodies pushing up through it.' },
+          { type: 'image', src: 'projects/puffer-playscape/iteration-02-axo.webp', caption: 'Iteration 02, axonometric: taller posts, the canopy lifted clear of the cluster.' },
+        ],
+      },
+      {
+        heading: 'In section',
+        body: [
+          'The sections show what the inflation leaves behind. The bodies are hollow and open at the sides and the top, and the drawings put people at every level: inside the shells, in the arches between them, on top, and lying on the mesh.',
+        ],
+        media: [
+          { type: 'image', src: 'projects/puffer-playscape/section-01.webp', caption: 'Section 01: the two mesh layers over the cluster, with the hollow bodies cut open.' },
+          { type: 'image', src: 'projects/puffer-playscape/section-02.webp', caption: 'Section 02: three bodies cut, the canopy carried on a central mast.' },
         ],
       },
     ],
@@ -958,11 +983,36 @@ const _projects = [
     ],
     sections: [
       {
-        heading: 'From surface to print',
-        body: [],
+        heading: 'The definition, step by step',
+        body: [
+          'The chair is one chain of operations and every step is a number. Arcs are drawn in the XY plane — distance 0.1, count 20, angles 20 to 180, radius 0.6 — then rotated in the XZ plane by a sine graph at 0.5. Lofting them gives the surface; voxelating at 0.07 turns it into printable blocks.',
+          'Voxel size decides everything downstream, and it was swept from 0.01 to 0.20 — fine enough to read as a smooth shell at one end, coarse enough to sit on at the other. Dendro takes the voxels back to a mesh, slider 0.001 to 0.010.',
+        ],
         media: [
-          { type: 'image', src: 'projects/wave-chair/zoom.webp', caption: 'Detail of a 3D-print trial.' },
-          { type: 'image', src: 'projects/wave-chair/iter.webp', caption: 'Geometry iteration.' },
+          { type: 'image', src: 'projects/wave-chair/definition-steps.webp', caption: 'The four process steps, read across then down: arcs in the XY plane, rotation by the sine graph, the loft, and the voxelated result.' },
+          { type: 'image', src: 'projects/wave-chair/voxel-size-sweep.webp', caption: 'Four frames from the voxel-size sweep, slider 0.01 to 0.20, finest first.' },
+        ],
+      },
+      {
+        heading: 'Four iterations',
+        body: [
+          'Four sets were run against a seated figure. Iteration 01 is the base case and comes out as an arch. Iteration 02 doubles the count to 40 and opens the angles to 270, spreading into a broad low platform. Iteration 03 pulls the angles to 120 and coarsens the voxel to 0.1 — the most chair-like of the four, a stepped seat with a back. Iteration 04 changes distance, count and sine at once and the surface breaks into a long flat wave.',
+        ],
+        media: [
+          { type: 'image', src: 'projects/wave-chair/iteration-01.webp', caption: 'Iteration 01: count 20, angles 20 to 180, sine 0.5, voxel 0.07.' },
+          { type: 'image', src: 'projects/wave-chair/iteration-02.webp', caption: 'Iteration 02: count 40, angles 20 to 270, sine 2, voxel 0.07.' },
+          { type: 'image', src: 'projects/wave-chair/iteration-03.webp', caption: 'Iteration 03: count 20, angles 20 to 120, sine 0.5, voxel 0.1.' },
+          { type: 'image', src: 'projects/wave-chair/iteration-04.webp', caption: 'Iteration 04: distance 0.2, count 30, angles 20 to 180, sine 3, voxel 0.05.' },
+        ],
+      },
+      {
+        heading: 'Printing it',
+        body: [
+          'Then the fabrication test: a robot arm printing the voxelated chair, one cell given as a polyline through its numbered vertices, 2,1,6,5,3,7,6,2,3,1. Close up the result is a lattice of struts.',
+        ],
+        media: [
+          { type: 'image', src: 'projects/wave-chair/print-trial.webp', caption: 'The print trial: a robot arm over the voxelated chair.' },
+          { type: 'image', src: 'projects/wave-chair/print-lattice.webp', caption: 'Detail of the print trial: the cells resolved as a lattice of struts.' },
         ],
       },
     ],
@@ -988,11 +1038,35 @@ const _projects = [
     ],
     sections: [
       {
-        heading: 'Working the surface',
-        body: [],
+        heading: 'A surface from five parameters',
+        body: [
+          'The cross-cap is generated rather than drawn. A 50 by 50 grid of u and v values is pushed through three parametric equations and a surface is stretched through the point grid that comes back. Five inputs steer it: a scales it at 60, b and c set the repetitions in u and v, d stretches the x axis at 0.50, and e sets the twist frequency at 2.00.',
+        ],
         media: [
-          { type: 'image', src: 'projects/cross-cap-house/geom.webp', caption: 'The cross-cap surface geometry.' },
-          { type: 'image', src: 'projects/cross-cap-house/iter.webp', caption: 'The chosen iteration.' },
+          { type: 'image', src: 'projects/cross-cap-house/surface-points.webp', caption: 'The default surface at u_count and v_count 50, with the point grid it is stretched through.' },
+          { type: 'image', src: 'projects/cross-cap-house/submission-board.webp', caption: 'The submission board: the equations, the default inputs, the three iterations, the reduced mesh and the layout.' },
+        ],
+      },
+      {
+        heading: 'Three iterations',
+        body: [
+          'Three sets were run against the defaults, one move at a time. Dropping b and c together to 0.75 opens the shell into a scroll. Taking d to 1.00 and easing the twist to 1.50 flattens it into a fin. Pulling c alone to 0.80 closes it into a near-sphere with a deep spiral mouth.',
+        ],
+        media: [
+          { type: 'image', src: 'projects/cross-cap-house/iteration-01.webp', caption: 'Iteration 01: b 0.75, c 0.75, d 0.50, e 2.00.' },
+          { type: 'image', src: 'projects/cross-cap-house/iteration-02.webp', caption: 'Iteration 02: b 1.00, c 1.00, d 1.00, e 1.50.' },
+          { type: 'image', src: 'projects/cross-cap-house/iteration-03.webp', caption: 'Iteration 03: b 1.00, c 0.80, d 0.50, e 2.00.' },
+        ],
+      },
+      {
+        heading: 'Reducing it to a house',
+        body: [
+          'The surface the house is fitted into is reduced from b 0.75, c 1.00, d 0.50, e 2.00 — the scroll, kept full. Reducing the mesh turns it into a handful of flat planes, and eight programs are stacked on floor plates inside them: entrance, living area, kitchen and stairway, then two bedrooms and two bathrooms.',
+        ],
+        media: [
+          { type: 'image', src: 'projects/cross-cap-house/chosen-iteration.webp', caption: 'The chosen iteration, before the mesh is reduced.' },
+          { type: 'image', src: 'projects/cross-cap-house/low-poly.webp', caption: 'The same surface reduced to flat planes.' },
+          { type: 'image', src: 'projects/cross-cap-house/cover.webp', caption: 'The layout: the reduced shell above, the stacked floor plates inside its frame below.' },
         ],
       },
     ],
