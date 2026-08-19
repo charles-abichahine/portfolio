@@ -69,7 +69,7 @@
   --color-paper: #f4f5f6;
   --color-ink: #16181d;
   --color-soft: #4e535c;
-  --color-muted: #767d88;
+  --color-muted: #6a707b;
   --color-line: #e0e3e7;
   /* The /about dot-matrix landmass. Deliberately NOT --color-line: a hairline
      border is meant to nearly disappear, but a field of ~2,400 dots is the
@@ -83,11 +83,11 @@
      but ink flips to a near-white in dark, where a full-strength rule would
      outweigh the heading it sits under, so dark gives it its own quieter value. */
   --color-rule: #16181d;
-  --color-accent: #d92b1f;
+  --color-accent: #c9261b;
   /* Work-page category colours. Computation & AI reuses the red accent; BIM and
      Design get their own hue so the three groups read at a glance. Lifted in
      dark (below) the way accent is, so each stays legible on both grounds. */
-  --color-blue: #1f6feb;
+  --color-blue: #1a5fd0;
   --color-green: #1a7f37;
   /* The fourth belt on the landing, the pre-MaCAD professional work. The three
      category hues are spoken for, so Practice gets its own: an ochre that reads
@@ -128,7 +128,20 @@
  *
  * Not an inversion: the ramp is drawn separately so hairlines stay visible and
  * body copy stays comfortable. accent is lifted and slightly desaturated,
- * because #d92b1f is 3.8:1 here and shimmers where #f0554a is 5.4:1 and doesn't.
+ * because the light red is 3.8:1 here and shimmers where #f0554a is 5.4:1 and
+ * doesn't.
+ *
+ * Dark was tuned for contrast first and light was not, so for a while the dark
+ * ramp was the accessible one and the light ramp, the default every visitor
+ * opens on, was the one that failed. Three values were re-solved against the
+ * tinted paper: muted #767d88 to #6a707b (3.80:1 to 4.56:1), and it sets the
+ * smallest type on the site so it is the one that had to clear AA; blue #1f6feb
+ * to #1a5fd0 (4.25:1 to 5.36:1); accent #d92b1f to #c9261b (4.46:1 to 5.09:1).
+ * Each moved down the same hue rather than across, because these are not only
+ * text: accent is the selection ground, the period after the name and the belt
+ * for Computation & AI, and blue and the other belt hues fill the /work filter
+ * pills, so a hue that shifted would show up as a different site, not as a
+ * darker one. Green 4.65:1 and amber 4.91:1 already cleared AA and are untouched.
  */
 :root {
   /* Set from the footer's measured height by Footer.jsx. The landing subtracts
