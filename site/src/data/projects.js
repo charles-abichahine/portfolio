@@ -489,7 +489,7 @@ const _projects = [
         heading: 'Feasibility as a design layer',
         body: [
           'A facade is normally costed after it is designed, so the number arrives too late to change anything. FacadeIQ puts the two on one screen: geometry sliders on the left, the model in the middle, the feasibility dashboard on the right, everything recalculating on every move.',
-          'The parameters are the ones a designer actually holds — building length and width, number of typical floors, balcony typology, glass opening, balcony depth. What comes back is unit count, total balcony area, a facade cost split into double-glazed units, galvanized steel panels and balcony concrete floors, and an efficiency ratio saying which market the design has landed in.',
+          'The parameters are the ones a designer actually holds: building length and width, number of typical floors, balcony typology, glass opening, balcony depth. What comes back is unit count, total balcony area, a facade cost split into double-glazed units, galvanized steel panels and balcony concrete floors, and an efficiency ratio saying which market the design has landed in.',
         ],
         media: [
           { type: 'image', src: 'projects/facadeiq/webapp.webp', caption: 'The three panels: geometry on the left, the model in the middle, the feasibility dashboard on the right.' },
@@ -666,11 +666,11 @@ const _projects = [
       {
         heading: 'Defining the volume',
         body: [
-          'Constraints and variables are kept apart, the building and its electrostatic precipitator on one side and the environment on the other. It builds in three steps — the skeleton of three towers at 600, 500 and 400 m with a podium and a bridge, then framing and plug-in volumes, then the facade.',
+          'Constraints and variables are kept apart, the building and its electrostatic precipitator on one side and the environment on the other. It builds in three steps: the skeleton of three towers at 600, 500 and 400 m with a podium and a bridge, then framing and plug-in volumes, then the facade.',
           'The core is not drawn either. Alpaca reads the stress where the core meets the volumes, the script strips material that is doing nothing, and the surviving voxels become the lattice.',
         ],
         media: [
-          { type: 'image', src: 'projects/integrative-modeling/parametric-engine.webp', caption: 'Constraints on the left — core dimensions, vertical stages, plate voltages and spacing, against inlet PM2.5 and PM10, air flow, temperature, humidity and wind; on the right, the skeleton at 600, 500 and 400 m.' },
+          { type: 'image', src: 'projects/integrative-modeling/parametric-engine.webp', caption: 'Constraints on the left: core dimensions, vertical stages, plate voltages and spacing, against inlet PM2.5 and PM10, air flow, temperature, humidity and wind; on the right, the skeleton at 600, 500 and 400 m.' },
           { type: 'image', src: 'projects/integrative-modeling/performance-approach.webp', caption: 'The Alpaca loop: stress read at the points connecting core to volumes, then the surviving voxels turned into a lattice.' },
         ],
       },
@@ -687,7 +687,7 @@ const _projects = [
       {
         heading: 'One geometry, two facade logics',
         body: [
-          'The facade is one panel geometry running two logics. The fixed version is static but calibrated, for residential floors, offices, hotels and mixed use. The adaptive version moves, where the interior function is climate-responsive: urban farming and the productive programs. Both share four parameters — fillet radius, frame thickness, panel opening, panel thickness.',
+          'The facade is one panel geometry running two logics. The fixed version is static but calibrated, for residential floors, offices, hotels and mixed use. The adaptive version moves, where the interior function is climate-responsive: urban farming and the productive programs. Both share four parameters: fillet radius, frame thickness, panel opening, panel thickness.',
           'The schedule proves the two stayed one system: 57,408 fixed panels and 9,810 adaptive, 67,218 in total.',
         ],
         media: [
@@ -889,7 +889,7 @@ const _projects = [
         heading: 'Nine iterations',
         body: [
           'Two things were tested. First the lattice module itself, holding beam radius and thickness constant and changing only the cell: 488 kg at a displacement of 0.611 m, then 334 kg at 0.627 m, then 303 kg at 0.599 m. The third module is lighter and stiffer at once, so it carries.',
-          'Then the beams. An evolutionary run in Wallacei, fed by the stiffness map, searched beam radius and thickness against two fitness objectives at once: lowest mass and lowest displacement. The optimum comes out of the nine individuals of generation 9 — 303 kg, 0.599 m of displacement, thickness graded from 0.0025 to 0.0035 m and diameter from 0.005 to 0.007 m, thicker exactly where the stiffness map said.',
+          'Then the beams. An evolutionary run in Wallacei, fed by the stiffness map, searched beam radius and thickness against two fitness objectives at once: lowest mass and lowest displacement. The optimum comes out of the nine individuals of generation 9: 303 kg, 0.599 m of displacement, thickness graded from 0.0025 to 0.0035 m and diameter from 0.005 to 0.007 m, thicker exactly where the stiffness map said.',
         ],
         media: [
           { type: 'image', src: 'projects/clebsch-pavilion/lattice-modules.webp', caption: 'Three lattice modules at the same beam radius and thickness: 488 kg, 334 kg and 303 kg.' },
@@ -931,7 +931,7 @@ const _projects = [
       {
         heading: 'Three stages of relaxation',
         body: [
-          'Nothing here is modelled, it is relaxed. The definition is four groups — input geometry, forces, solvers, visualization — and the forces are all Kangaroo goals: pressure to inflate the meshes, edge lengths to hold them together, soft-body collision to keep them off each other, and a floor to stand them on. Two solvers, BouncySolver and StepSolver, run it at a damping of 0.975.',
+          'Nothing here is modelled, it is relaxed. The definition is four groups, input geometry, forces, solvers and visualization, and the forces are all Kangaroo goals: pressure to inflate the meshes, edge lengths to hold them together, soft-body collision to keep them off each other, and a floor to stand them on. Two solvers, BouncySolver and StepSolver, run it at a damping of 0.975.',
           'The form arrives in three passes: the bodies inflate against the ground and each other; a mesh canopy is hung between the inner posts and pulled taut; then a second, wider canopy spreads to the outer posts.',
         ],
         media: [
@@ -985,8 +985,8 @@ const _projects = [
       {
         heading: 'The definition, step by step',
         body: [
-          'The chair is one chain of operations and every step is a number. Arcs are drawn in the XY plane — distance 0.1, count 20, angles 20 to 180, radius 0.6 — then rotated in the XZ plane by a sine graph at 0.5. Lofting them gives the surface; voxelating at 0.07 turns it into printable blocks.',
-          'Voxel size decides everything downstream, and it was swept from 0.01 to 0.20 — fine enough to read as a smooth shell at one end, coarse enough to sit on at the other. Dendro takes the voxels back to a mesh, slider 0.001 to 0.010.',
+          'The chair is one chain of operations and every step is a number. Arcs are drawn in the XY plane at distance 0.1, count 20, angles 20 to 180, radius 0.6, then rotated in the XZ plane by a sine graph at 0.5. Lofting them gives the surface; voxelating at 0.07 turns it into printable blocks.',
+          'Voxel size decides everything downstream, and it was swept from 0.01 to 0.20: fine enough to read as a smooth shell at one end, coarse enough to sit on at the other. Dendro takes the voxels back to a mesh, slider 0.001 to 0.010.',
         ],
         media: [
           { type: 'image', src: 'projects/wave-chair/definition-steps.webp', caption: 'The four process steps, read across then down: arcs in the XY plane, rotation by the sine graph, the loft, and the voxelated result.' },
@@ -996,7 +996,7 @@ const _projects = [
       {
         heading: 'Four iterations',
         body: [
-          'Four sets were run against a seated figure. Iteration 01 is the base case and comes out as an arch. Iteration 02 doubles the count to 40 and opens the angles to 270, spreading into a broad low platform. Iteration 03 pulls the angles to 120 and coarsens the voxel to 0.1 — the most chair-like of the four, a stepped seat with a back. Iteration 04 changes distance, count and sine at once and the surface breaks into a long flat wave.',
+          'Four sets were run against a seated figure. Iteration 01 is the base case and comes out as an arch. Iteration 02 doubles the count to 40 and opens the angles to 270, spreading into a broad low platform. Iteration 03 pulls the angles to 120 and coarsens the voxel to 0.1, the most chair-like of the four, a stepped seat with a back. Iteration 04 changes distance, count and sine at once and the surface breaks into a long flat wave.',
         ],
         media: [
           { type: 'image', src: 'projects/wave-chair/iteration-01.webp', caption: 'Iteration 01: count 20, angles 20 to 180, sine 0.5, voxel 0.07.' },
@@ -1061,7 +1061,7 @@ const _projects = [
       {
         heading: 'Reducing it to a house',
         body: [
-          'The surface the house is fitted into is reduced from b 0.75, c 1.00, d 0.50, e 2.00 — the scroll, kept full. Reducing the mesh turns it into a handful of flat planes, and eight programs are stacked on floor plates inside them: entrance, living area, kitchen and stairway, then two bedrooms and two bathrooms.',
+          'The surface the house is fitted into is reduced from b 0.75, c 1.00, d 0.50, e 2.00, the scroll, kept full. Reducing the mesh turns it into a handful of flat planes, and eight programs are stacked on floor plates inside them: entrance, living area, kitchen and stairway, then two bedrooms and two bathrooms.',
         ],
         media: [
           { type: 'image', src: 'projects/cross-cap-house/chosen-iteration.webp', caption: 'The chosen iteration, before the mesh is reduced.' },
@@ -1210,22 +1210,22 @@ const _projects = [
     award: null,
     links: {},
     intro: [
-      'Point Nought is my final-year thesis at the Lebanese American University (Spring 2023), advised by Issam Barhouch and Omar Harb, and shown at the LAU final-projects exhibition. Anfeh has a lot to offer — salt ponds along the coast, agricultural land, a living fishing culture — and the thesis commemorates that long-living heritage: restoring the salinas not just to rebuild, but to build a narrative around a degrading tradition, and to give the town a base for the visitors who come to learn it.',
+      'Point Nought is my final-year thesis at the Lebanese American University (Spring 2023), advised by Issam Barhouch and Omar Harb, and shown at the LAU final-projects exhibition. Anfeh has a lot to offer, salt ponds along the coast, agricultural land, a living fishing culture, and the thesis commemorates that long-living heritage: restoring the salinas not just to rebuild, but to build a narrative around a degrading tradition, and to give the town a base for the visitors who come to learn it.',
     ],
     sections: [
       {
         heading: 'The golden age, and after',
         body: [
-          'Anfeh lives off three traditions: salt from the coastal salinas, fishing, and olive groves inland. Between 1950 and 2020 all three declined — salt from 25% of the town’s land use to 5%, fishing from 25% to 10%, olives from 50% to 35% — and the municipality’s Vision 2030 asks for the golden age back. The thesis is an answer to that call.',
+          'Anfeh lives off three traditions: salt from the coastal salinas, fishing, and olive groves inland. Between 1950 and 2020 all three declined, salt from 25% of the town’s land use to 5%, fishing from 25% to 10%, olives from 50% to 35%, and the municipality’s Vision 2030 asks for the golden age back. The thesis is an answer to that call.',
         ],
         media: [
-          { type: 'image', src: 'projects/lau-anfeh/vision.webp', caption: 'Anfeh’s land use in 1950 and 2020 — salt 25% to 5%, fish 25% to 10%, olive 50% to 35% — and the Vision 2030 the thesis answers.' },
+          { type: 'image', src: 'projects/lau-anfeh/vision.webp', caption: 'Anfeh’s land use in 1950 and 2020, salt 25% to 5%, fish 25% to 10%, olive 50% to 35%, and the Vision 2030 the thesis answers.' },
         ],
       },
       {
         heading: 'Point nought',
         body: [
-          'The site is Plot C, 7,500 m² beside the salinas: close to the seaside road, on quiet streets, and carrying the salt-farm history the project is about. The name is the strategy — taking a step back to aleph null, point zero, to reacquaint Anfeh’s residents with their own history. On that ground sits an urban village of shopping, food, craft, culture and learning, with a public plaza extending the historic footpath through the site, bringing people in from all over the town and making breakout space for the young and the old.',
+          'The site is Plot C, 7,500 m² beside the salinas: close to the seaside road, on quiet streets, and carrying the salt-farm history the project is about. The name is the strategy: taking a step back to aleph null, point zero, to reacquaint Anfeh’s residents with their own history. On that ground sits an urban village of shopping, food, craft, culture and learning, with a public plaza extending the historic footpath through the site, bringing people in from all over the town and making breakout space for the young and the old.',
         ],
         media: [
           { type: 'image', src: 'projects/lau-anfeh/hero.webp', caption: 'Point Nought at dusk: the wind wheel over the restored ponds, bathers on the salt terraces.' },
@@ -1235,7 +1235,7 @@ const _projects = [
       {
         heading: 'Salt, fish and olive',
         body: [
-          'Three pavilions carry the three traditions. The Salt Pavilion sits directly on the working ponds, part exhibit and part salt store, with the ponds around it open to bathers. The Fish Pavilion is organised the way the catch moves — auction, washing, salting, packing, then the market and a restaurant — under planted roofs. The Olive Pavilion steps its terraces through the grove.',
+          'Three pavilions carry the three traditions. The Salt Pavilion sits directly on the working ponds, part exhibit and part salt store, with the ponds around it open to bathers. The Fish Pavilion is organised the way the catch moves, auction, washing, salting, packing, then the market and a restaurant, all under planted roofs. The Olive Pavilion steps its terraces through the grove.',
         ],
         media: [
           { type: 'image', src: 'projects/lau-anfeh/salt-fish-olive.webp', caption: 'Salt, fish and olive: the objectives for each tradition, and the tile grammar drawn from the salt-pond grid.' },
@@ -1247,7 +1247,7 @@ const _projects = [
       {
         heading: 'Drawn and built',
         body: [
-          'The set closes with the technical record and the models: the plan with its long sections through the windmill and the ponds, the wall section detailing the pavilion structure, and the physical models — the salt ponds cast in resin over cork, the town in white against the brown of its context, test casts in terracotta and in salt itself, and the salts of Anfeh bottled in a row.',
+          'The set closes with the technical record and the models: the plan with its long sections through the windmill and the ponds, the wall section detailing the pavilion structure, and the physical models: the salt ponds cast in resin over cork, the town in white against the brown of its context, test casts in terracotta and in salt itself, and the salts of Anfeh bottled in a row.',
         ],
         media: [
           { type: 'image', src: 'projects/lau-anfeh/plans-sections.webp', caption: 'Plan and long sections: the windmill, the ponds and the bathing steps.' },
