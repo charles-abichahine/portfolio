@@ -134,18 +134,32 @@ function ProjectTile({ p, hot, motionOk }) {
 }
 
 export default function Work() {
-  // The homepage's three category strands land here already filtered, so the
-  // wire genuinely leads somewhere rather than dropping you at the top of the
-  // full index. Anything unrecognised falls back to All.
-  const [params] = useSearchParams()
+  /*
+   * The filter is the URL, not a piece of state that happens to start from it.
+   *
+   * It was read once on mount and then kept privately, so pressing a pill left
+   * the URL saying /work: a refresh lost the filter, and a link shared from a
+   * filtered index arrived unfiltered. Deriving it from the query instead means
+   * the page you are looking at and the address of it cannot disagree, and the
+   * homepage's category strands, which have always arrived as ?category=, now
+   * use the same road in as a click does.
+   *
+   * replace, so eighteen presses do not become eighteen entries to back out
+   * through; All drops the parameter rather than writing ?category=All.
+   * Anything unrecognised falls back to All.
+   */
+  const [params, setParams] = useSearchParams()
   const asked = params.get('category')
-  const [filter, setFilter] = useState(CATEGORIES.includes(asked) ? asked : 'All')
+  const filter = CATEGORIES.includes(asked) ? asked : 'All'
+  const setFilter = (cat) =>
+    setParams(cat === 'All' ? {} : { category: cat }, { replace: true })
   // Which tile the cursor is over. Held in state rather than left to :hover
   // because a browser only re-evaluates :hover when the pointer moves — see the
   // effect below.
   const [hotSlug, setHotSlug] = useState(null)
   const [motionOk, setMotionOk] = useState(true)
 
+  const pillsRef = useRef(null)
   const stripRef = useRef(null)
   const trackRef = useRef(null)
   const thumbRef = useRef(null)
@@ -464,6 +478,30 @@ export default function Work() {
     }
   }, [])
 
+  /*
+   * Bring the pressed pill into view, sideways, inside its own row.
+   *
+   * Below lg the four pills do not fit across a phone and the row scrolls; a
+   * visitor arriving on ?category=Practice landed with the row at scrollLeft 0
+   * and the pressed pill off the right-hand end, so every pill in sight looked
+   * unselected and the only clue that a filter was on at all was the project
+   * count.
+   *
+   * scrollLeft rather than scrollIntoView: that walks up the ancestors and would
+   * scroll the page vertically as well, which on arrival would move the ground
+   * under someone who has not touched anything yet. Instant, for the same
+   * reason. At lg the row does not scroll, so this is a no-op there.
+   */
+  useEffect(() => {
+    const row = pillsRef.current
+    const pill = row?.querySelector('[data-on="true"]')
+    if (!row || !pill) return
+    const rowBox = row.getBoundingClientRect()
+    const pillBox = pill.getBoundingClientRect()
+    const centred = row.scrollLeft + (pillBox.left - rowBox.left) - (row.clientWidth - pillBox.width) / 2
+    row.scrollLeft = Math.max(0, Math.min(centred, row.scrollWidth - row.clientWidth))
+  }, [filter])
+
   // A smaller set may not overflow at all, so the scrubber and the fades have to
   // be recomputed — and the tile under the cursor has just been replaced.
   useEffect(() => {
@@ -494,6 +532,7 @@ export default function Work() {
               do not fit across a phone, and a second line would push the first
               tile off screen. */}
           <nav
+            ref={pillsRef}
             aria-label="Filter by category"
             className="-mx-6 flex gap-2 overflow-x-auto px-6 [scrollbar-width:none] lg:mx-0 lg:overflow-visible lg:px-0 [&::-webkit-scrollbar]:hidden"
           >
