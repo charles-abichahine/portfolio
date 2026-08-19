@@ -33,6 +33,14 @@ const CATEGORY_COLOR = Object.fromEntries(BELTS.map((b) => [b.label, b.color]))
 // single value rather than a set.
 const R = 'rounded-[10px]'
 
+// The card's arrow, spelled out once: 34px, on the paper, going accent on hover.
+// The caller adds the side. It is the same object as the arrows inside a project
+// card, so the control is met on the index and recognised again in the card.
+const ARROW =
+  'absolute top-1/2 z-[3] hidden h-[34px] w-[34px] -translate-y-1/2 items-center justify-center ' +
+  'rounded-full border border-line bg-paper/80 text-ink opacity-0 ' +
+  'transition-[opacity,color,border-color] duration-300 hover:border-accent hover:text-accent lg:flex'
+
 // 38vh rather than the 46vh this page used to run at: three tiles plus a slice
 // of the fourth fit, and that slice is what tells you the strip scrolls.
 const FRAME = `relative aspect-[4/3] w-full overflow-hidden bg-line lg:h-[clamp(250px,38vh,400px)] lg:w-auto ${R}`
@@ -144,6 +152,9 @@ export default function Work() {
   const indRef = useRef(null)
   const fadeLRef = useRef(null)
   const fadeRRef = useRef(null)
+  const prevRef = useRef(null)
+  const nextRef = useRef(null)
+  const countRef = useRef(null)
   const syncRef = useRef(() => {})
 
   // A filtered view uses the belt's own order, which puts awarded projects first.
@@ -167,6 +178,8 @@ export default function Work() {
     const track = trackRef.current
     const thumb = thumbRef.current
     const ind = indRef.current
+    const prev = prevRef.current
+    const next = nextRef.current
     if (!el) return
     const isDesktop = () => window.matchMedia('(min-width: 1024px)').matches
     const reduce = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -187,9 +200,41 @@ export default function Work() {
       const pos = overflow > 0 ? (el.scrollLeft / overflow) * (trackW - thumbW) : 0
       thumb.style.width = `${thumbW}px`
       thumb.style.transform = `translateX(${pos}px)`
-      if (fadeLRef.current) fadeLRef.current.style.opacity = can && el.scrollLeft > 8 ? '1' : '0'
-      if (fadeRRef.current) {
-        fadeRRef.current.style.opacity = can && el.scrollLeft < overflow - 8 ? '1' : '0'
+      const atStart = el.scrollLeft <= 8
+      const atEnd = el.scrollLeft >= overflow - 8
+      if (fadeLRef.current) fadeLRef.current.style.opacity = can && !atStart ? '1' : '0'
+      if (fadeRRef.current) fadeRRef.current.style.opacity = can && !atEnd ? '1' : '0'
+
+      // The arrows say the same thing the fades do, but as something to press.
+      // Disabled rather than merely faded, so a keyboard tab does not land on an
+      // end of the strip that has nowhere to go.
+      for (const [btn, spent] of [
+        [prev, atStart],
+        [next, atEnd],
+      ]) {
+        if (!btn) continue
+        btn.disabled = !can || spent
+        btn.style.opacity = btn.disabled ? '0' : '1'
+        btn.style.pointerEvents = btn.disabled ? 'none' : 'auto'
+      }
+
+      // "03 / 18": which tile the strip starts on. The first one whose left edge
+      // has not been scrolled past is the first you can actually see whole, and
+      // it is read off the tiles rather than divided out of the scroll position,
+      // which would go wrong the moment the tiles are not all one width.
+      if (countRef.current) {
+        const lis = el.querySelectorAll('li')
+        const edge = el.getBoundingClientRect().left - 1
+        let first = 0
+        for (let i = 0; i < lis.length; i++) {
+          if (lis[i].getBoundingClientRect().left >= edge) {
+            first = i
+            break
+          }
+        }
+        const pad = (n) => String(n).padStart(2, '0')
+        countRef.current.textContent = `${pad(first + 1)} / ${pad(lis.length)}`
+        countRef.current.style.opacity = can ? '1' : '0'
       }
     }
 
@@ -282,6 +327,9 @@ export default function Work() {
       }
       return (lis[0]?.getBoundingClientRect().width ?? 400) + 24
     }
+
+    const onPrev = () => glideBy(-tileStep())
+    const onNext = () => glideBy(tileStep())
 
     // Mouse-wheel users cannot scroll a horizontal strip natively. A notched wheel
     // arrives in ~100px jumps and needs easing; a trackpad arrives as a continuous
@@ -390,6 +438,10 @@ export default function Work() {
     ind?.addEventListener('pointermove', onIndMove)
     ind?.addEventListener('pointerup', endScrub)
     ind?.addEventListener('pointercancel', endScrub)
+    // Through glideBy, so a press decelerates exactly like the wheel and the
+    // arrow keys, and repeated presses retarget one glide rather than fighting.
+    prev?.addEventListener('click', onPrev)
+    next?.addEventListener('click', onNext)
     sync()
 
     return () => {
@@ -407,6 +459,8 @@ export default function Work() {
       ind?.removeEventListener('pointermove', onIndMove)
       ind?.removeEventListener('pointerup', endScrub)
       ind?.removeEventListener('pointercancel', endScrub)
+      prev?.removeEventListener('click', onPrev)
+      next?.removeEventListener('click', onNext)
     }
   }, [])
 
@@ -506,24 +560,49 @@ export default function Work() {
                 'linear-gradient(to left, var(--color-paper) 0%, color-mix(in srgb, var(--color-paper) 55%, transparent) 48%, color-mix(in srgb, var(--color-paper) 0%, transparent) 100%)',
             }}
           />
+
+          {/* Something to press. Three and a bit of eighteen tiles are on screen
+              and the only cues were the clipped fourth, the fade over it and a
+              4px scrubber — all of them things you notice after you have already
+              worked out that it scrolls. Desktop only: below lg this is a
+              vertical grid.
+
+              Above the fades, and one tile per press, so a press and an arrow
+              key do the same thing. */}
+          <button ref={prevRef} type="button" aria-label="Previous projects" className={`left-2.5 ${ARROW}`}>
+            ←
+          </button>
+          <button ref={nextRef} type="button" aria-label="Next projects" className={`right-2.5 ${ARROW}`}>
+            →
+          </button>
         </div>
 
         {/* Scroll position (desktop filmstrip only). The whole row is the hit
-            target, not the bar — click to ease across, drag to scrub. */}
-        <div
-          ref={indRef}
-          className="group mt-2.5 hidden h-[26px] shrink-0 cursor-pointer touch-none items-center px-10 transition-opacity duration-300 lg:flex"
-        >
+            target, not the bar — click to ease across, drag to scrub. The count
+            sits outside that target, so reading it is not a way to scrub by
+            accident. A bar says how far along; a number says how far along out
+            of how many, which is the thing you wanted to know. */}
+        <div className="mt-2.5 hidden shrink-0 items-center gap-3.5 px-10 lg:flex">
           <div
-            ref={trackRef}
-            className={`relative h-[4px] w-full bg-line transition-[height] duration-150 group-hover:h-[7px] ${R}`}
+            ref={indRef}
+            className="group flex h-[26px] flex-1 cursor-pointer touch-none items-center transition-opacity duration-300"
           >
             <div
-              ref={thumbRef}
-              className={`absolute left-0 top-0 h-full bg-soft transition-colors duration-150 group-hover:bg-ink ${R}`}
-              style={{ width: '80px' }}
-            />
+              ref={trackRef}
+              className={`relative h-[4px] w-full bg-line transition-[height] duration-150 group-hover:h-[7px] ${R}`}
+            >
+              <div
+                ref={thumbRef}
+                className={`absolute left-0 top-0 h-full bg-soft transition-colors duration-150 group-hover:bg-ink ${R}`}
+                style={{ width: '80px' }}
+              />
+            </div>
           </div>
+          <span
+            ref={countRef}
+            aria-hidden="true"
+            className={`shrink-0 tabular-nums opacity-0 transition-opacity duration-300 ${MONO} text-muted`}
+          />
         </div>
       </div>
 
