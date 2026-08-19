@@ -121,6 +121,23 @@ export default function DynamicIsland() {
         aria-label="Site"
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => setHover(false)}
+        /*
+         * Keyboard focus opens it too, because hover is the only thing that
+         * ever did and hover is a mouse. Compact collapsed the links to a
+         * max-width of 0 at zero opacity without taking them out of the tab
+         * order, so on a scrolled page Tab landed on an invisible Work link and
+         * nothing on screen moved.
+         *
+         * React's onFocus/onBlur are focusin/focusout, which bubble, so these
+         * are focus-within: the relatedTarget check is what stops a collapse
+         * while focus is only moving from the logo to a link or on to the
+         * toggle. A null relatedTarget — focus leaving the window entirely —
+         * counts as leaving, which is the same thing the pointer does.
+         */
+        onFocus={() => setHover(true)}
+        onBlur={(e) => {
+          if (!e.currentTarget.contains(e.relatedTarget)) setHover(false)
+        }}
         className="flex items-center gap-1 rounded-full border border-[var(--chrome-edge)] bg-[var(--chrome-glass)] px-2 py-1.5 shadow-[var(--chrome-lift)] backdrop-blur-md transition-colors sm:gap-1.5"
       >
         {/* Logo only — the wordmark lives in the hero, and dropping it here keeps
@@ -147,11 +164,13 @@ export default function DynamicIsland() {
               onMouseEnter={() => placePill(l.to)}
               onMouseLeave={() => placePill(activeTo)}
               className={({ isActive }) =>
-                /* chrome-label fixes the tracking at the band's wider 0.16em, so
-                   the size comes down a step from what this used to set: the
-                   links occupy about the width they did before and the pill
-                   still fits a 360px phone with the toggle beside it. */
-                `relative z-[1] whitespace-nowrap rounded-full px-2 py-1.5 text-[0.6rem] transition-colors chrome-label sm:px-2.5 sm:text-[0.64rem] ${
+                /* chrome-label fixes the tracking at the band's wider 0.16em.
+                   One size at every width now, and that size is the site's
+                   floor for anything a visitor has to click: 9.6px on a phone
+                   and 10.24px above it were the smallest targets on the page
+                   and they were the primary navigation. 11px costs the pill
+                   about 12px of width, which the 360px case still has. */
+                `relative z-[1] whitespace-nowrap rounded-full px-2 py-1.5 text-[0.6875rem] transition-colors chrome-label sm:px-2.5 ${
                   isActive ? 'text-ink' : 'text-soft hover:text-accent'
                 }`
               }
