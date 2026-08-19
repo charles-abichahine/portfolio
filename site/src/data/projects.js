@@ -1196,30 +1196,63 @@ const _projects = [
   {
     slug: 'lau-anfeh',
     date: '2023-05-22',
-    title: 'Anfeh',
+    title: 'Point Nought',
     subtitle:
       'My bachelor final-year thesis at LAU: reimagining the coastal town of Anfeh in North Lebanon through its landscape of salt ponds, fishing, and olives.',
     year: '2023',
-    module: 'B.Arch Final Year Project: LAU',
+    module: 'B.Arch Final Year Project · LAU',
     team: ['Charles Abi Chahine'],
     tools: ['Architecture', 'Urban design'],
     tag: 'ARCH',
     toolsShort: 'ARCHITECTURE',
-    cover: 'projects/lau-anfeh/spread1.webp',
+    cover: 'projects/lau-anfeh/cover.webp',
     category: 'Design & Research',
     award: null,
     links: {},
     intro: [
-      'Anfeh is my final-year thesis at the Lebanese American University (Spring 2023), advised by Issam Barhouch and Omar Harb. It reimagines the rural coastal town of Anfeh in North Lebanon, working from its landscape of salt ponds, fishing, and olives toward an urban re-imagination of the town.',
+      'Point Nought is my final-year thesis at the Lebanese American University (Spring 2023), advised by Issam Barhouch and Omar Harb, and shown at the LAU final-projects exhibition. Anfeh has a lot to offer — salt ponds along the coast, agricultural land, a living fishing culture — and the thesis commemorates that long-living heritage: restoring the salinas not just to rebuild, but to build a narrative around a degrading tradition, and to give the town a base for the visitors who come to learn it.',
     ],
     sections: [
       {
-        heading: 'From the portfolio',
-        body: [],
+        heading: 'The golden age, and after',
+        body: [
+          'Anfeh lives off three traditions: salt from the coastal salinas, fishing, and olive groves inland. Between 1950 and 2020 all three declined — salt from 25% of the town’s land use to 5%, fishing from 25% to 10%, olives from 50% to 35% — and the municipality’s Vision 2030 asks for the golden age back. The thesis is an answer to that call.',
+        ],
         media: [
-          { type: 'image', src: 'projects/lau-anfeh/spread1.webp', caption: 'From the Anfeh final-year portfolio.' },
-          { type: 'image', src: 'projects/lau-anfeh/spread2.webp', caption: 'From the Anfeh final-year portfolio.' },
-          { type: 'image', src: 'projects/lau-anfeh/spread3.webp', caption: 'From the Anfeh final-year portfolio.' },
+          { type: 'image', src: 'projects/lau-anfeh/vision.webp', caption: 'Anfeh’s land use in 1950 and 2020 — salt 25% to 5%, fish 25% to 10%, olive 50% to 35% — and the Vision 2030 the thesis answers.' },
+        ],
+      },
+      {
+        heading: 'Point nought',
+        body: [
+          'The site is Plot C, 7,500 m² beside the salinas: close to the seaside road, on quiet streets, and carrying the salt-farm history the project is about. The name is the strategy — taking a step back to aleph null, point zero, to reacquaint Anfeh’s residents with their own history. On that ground sits an urban village of shopping, food, craft, culture and learning, with a public plaza extending the historic footpath through the site, bringing people in from all over the town and making breakout space for the young and the old.',
+        ],
+        media: [
+          { type: 'image', src: 'projects/lau-anfeh/hero.webp', caption: 'Point Nought at dusk: the wind wheel over the restored ponds, bathers on the salt terraces.' },
+          { type: 'image', src: 'projects/lau-anfeh/masterplan.webp', caption: 'The masterplan and its aerial: the village grid stepping down to the ponds along the extended footpath.' },
+        ],
+      },
+      {
+        heading: 'Salt, fish and olive',
+        body: [
+          'Three pavilions carry the three traditions. The Salt Pavilion sits directly on the working ponds, part exhibit and part salt store, with the ponds around it open to bathers. The Fish Pavilion is organised the way the catch moves — auction, washing, salting, packing, then the market and a restaurant — under planted roofs. The Olive Pavilion steps its terraces through the grove.',
+        ],
+        media: [
+          { type: 'image', src: 'projects/lau-anfeh/salt-fish-olive.webp', caption: 'Salt, fish and olive: the objectives for each tradition, and the tile grammar drawn from the salt-pond grid.' },
+          { type: 'image', src: 'projects/lau-anfeh/salt-pavilion.webp', caption: 'The Salt Pavilion on the ponds; at left, the plan layered into groves, salinas, footpath and market.' },
+          { type: 'image', src: 'projects/lau-anfeh/fish-pavilion.webp', caption: 'The Fish Pavilion, exploded: auction, washing, salting and packing below, market and restaurant above, planted roofs over all of it.' },
+          { type: 'image', src: 'projects/lau-anfeh/olive-pavilion.webp', caption: 'The Olive Pavilion: the programme diagrammed and the terraces stepping through the grove.' },
+        ],
+      },
+      {
+        heading: 'Drawn and built',
+        body: [
+          'The set closes with the technical record and the models: the plan with its long sections through the windmill and the ponds, the wall section detailing the pavilion structure, and the physical models — the salt ponds cast in resin over cork, the town in white against the brown of its context, test casts in terracotta and in salt itself, and the salts of Anfeh bottled in a row.',
+        ],
+        media: [
+          { type: 'image', src: 'projects/lau-anfeh/plans-sections.webp', caption: 'Plan and long sections: the windmill, the ponds and the bathing steps.' },
+          { type: 'image', src: 'projects/lau-anfeh/sections-details.webp', caption: 'Long sections and the wall section, detailed through the pavilion structure.' },
+          { type: 'image', src: 'projects/lau-anfeh/model.webp', caption: 'The models: resin and cork salt ponds, the white town on its brown coast, casts in terracotta and salt, and the salts bottled.' },
         ],
       },
     ],
