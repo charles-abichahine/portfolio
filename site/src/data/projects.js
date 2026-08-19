@@ -1132,7 +1132,7 @@ const _projects = [
     date: '2024-03-15',
     title: 'Saria, Dubai Maritime City',
     subtitle:
-      'A residential tower at Dubai Maritime City, taken from pre-concept to design development at SOMA: parametric facade iterations, then the BIM model for delivery.',
+      'A residential tower on the water at Dubai Maritime City, 38 levels over a podium, taken from pre-concept to design development at SOMA: parametric facade iterations, then the BIM model for delivery.',
     year: '2024',
     module: 'SOMA · Design Architect',
     team: ['SOMA: office project'],
@@ -1144,14 +1144,51 @@ const _projects = [
     award: null,
     links: {},
     intro: [
-      'Saria is a residential tower on the water at Dubai Maritime City, with the Dubai skyline behind it. I took it from pre-concept through to design development as a Design Architect at SOMA: parametric facade iterations in Rhino and Grasshopper, then the BIM model for delivery.',
+      'Saria is a residential tower on the water at Dubai Maritime City, with the Dubai skyline behind it. I took it from pre-concept through to design development as a Design Architect at SOMA: parametric facade iterations in Rhino and Grasshopper, then the BIM model for delivery. The drawings here are from the concept design submission of March 2024, with SOMA as design architect.',
     ],
     sections: [
       {
-        heading: 'At SOMA',
-        body: [],
+        heading: 'A tower on the water',
+        body: [
+          'The plot sits at the edge of the Maritime City peninsula, so the tower is read from the water first: a slender square plan rising off a podium, with the skyline of Business Bay and the Burj behind it. Four levels of podium carry the parking under a landscaped deck; above it sit 38 levels, the roof at 167 m. The amenities are on the first level over the podium, a gym, a lounge and juice bar, an outdoor deck and a pool opening onto the planted terrace; the tower’s rhythm breaks once at level 20 and again at the top two floors, which have plans of their own.',
+        ],
         media: [
-          { type: 'image', src: 'projects/saria/terraces.webp', caption: 'Terraces and the crowning pergola, from the project renders.' },
+          { type: 'image', src: 'projects/saria/waterfront.webp', caption: 'Saria from the water, the podium and tower in their context of neighbouring towers.' },
+          { type: 'image', src: 'projects/saria/dusk-facade.webp', caption: 'The facade at dusk: stacked balconies with planters, the podium lit below.' },
+          { type: 'image', src: 'projects/saria/massing-context.webp', caption: 'The massing in its context on the peninsula, seen from the water.' },
+        ],
+      },
+      {
+        heading: 'The facade',
+        body: [
+          'The facade is where the parametric work went. The balconies shift and step across the elevation rather than stacking in a straight line, and the pattern was iterated in Rhino and Grasshopper: how far each band projects, where the planters sit, how the rhythm breaks at level 20 and again at the crown. What survived the iterations went into the BIM model in Revit, which is what the set below is cut from.',
+        ],
+        media: [
+          { type: 'image', src: 'projects/saria/elevation-north-west.webp', caption: 'North-west elevation: the podium, the stepping balcony bands, the break at level 20 and the crown, with the level datums from ground to the roof at 167.30 m.' },
+          { type: 'image', src: 'projects/saria/section.webp', caption: 'Section through the tower and podium.' },
+        ],
+      },
+      {
+        heading: 'The podium and the ground',
+        body: [
+          'At street level the podium is wrapped in planting and opens under a deep canopy at the entrance; the landscape runs over the podium roof and down to the promenade, so the tower lands in a garden rather than on a car park. The ground floor takes the lobby and the drop-off, the podium levels the parking, and the deck above carries the pool and the outdoor amenity.',
+        ],
+        media: [
+          { type: 'image', src: 'projects/saria/podium-street.webp', caption: 'The podium from the street: the entrance canopy, the planted setbacks and the tower rising behind.' },
+          { type: 'image', src: 'projects/saria/podium-garden.webp', caption: 'The garden side of the podium, with the planted terraces stepping up to the amenity deck.' },
+          { type: 'image', src: 'projects/saria/path.webp', caption: 'The shaded walk along the podium edge.' },
+        ],
+      },
+      {
+        heading: 'The drawings',
+        body: [
+          'The concept set: the master plan on its plot, the ground floor with the lobby and drop-off, the amenity level over the podium, and a typical residential floor, which runs from the 12th to the 34th with the core in the middle and the apartments around it.',
+        ],
+        media: [
+          { type: 'image', src: 'projects/saria/master-plan.webp', caption: 'Master plan: the tower and podium on the plot, setbacks and the waterfront edge.' },
+          { type: 'image', src: 'projects/saria/plan-ground.webp', caption: 'Ground floor: lobby, drop-off and back of house.' },
+          { type: 'image', src: 'projects/saria/plan-level-01.webp', caption: 'Level 01, the amenity floor over the podium: gym, outdoor deck and pool.' },
+          { type: 'image', src: 'projects/saria/plan-typical.webp', caption: 'Typical residential floor, levels 12 to 19 and 21 to 34: the core at the centre, apartments around it, balconies on all four sides.' },
         ],
       },
     ],
