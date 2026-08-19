@@ -1,5 +1,7 @@
+import { useEffect } from 'react'
 import { matchPath, Route, Routes, useLocation } from 'react-router-dom'
 import App from './App.jsx'
+import { canonicalFor, titleFor } from './documentMeta.js'
 import ProjectOverlay from './components/ProjectOverlay.jsx'
 import { getProject } from './data/projects.js'
 import Home from './pages/Home.jsx'
@@ -35,6 +37,28 @@ export default function AppRoutes() {
   const background =
     location.state?.background ??
     (known ? { ...location, pathname: '/work', search: '', hash: '', state: null } : null)
+
+  /*
+   * The head, per route. index.html carries one title and one canonical, which
+   * is correct for "/" and wrong everywhere else, and nothing moved them.
+   *
+   * This keys off location.pathname, not the background: when a card is open the
+   * URL is the project's, so the title is the project's, and closing it puts the
+   * index's back. prerender.mjs writes the same pair into the file at each route
+   * for crawlers that never get this far.
+   */
+  const title = titleFor(location.pathname, known ? known.title : undefined)
+  const canonical = canonicalFor(location.pathname)
+  useEffect(() => {
+    document.title = title
+    let link = document.querySelector('link[rel="canonical"]')
+    if (!link) {
+      link = document.createElement('link')
+      link.rel = 'canonical'
+      document.head.appendChild(link)
+    }
+    link.href = canonical
+  }, [title, canonical])
 
   return (
     <>
