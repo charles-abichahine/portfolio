@@ -334,34 +334,67 @@ const _projects = [
     ],
     sections: [
       {
-        heading: 'Wind as the design field',
+        heading: 'Endurance, not shelter',
         body: [
-          'Wind analysis is the main field driving the aggregation: module placement, heights, and openings respond to the dominant winds rather than resisting them. Height is restricted and the scheme stays low-rise for structural behaviour, letting the massing deflect rather than fight the flow.',
+          'Punta Arenas sits on the Magellan Strait, and its position is its programme: a departure point for expeditions toward the nearby islands and the Antarctic south. The hub is a research laboratory tied to the local university.',
+          'We compared two plots and took the harder one: open, windy, worked on by salt and moisture, but with a direct relationship to the sea. Climate analysis confirmed the severity, so the project begins by accepting wind as an omnipresent force rather than resisting it.',
         ],
         media: [
-          { type: 'image', src: 'projects/huddle/wind01.webp', caption: 'Wind analysis over the aggregation.' },
-          { type: 'image', src: 'projects/huddle/wind02.webp', caption: 'Flow around the massing.' },
-          { type: 'image', src: 'projects/huddle/wind03.webp', caption: 'Iterating the aggregation against the wind field.' },
+          { type: 'image', src: 'projects/huddle/axonometric.webp', caption: 'The hub on its seafront plot, the edge of Punta Arenas behind it.' },
+          { type: 'image', src: 'projects/huddle/plots.webp', caption: 'The two plots we compared: an urban plot of 17,000 m² inside the city and a seafront plot of 20,000 m² on the strait.' },
+          { type: 'image', src: 'projects/huddle/climate.webp', caption: 'Westerly wind speeds across the southern hemisphere, the monthly wind rose, and a year of dry-bulb temperature and relative humidity.' },
         ],
       },
       {
-        heading: 'A kit of parts',
+        heading: 'Learning from the kawi',
         body: [
-          'The module’s form merges the logic of the semispheric kawis of the region’s native tribes: a compact, continuous shape that echoes both traditions while naturally optimizing wind flow and minimizing resistance. A topological map organizes the program for 1,000 users at 100 m² per user into private, semi-private, and public groups, and two Kangaroo workflows translate that conceptual map into real constraints and measures.',
+          'The core typology comes from the kawis, the huts of the region’s native tribes, whose aerodynamic form is already adapted to extreme wind. We reinterpreted it as a modular system of 4×4×4 m units under a 16 m height limit, and the gaps the aggregation leaves become wind-protected courtyards and tunnels that accelerate the airflow.',
+          'A topological map sorts a 50,000 m² programme into public, researcher-only and sensitive laboratory groups, with adjacency rules that keep the public accessible and the labs protected. The vertical cores are fixed; the dormitories, libraries and shared spaces scale with demand.',
         ],
         media: [
-          { type: 'image', src: 'projects/huddle/axonometric-zoom.webp', caption: 'The kit of parts, aggregated.' },
+          { type: 'image', src: 'projects/huddle/kit-of-parts.webp', caption: 'The kit of parts across three levels: cross modules for general functions, reinforced cores for circulation, triangular connectors, and the 12 m theatre volume, coloured private, semi-private and public.' },
+          { type: 'image', src: 'projects/huddle/module-rules.webp', caption: 'The rules the aggregation obeys: the semisphere reduced to a 4 m cube, the 16 m height limit, the wind-proof courtyards, and the wind tunnels the massing creates.' },
         ],
       },
       {
-        heading: 'The aggregation',
+        heading: 'A workflow, not a shape',
         body: [
-          'Wasp aggregates the kit of parts under a rule layout grouped by part and space type, converging on a massing that huddles the program together: public space at the sheltered heart, expedition functions at the edge.',
+          'The definition runs as one chain. An adaptable program definition feeds two sequential Kangaroo solvers, the first placing the programme roughly through physics-based logic, the second refining it into precise subprogram locations. Wasp then aggregates the kit of parts under a rule layout grouped by part and access type.',
+          'Because it is a system rather than an object, the part count is known at every moment: one iteration carries 23 private laboratory modules against 28 public ones. Whether the building holds 50 users or 1,000, the rules hold.',
         ],
         media: [
-          { type: 'image', src: 'projects/huddle/axonometric.webp', caption: 'Aggregation axonometric.' },
-          { type: 'image', src: 'projects/huddle/persp-01.webp', caption: 'The Huddle against the Patagonian horizon.' },
-          { type: 'image', src: 'projects/huddle/persp-02.webp', caption: 'Between the modules.' },
+          { type: 'image', src: 'projects/huddle/workflow.webp', caption: 'The whole definition: program definition, two Kangaroo passes, the Wasp aggregation rule layout, skin generation, information extraction.' },
+          { type: 'image', src: 'projects/huddle/aggregation.webp', caption: 'A Wasp run, from the precise subprogram gradient through the iterations to the part counts it reports back.' },
+        ],
+      },
+      {
+        heading: 'Program becomes massing',
+        body: [
+          'The layout is legible: public programme wraps around and shields the research and residential areas, and a single circulation spine connects everything. In section the building stays compact under the height limit, the skin acting as a buffer against the cold wind, and the courtyards it encloses are rare protected outdoor space here.',
+        ],
+        media: [
+          { type: 'image', src: 'projects/huddle/section.webp', caption: 'The aggregation cut open, with two sections through it: public in yellow, semi-private in blue, private in red, connections in black.' },
+          { type: 'image', src: 'projects/huddle/persp-02.webp', caption: 'Between the modules at ground level.' },
+        ],
+      },
+      {
+        heading: 'Timber, seismic forces, and a skin of three panels',
+        body: [
+          'The structure is grounded in local timber, which cuts the logistical and environmental footprint and ties the building back to the region’s vernacular. Shear walls and diagonal bracing take the lateral wind loads, and seismic isolators take the horizontal movement. Alpaca4D displacement maps confirmed stable behaviour at a mass of roughly 709 tons.',
+          'The envelope is a kit of three ETFE panels. The Shield sits on windward faces and uses hoop-stress logic at 800 Pa to stop the membrane flapping; the Lens traps solar gain in argon-filled cushions; the Gill lets the mechanical zones breathe. A Global Index weights wind incidence, solar orientation and daylight need equally and picks the panel for each face, so the facade reads as a map of the climate on it.',
+        ],
+        media: [
+          { type: 'image', src: 'projects/huddle/structure.webp', caption: 'Structure by part: the engineered-wood crosses, square modules and y-node, with the shear walls, the seismic isolators, and the three layers of the skin.' },
+          { type: 'image', src: 'projects/huddle/panels.webp', caption: 'Three precedents synthesised into three panels: the Shield for windward pressure, the Lens for solar gain, the Gill for ventilation.' },
+        ],
+      },
+      {
+        heading: 'Wind becomes a resource',
+        body: [
+          'The aggregation opens wind tunnels between the modules, and those tunnels accelerate the flow. Vertical turbines stand in exactly those zones and harvest the site’s most abundant force. The thing the building was shaped to survive ends up powering it.',
+        ],
+        media: [
+          { type: 'image', src: 'projects/huddle/persp-01.webp', caption: 'Turbines standing in the wind tunnels the aggregation opens between the modules.' },
         ],
       },
     ],
@@ -454,9 +487,50 @@ const _projects = [
     sections: [
       {
         heading: 'Feasibility as a design layer',
-        body: [],
+        body: [
+          'A facade is normally costed after it is designed, so the number arrives too late to change anything. FacadeIQ puts the two on one screen: geometry sliders on the left, the model in the middle, the feasibility dashboard on the right, everything recalculating on every move.',
+          'The parameters are the ones a designer actually holds — building length and width, number of typical floors, balcony typology, glass opening, balcony depth. What comes back is unit count, total balcony area, a facade cost split into double-glazed units, galvanized steel panels and balcony concrete floors, and an efficiency ratio saying which market the design has landed in.',
+        ],
         media: [
-          { type: 'image', src: 'projects/facadeiq/webapp.webp', caption: 'The FacadeIQ web app: geometry linked to live cost and efficiency metrics.' },
+          { type: 'image', src: 'projects/facadeiq/webapp.webp', caption: 'The three panels: geometry on the left, the model in the middle, the feasibility dashboard on the right.' },
+        ],
+      },
+      {
+        heading: 'Step 01 · Clearing the canvas',
+        body: [
+          'The tool opens on a description and a step-by-step panel that walks you through the process. Once you are ready it collapses out of the way, which hands the whole canvas back to the geometry and leaves the projection and the display style free to change.',
+        ],
+        media: [
+          { type: 'video', src: 'projects/facadeiq/interface.mp4', caption: 'Collapsing the guide panel, then switching the projection and the display style.' },
+        ],
+      },
+      {
+        heading: 'Step 02 · Geometry moves the numbers',
+        body: [
+          'Widening the footprint and adding floors shows the link working. Building width goes from 1 to 2 and the typical floor count from 16 to 21; the unit count goes from 48 to 126, the total balcony area from 984 to 2,624 m², and the building facade cost from $1.73M to $3.22M. The cost per apartment falls from $36,065 to $25,553 as the same envelope logic spreads over more units.',
+        ],
+        media: [
+          { type: 'video', src: 'projects/facadeiq/parameters.mp4', caption: 'Widening the footprint and adding floors: 48 units become 126 and the facade cost rises to $3.22M.' },
+        ],
+      },
+      {
+        heading: 'Step 03 · Swapping the design language',
+        body: [
+          'The same building can be drawn in a different language. Switching from the double-panel to the single-panel balcony typology redraws the tower and redistributes the cost breakdown pie: the concrete floor share collapses as the balcony area drops from 2,624 to 1,312 m², the glazing and steel shares grow, and the efficiency ratio settles at 0.567.',
+        ],
+        media: [
+          { type: 'video', src: 'projects/facadeiq/typology-swap.mp4', caption: 'Switching to the single-panel balcony: the cost breakdown redistributes and the ratio falls to 0.567.' },
+        ],
+      },
+      {
+        heading: 'Step 04 · The efficiency ratio, both ways',
+        body: [
+          'The efficiency ratio is the connection the tool is really built around, and it works in both directions. Pushing the balcony depth up carries the design across the 0.70 threshold to 0.743, into iconic and luxury territory. Pulling the glass opening back down does the reverse: the glazed area shrinks, the ratio drops to 0.577, and the design lands back under the 0.60 mark in standard residential.',
+          'That is the point of putting the dashboard next to the sliders. The threshold stops being a verdict delivered at the end of the project and becomes something you can walk across and back in a few seconds, while the geometry is still an argument.',
+        ],
+        media: [
+          { type: 'video', src: 'projects/facadeiq/balcony-depth.mp4', caption: 'Deepening the balconies pushes the efficiency ratio to 0.743, past the 0.70 luxury threshold.' },
+          { type: 'video', src: 'projects/facadeiq/glass-opening.mp4', caption: 'Shrinking the glass opening pulls it back to 0.577, below the 0.60 standard-residential mark.' },
         ],
       },
     ],
@@ -486,7 +560,10 @@ const _projects = [
     sections: [
       {
         heading: 'From floor plan to graph',
-        body: [],
+        body: [
+          'Fifty-four units over six floors, in two types: Type K, a two-storey duplex with a corridor on the bottom floor and eleven fragmented rooms above; Type F, a three-storey unit with the corridor in the middle and rooms below and above.',
+          'We rebuilt both in Rhino and turned them into graphs by grid sampling: a regular grid on each floor, ray-cast against the boundary, edges between neighbours, a vertical edge at every stair landing. Of the spacings we tried the finest was too slow, so 0.5 became the working resolution.',
+        ],
         media: [
           { type: 'image', src: 'projects/narkomfin/exploded.webp', caption: 'Both apartment types exploded by level. Type K is a two-storey duplex, Type F a three-storey unit for singles, and the corridor sits at a different height in each.' },
           { type: 'image', src: 'projects/narkomfin/graphs.webp', caption: 'Both types sampled on a 0.5-unit grid and stitched across floors at the stairs. Type K is asymmetric, one dense floor and one fragmented; Type F is symmetric, sparse-dense-sparse.' },
@@ -494,7 +571,9 @@ const _projects = [
       },
       {
         heading: 'Closeness: the most accessible point',
-        body: [],
+        body: [
+          'In Type K the hot band runs the L1 corridor, and the rooms above are uniformly cold, reachable only by walking to a stair and climbing, so the gradient runs one way. In Type F the peak sits on the middle floor and falls in both directions: a symmetric privacy gradient rather than a one-sided one.',
+        ],
         media: [
           { type: 'image', src: 'projects/narkomfin/closeness-k.webp', caption: 'Type K. The hot band runs the length of the L1 corridor and accessibility falls off in one direction only, upward into the rooms.' },
           { type: 'image', src: 'projects/narkomfin/closeness-f.webp', caption: 'Type F. Closeness peaks on the middle floor and drops both downward and upward, a balanced privacy gradient rather than a one-way one.' },
@@ -502,7 +581,9 @@ const _projects = [
       },
       {
         heading: 'Betweenness: where the traffic goes',
-        body: [],
+        body: [
+          'Both types answer the same way: a sharp line along the corridor, the stair landings lit as the only way between floors, the room floors dark because they are endpoints rather than throughways. You can see a corridor on a plan; betweenness shows that every single path runs through it. The Type F corridor serves two floors of rooms instead of one, so blocking it cuts off twice as much.',
+        ],
         media: [
           { type: 'image', src: 'projects/narkomfin/betweenness-k.webp', caption: 'Type K. A razor-sharp line along the corridor centreline: every cross-building path passes through one narrow band, and the stair landings are the chokepoints.' },
           { type: 'image', src: 'projects/narkomfin/betweenness-f.webp', caption: 'Type F. The same spine, carrying double the load. It serves rooms on two floors, so any L1 to L3 journey must cross it.' },
@@ -510,21 +591,27 @@ const _projects = [
       },
       {
         heading: 'Crossing the building',
-        body: [],
+        body: [
+          'Traced corner to corner, Type K makes an L: along the corridor, then one stair up. Type F makes a Z. In both, the straightened geometric path barely improves on the topological one, because the corridor is too narrow to optimise around.',
+        ],
         media: [
           { type: 'image', src: 'projects/narkomfin/shortest-path.webp', caption: 'A corner-to-corner traversal: an L-shape in Type K, a Z-shape in Type F. The straightened path barely improves on the topological one, because the corridor is too narrow to optimise around.' },
         ],
       },
       {
         heading: 'A plan that is flat up close',
-        body: [],
+        body: [
+          'Not every metric finds hierarchy. Degree centrality is almost uniform, and only the stair landings stand out. Clustering coefficient is zero everywhere, because a grid cannot form triangles: no ring corridors, no courtyards, no shortcuts. The flat results are still a finding, and what they say is that the building is legible only at the global scale.',
+        ],
         media: [
           { type: 'image', src: 'projects/narkomfin/degree.webp', caption: 'Degree centrality is almost uniform, and only the stair cells stand out as outliers. The hierarchy of the building is invisible locally and only emerges at the scale of the whole graph.' },
         ],
       },
       {
         heading: 'Communities: Ginzburg’s living cells',
-        body: [],
+        body: [
+          'Louvain groups cells more densely connected to each other than to the rest of the network, and it knows nothing about rooms or floors. In both types it slices the building into longitudinal bands perpendicular to the corridor, each a segment of corridor plus the rooms above it and, in Type F, below. So the real spatial units are not rooms and not floors but vertical slices: what Ginzburg called integrated living cells, recovered from topology alone.',
+        ],
         media: [
           { type: 'image', src: 'projects/narkomfin/communities-k.webp', caption: 'Type K. Communities cut perpendicular to the corridor into longitudinal bands, each a corridor segment with the rooms above it. The building self-organises into vertical slices, not floors.' },
           { type: 'image', src: 'projects/narkomfin/communities-f.webp', caption: 'Type F. The same pattern across three floors: each community spans a corridor segment plus the rooms below and above, which is what Ginzburg designed the units to be.' },
@@ -532,7 +619,10 @@ const _projects = [
       },
       {
         heading: 'Classifying room types from topology',
-        body: [],
+        body: [
+          'We fed both types into a GraphSAGE-Pool model pretrained on Modified Swiss Dwellings, 5,372 Swiss floor plans; it sees only zone type and connectivity. Type F scored 91.3%, 210 of 230, sixteen of its twenty errors open kitchens read as corridors. Type K scored 67.9%, 55 of 81.',
+          'The gap is the finding. Narkomfin was built as a dom-kommuna: kitchens minimal because residents were to eat in a shared canteen, living rooms doubling as social space. Familiar positions, unfamiliar functions, which a model trained on ordinary apartments cannot separate. The 68% is the building refusing the rules.',
+        ],
         media: [
           { type: 'image', src: 'projects/narkomfin/classifier-k.webp', caption: 'GraphSAGE reaches 67.9% on Type K, 55 of 81 rooms. The errors cluster where connectivity is near-identical: living rooms read as kitchens, stairs as storerooms.' },
           { type: 'image', src: 'projects/narkomfin/classifier-f.webp', caption: '91.3% on Type F, 210 of 230. Sixteen of the twenty errors are kitchens predicted as corridor, a single dominant blind spot.' },
