@@ -164,7 +164,7 @@ const _projects = [
     tools: ['FLUX.2 + LoRA', 'TRELLIS-2', 'ComfyUI', 'Python'],
     tag: 'AI',
     toolsShort: 'FLUX · TRELLIS · PYTHON',
-    cover: 'projects/legoarch/cover.webm',
+    cover: 'projects/legoarch/cover.webp',
     category: 'Computation & AI',
     award: 'IAAC Exhibition',
     links: {
