@@ -24,7 +24,11 @@ import { summary } from '../data/cv.js'
  * like any other block: the field is what stays, the type is what leaves.
  */
 
-const MONO = 'font-mono text-[0.56rem] uppercase tracking-[0.16em]'
+// The same floor /work sets, for the same reason: this voice is the belt labels,
+// the belt counts, the years and the cue at the top, all of which are read or
+// pressed. The four belt columns are measured for the fan, so the caps follow
+// the wider header rather than drifting off it.
+const MONO = 'font-mono text-[0.6875rem] uppercase tracking-[0.16em]'
 
 // Two per belt, newest first. The header keeps the true count and links onward,
 // so nothing is hidden, it is just not all on the landing.
@@ -222,9 +226,11 @@ export default function Home() {
                         always fit the frame even on a wide, short window where
                         the column alone would be too tall. */}
                     <div className="aspect-[4/3] w-[62px] shrink-0 overflow-hidden rounded-[6px] bg-line sm:w-full sm:max-h-[26svh] sm:rounded-[8px]">
+                      {/* The title is the next thing inside the same link, so
+                          an alt here names the link twice over. */}
                       <img
                         src={asset(posterFor(p))}
-                        alt={p.title}
+                        alt=""
                         loading="lazy"
                         draggable="false"
                         className="h-full w-full object-cover grayscale transition duration-500 ease-out group-hover:scale-[1.03] group-hover:grayscale-0"

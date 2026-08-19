@@ -14,7 +14,11 @@ const isAnimated = (p) => p.cover.endsWith('.webm')
 const posterFor = (p) => (isAnimated(p) ? p.cover.replace(/cover\.webm$/, 'poster.webp') : p.cover)
 const videoFor = (p, ext) => p.cover.replace(/cover\.webm$/, `cover.${ext}`)
 
-const MONO = 'font-mono text-[0.56rem] uppercase tracking-[0.16em]'
+// 0.6875rem is the site's floor for anything informational: this voice carries
+// the project count, the years and the awards, and at 0.56rem it was 8.96px —
+// a stamp rather than something to read. Only the width of the tile row moves
+// with it, and a tile is wider than its longest title.
+const MONO = 'font-mono text-[0.6875rem] uppercase tracking-[0.16em]'
 
 // The same four belts the landing groups by, in the same order, so pressing a
 // count there arrives here on a page that agrees with the one it came from.
@@ -45,7 +49,7 @@ const ARROW =
 // of the fourth fit, and that slice is what tells you the strip scrolls.
 const FRAME = `relative aspect-[4/3] w-full overflow-hidden bg-line lg:h-[clamp(250px,38vh,400px)] lg:w-auto ${R}`
 
-function ProjectTile({ p, hot, motionOk }) {
+function ProjectTile({ p, hot, motionOk, onFocus, onBlur }) {
   const color = beltFor(p).color
   const animate = motionOk && isAnimated(p)
   // mounted: the element exists and is fetching. ready: it can paint a frame.
@@ -69,11 +73,24 @@ function ProjectTile({ p, hot, motionOk }) {
   const playing = mounted && ready
 
   return (
-    <ProjectLink slug={p.slug} data-slug={p.slug} className={`block ${R}`}>
+    // onFocus/onBlur, so arriving by keyboard lights the tile the way the
+    // cursor does: the cover comes out of greyscale and the title takes its
+    // category colour, which is the only thing that says which of eighteen
+    // tiles you are on. The pointer keeps its own path — see the strip's
+    // pointermove handler, which is what sets this for a cursor.
+    <ProjectLink
+      slug={p.slug}
+      data-slug={p.slug}
+      onFocus={onFocus}
+      onBlur={onBlur}
+      className={`block ${R}`}
+    >
       <div className={FRAME}>
+        {/* The heading below is inside this link and names it, so an alt here
+            would announce the project twice. */}
         <img
           src={asset(posterFor(p))}
-          alt={p.title}
+          alt=""
           loading="lazy"
           draggable="false"
           className={`h-full w-full object-cover transition duration-500 ease-out ${
@@ -158,6 +175,10 @@ export default function Work() {
   // effect below.
   const [hotSlug, setHotSlug] = useState(null)
   const [motionOk, setMotionOk] = useState(true)
+  // Whether the strip is a filmstrip. Below lg it is a plain vertical grid that
+  // scrolls with the page, which is why this is not only a styling question —
+  // see the region's tabIndex and label further down.
+  const [filmstrip, setFilmstrip] = useState(false)
 
   const pillsRef = useRef(null)
   const stripRef = useRef(null)
@@ -182,6 +203,16 @@ export default function Work() {
   useEffect(() => {
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
     const apply = () => setMotionOk(!mq.matches)
+    apply()
+    mq.addEventListener('change', apply)
+    return () => mq.removeEventListener('change', apply)
+  }, [])
+
+  // Same shape, same breakpoint the layout uses. Read here rather than assumed,
+  // because the answer decides what the strip claims to be, not just how it looks.
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 1024px)')
+    const apply = () => setFilmstrip(mq.matches)
     apply()
     mq.addEventListener('change', apply)
     return () => mq.removeEventListener('change', apply)
@@ -523,7 +554,10 @@ export default function Work() {
         <div className="flex shrink-0 flex-col gap-3 px-6 pb-4 lg:flex-row lg:items-center lg:justify-between lg:gap-6 lg:px-10">
           <div className="flex items-baseline gap-3.5">
             <span className={`${MONO} text-ink`}>Work</span>
-            <span className={`${MONO} tabular-nums text-muted`}>
+            {/* Pressing a pill replaces the strip and changes nothing else that
+                is announced, so this number is the confirmation that the filter
+                did anything. */}
+            <span aria-live="polite" className={`${MONO} tabular-nums text-muted`}>
               {filtered.length} {filtered.length === 1 ? 'Project' : 'Projects'}
             </span>
           </div>
@@ -546,7 +580,7 @@ export default function Work() {
                   aria-pressed={on}
                   data-on={on}
                   style={{ '--c': cat === 'All' ? 'var(--color-ink)' : CATEGORY_COLOR[cat] }}
-                  className={`shrink-0 whitespace-nowrap border px-3.5 py-2.5 font-mono text-[0.56rem] uppercase leading-none tracking-[0.14em] transition-colors ${R} data-[on=false]:border-[color-mix(in_srgb,var(--c)_34%,transparent)] data-[on=false]:text-[var(--c)] data-[on=false]:hover:border-[color-mix(in_srgb,var(--c)_62%,transparent)] data-[on=false]:hover:bg-[color-mix(in_srgb,var(--c)_9%,transparent)] data-[on=true]:border-[var(--c)] data-[on=true]:bg-[var(--c)] data-[on=true]:text-paper`}
+                  className={`shrink-0 whitespace-nowrap border px-3.5 py-2.5 font-mono text-[0.6875rem] uppercase leading-none tracking-[0.14em] transition-colors ${R} data-[on=false]:border-[color-mix(in_srgb,var(--c)_34%,transparent)] data-[on=false]:text-[var(--c)] data-[on=false]:hover:border-[color-mix(in_srgb,var(--c)_62%,transparent)] data-[on=false]:hover:bg-[color-mix(in_srgb,var(--c)_9%,transparent)] data-[on=true]:border-[var(--c)] data-[on=true]:bg-[var(--c)] data-[on=true]:text-paper`}
                 >
                   {cat}
                 </button>
@@ -560,11 +594,15 @@ export default function Work() {
             scrolls down. The native scrollbar is hidden — the scrubber below
             carries position. */}
         <div className="relative flex min-h-0 flex-col">
+          {/* A tab stop that promises arrow keys, only where the arrow keys are
+              wired up. Below lg this is a vertical grid that the page scrolls,
+              so the stop led nowhere and the label described a control that did
+              not exist. */}
           <div
             ref={stripRef}
-            tabIndex={0}
+            tabIndex={filmstrip ? 0 : undefined}
             role="region"
-            aria-label="Projects: scroll sideways or use the arrow keys"
+            aria-label={filmstrip ? 'Projects: scroll sideways or use the arrow keys' : undefined}
             className="min-h-0 px-6 pb-6 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent lg:overflow-x-auto lg:overflow-y-hidden lg:overscroll-x-contain lg:px-0 lg:pb-0 lg:cursor-grab lg:[scrollbar-width:none] lg:[&::-webkit-scrollbar]:hidden"
           >
             <ul
@@ -573,7 +611,13 @@ export default function Work() {
             >
               {filtered.map((p) => (
                 <li key={p.slug} className="lg:shrink-0">
-                  <ProjectTile p={p} hot={hotSlug === p.slug} motionOk={motionOk} />
+                  <ProjectTile
+                    p={p}
+                    hot={hotSlug === p.slug}
+                    motionOk={motionOk}
+                    onFocus={() => setHotSlug(p.slug)}
+                    onBlur={() => setHotSlug(null)}
+                  />
                 </li>
               ))}
             </ul>
@@ -650,7 +694,7 @@ export default function Work() {
           same data this page renders, so it cannot drift from what is above. */}
       <FooterSlot>
         <a
-          className="chrome-label text-[0.56rem] text-muted transition-colors hover:text-accent"
+          className="chrome-label text-[0.6875rem] text-muted transition-colors hover:text-accent"
           href={asset('book.pdf')}
           download
         >

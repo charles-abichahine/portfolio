@@ -20,11 +20,12 @@ import { contact, role } from '../data/cv.js'
  * footer over them means text on an unpredictable ground; the band gives the
  * type a floor to stand on and ends the page deliberately.
  */
-/* The band speaks quieter than the island: same voice, one size down. The
-   colour roles are the pair's, so a link here and a link up there answer to the
-   same three states — muted or soft at rest, ink for the one you are on, accent
-   under the cursor. */
-const MONO = 'chrome-label text-[0.56rem]'
+/* Same voice as the island, and now the same size: the band was one step down
+   at 0.56rem, which put the identity line and whatever file a page hangs in the
+   slot at 8.96px. The band is quieter than the island by colour instead, which
+   is where the difference belonged anyway — muted or soft at rest, ink for the
+   one you are on, accent under the cursor. */
+const MONO = 'chrome-label text-[0.6875rem]'
 
 /*
  * The three contacts as marks rather than words.
@@ -157,7 +158,12 @@ export default function Footer({ slotRef }) {
         {/* Bottom right. The negative margins let the 24px targets overflow into
             the padding rather than setting the row's height, so the marks sit on
             the same baseline as the type opposite them. */}
-        <nav className="-my-1 -mr-1.5 flex justify-self-end gap-0.5 sm:col-start-3 sm:row-start-1">
+        {/* Named, because a landmark with no name is announced as "navigation"
+            and there is a second one on the page. */}
+        <nav
+          aria-label="Contact"
+          className="-my-1 -mr-1.5 flex justify-self-end gap-0.5 sm:col-start-3 sm:row-start-1"
+        >
           {MARKS.map((m) => (
             <a
               key={m.key}
