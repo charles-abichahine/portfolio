@@ -5,6 +5,15 @@ import { asset } from '../data/projects.js'
 import { beltFor } from '../data/belts.js'
 
 /*
+ * The section's label, "NN · Heading".
+ *
+ * Two places name a section and they have to name it the same way: the caption
+ * under the gallery, which is all that holds the shape of the project once the
+ * media is flattened, and the heading over that section's write-up in the rail.
+ */
+const sectionLabel = (i, heading) => `${String(i + 1).padStart(2, '0')} · ${heading}`
+
+/*
  * The gallery, flattened out of the project record.
  *
  * Every piece of section media, in the order the sections put it. Each item
@@ -27,7 +36,7 @@ function galleryFor(project) {
       // Both kinds carry a poster now, named the same way: the file beside it
       // with -poster.webp for a suffix.
       poster: m.type === 'image' ? null : m.src.replace(/\.[a-z0-9]+$/i, '-poster.webp'),
-      section: `${String(i + 1).padStart(2, '0')} · ${s.heading}`,
+      section: sectionLabel(i, s.heading),
       caption: m.caption,
     })),
   )
@@ -305,6 +314,38 @@ export default function ProjectCard({ project, onClose }) {
           <p className="mt-2.5 font-serif text-[0.9rem] leading-[1.62] text-soft lg:mt-3">
             {project.intro[0]}
           </p>
+
+          {/*
+           * The write-up, which until now was on no page of the site.
+           *
+           * Two thousand words of it sat in sections[].body and the card showed
+           * the subtitle and one intro paragraph — the booklet PDF was the only
+           * place the writing existed. The media of those same sections has
+           * always been on the card; this puts the words back beside it, headed
+           * by the label the caption already uses, so a paragraph and the images
+           * it is about say the same "03 · Shape".
+           *
+           * Twelve of the eighteen projects carry no body text, and they render
+           * exactly as before: the map yields nothing and the box ends at the
+           * intro.
+           */}
+          {project.sections.map((s, i) =>
+            s.body.length === 0 ? null : (
+              <section key={s.heading} className="mt-5 lg:mt-6">
+                <h3 className="font-mono text-[0.58rem] font-medium uppercase tracking-[0.13em] text-[var(--c)]">
+                  {sectionLabel(i, s.heading)}
+                </h3>
+                {s.body.map((para, j) => (
+                  <p
+                    key={j}
+                    className="mt-2 font-serif text-[0.9rem] leading-[1.62] text-soft lg:mt-2.5"
+                  >
+                    {para}
+                  </p>
+                ))}
+              </section>
+            ),
+          )}
         </div>
 
         {/* Smaller than the page sets it, and pinned to the foot of the rail:
