@@ -248,7 +248,7 @@ const closing = `
   <div>
     <p class="eyebrow">The rest of it</p>
     <h2>${Word(projects.length)} projects, four belts<span class="dot">.</span></h2>
-    <p class="lede">This booklet is a selection. Every project, with its full gallery, is on the site.</p>
+    <p class="lede">This booklet is a selection. Every project, with its full gallery and write-up, is on the site.</p>
   </div>
   <div class="cover-foot">
     <p class="mono">${esc(contact.site ?? 'charlesabichahine.com')}/work</p>

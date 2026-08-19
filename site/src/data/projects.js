@@ -584,7 +584,7 @@ const _projects = [
     tools: ['Speckle Automate', 'Grasshopper', 'Python'],
     tag: 'BIM',
     toolsShort: 'SPECKLE · GH · PYTHON',
-    cover: 'projects/collaborative-workflow/cover.webp',
+    cover: 'projects/collaborative-workflow/pipeline.webp',
     category: 'BIM & Workflows',
     award: null,
     links: {
@@ -832,7 +832,7 @@ const _projects = [
     tools: ['Architecture', 'Urban design'],
     tag: 'ARCH',
     toolsShort: 'ARCHITECTURE',
-    cover: 'projects/lau-anfeh/cover.webp',
+    cover: 'projects/lau-anfeh/spread1.webp',
     category: 'Design & Research',
     award: null,
     links: {},
