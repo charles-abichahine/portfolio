@@ -653,11 +653,48 @@ const _projects = [
     ],
     sections: [
       {
-        heading: 'Structure and facade',
-        body: [],
+        heading: 'The alveolar spine',
+        body: [
+          'The core of Hyperbuilding 01 is the Alveolar Spine, a porous structural core that borrows its function from the bronchi: bronchioles, then a porous core, then program plugged into it, then air moving through all of it.',
+          'Behind it is a deterministic engine rather than a shape: program requirements set the spaces and base masses, environmental pressures decide where the facade opens, closes or thickens, and the script negotiates between them. What comes out is published to Speckle with its data embedded, for the program and data teams.',
+        ],
         media: [
-          { type: 'image', src: 'projects/integrative-modeling/render.webp', caption: 'The parametric complex: three towers on a shared lattice logic.' },
-          { type: 'image', src: 'projects/integrative-modeling/detail.webp', caption: 'Structure and facade resolved from the deterministic script.' },
+          { type: 'image', src: 'projects/integrative-modeling/lung-analogy.webp', caption: 'Four steps from the bronchioles to the building: biological inspiration, porous structural core, program massing, airflow system.' },
+          { type: 'image', src: 'projects/integrative-modeling/deterministic-engine.webp', caption: 'The script as negotiator between program requirements and environmental pressures, publishing to Speckle for the program and data teams.' },
+        ],
+      },
+      {
+        heading: 'Defining the volume',
+        body: [
+          'Constraints and variables are kept apart, the building and its electrostatic precipitator on one side and the environment on the other. It builds in three steps — the skeleton of three towers at 600, 500 and 400 m with a podium and a bridge, then framing and plug-in volumes, then the facade.',
+          'The core is not drawn either. Alpaca reads the stress where the core meets the volumes, the script strips material that is doing nothing, and the surviving voxels become the lattice.',
+        ],
+        media: [
+          { type: 'image', src: 'projects/integrative-modeling/parametric-engine.webp', caption: 'Constraints on the left — core dimensions, vertical stages, plate voltages and spacing, against inlet PM2.5 and PM10, air flow, temperature, humidity and wind; on the right, the skeleton at 600, 500 and 400 m.' },
+          { type: 'image', src: 'projects/integrative-modeling/performance-approach.webp', caption: 'The Alpaca loop: stress read at the points connecting core to volumes, then the surviving voxels turned into a lattice.' },
+        ],
+      },
+      {
+        heading: 'Bridging Grasshopper and Revit',
+        body: [
+          'The HB01 script carries the geometry into Revit as real families, not dumb solids: plug-in volumes as masses with levels and a tower parameter, the core as structural framing, the facade as adaptive components carrying panel type and panel ID. Filters and view filters turn that into documentation, out to an RVT model and PDF sheets synchronised with the script.',
+        ],
+        media: [
+          { type: 'image', src: 'projects/integrative-modeling/revit-workflow.webp', caption: 'The HB01 script writing into Revit: levels, direct shapes, floors, structural beams, adaptive components, then filters and sheets.' },
+          { type: 'image', src: 'projects/integrative-modeling/axonometric.webp', caption: 'The axonometric in site, and the same tower pulled apart into mass, facade panels, floors and structural framing.' },
+        ],
+      },
+      {
+        heading: 'One geometry, two facade logics',
+        body: [
+          'The facade is one panel geometry running two logics. The fixed version is static but calibrated, for residential floors, offices, hotels and mixed use. The adaptive version moves, where the interior function is climate-responsive: urban farming and the productive programs. Both share four parameters — fillet radius, frame thickness, panel opening, panel thickness.',
+          'The schedule proves the two stayed one system: 57,408 fixed panels and 9,810 adaptive, 67,218 in total.',
+        ],
+        media: [
+          { type: 'image', src: 'projects/integrative-modeling/facade-logics.webp', caption: 'One geometry, two logics: the fixed facade, the adaptive facade, and the four parameters both share.' },
+          { type: 'image', src: 'projects/integrative-modeling/panel-schedule.webp', caption: 'The Revit panel schedule: 57,408 fixed panels and 9,810 adaptive, 67,218 in total.' },
+          { type: 'image', src: 'projects/integrative-modeling/detail.webp', caption: 'The plug-in volumes at the facade, the lattice core visible behind the diamond panels.' },
+          { type: 'image', src: 'projects/integrative-modeling/aerial-night.webp', caption: 'The three towers, the bridge and the podium at night, seen from above in the site model.' },
         ],
       },
     ],
@@ -674,7 +711,7 @@ const _projects = [
     tools: ['Speckle Automate', 'Grasshopper', 'Python'],
     tag: 'BIM',
     toolsShort: 'SPECKLE · GH · PYTHON',
-    cover: 'projects/collaborative-workflow/pipeline.webp',
+    cover: 'projects/collaborative-workflow/who-when.webp',
     category: 'BIM & Workflows',
     award: null,
     links: {
@@ -686,11 +723,33 @@ const _projects = [
     ],
     sections: [
       {
-        heading: 'The pipeline',
-        body: [],
+        heading: 'The cost of a manual export',
+        body: [
+          'Every model update meant manual extraction, reformatting and sharing across a multi-disciplinary team, which turned version control into a guessing game. Fifteen minutes per export times several pushes a day is hours of overhead a week; nobody could tell whether the numbers in the sheet were from today or two days ago; updates travelled by chat, easy to miss.',
+          'The two parties are the structure/facade team and the data team, on the Hyperbuilding model in the mid-to-late design phase, when the model is live and decisions across disciplines depend on current data.',
+        ],
         media: [
-          { type: 'image', src: 'projects/collaborative-workflow/pipeline.webp', caption: 'The automated pipeline, triggered on every model push.' },
-          { type: 'image', src: 'projects/collaborative-workflow/sheet.webp', caption: 'Structured properties exported to Excel and Google Sheets.' },
+          { type: 'image', src: 'projects/collaborative-workflow/problem.webp', caption: 'The problem stated: manual extraction on every push, and one outdated file able to corrupt decisions across the team.' },
+          { type: 'image', src: 'projects/collaborative-workflow/who-when.webp', caption: 'Who and when: the structure/facade and data teams, in the mid-to-late design phase, with the web app at the end of the chain.' },
+        ],
+      },
+      {
+        heading: 'One push',
+        body: [
+          'The pipeline runs on Speckle Automate and fires on the commit, the moment a new model version is pushed from Grasshopper and Rhino. It walks the nested geometry collections, extracts the structural, environmental and facade properties, and writes them out twice: openpyxl builds and formats the Excel file, gspread writes the same data into Google Sheets through the API, google-auth carries the service account. It needs an output format, a target sheet ID and a service-account JSON file, and emails the team links to the sheet and the model when the run finishes.',
+        ],
+        media: [
+          { type: 'video', src: 'projects/collaborative-workflow/demo.mp4', caption: 'The automation end to end: the run triggered in Speckle Automate, the completion email, and the data landing in Google Sheets.' },
+          { type: 'image', src: 'projects/collaborative-workflow/pipeline.webp', caption: 'The pipeline: a commit from Grasshopper and Rhino into the automation, then live sync out to Google Sheets and Excel.' },
+        ],
+      },
+      {
+        heading: 'What changed',
+        body: [
+          'Before, sharing updated data took 15 to 30 minutes and 7 to 15 manual steps per model, the team heard hours later if anyone remembered, and the risk of circulating the wrong version was high. After: a 1 minute 16 second run, no manual steps, instant notification, that risk eliminated. The data stopped living in local files, and the person modelling spends the time on design.',
+        ],
+        media: [
+          { type: 'image', src: 'projects/collaborative-workflow/before-after.webp', caption: 'Before and after: 15–30 minutes down to a 1 min 16 s run, and 7–15 manual steps down to none.' },
         ],
       },
     ],
@@ -718,12 +777,58 @@ const _projects = [
     ],
     sections: [
       {
-        heading: 'Reading the climate',
-        body: [],
+        heading: 'A 19-hectare plot in Chuo City',
+        body: [
+          'The site is the former Tsukiji fish market, 5 Chome Tsukiji, in a metropolitan area of fourteen million people. What is proposed on it is a multifunctional venue built around wellness, innovation, food, experience, activity and hospitality: 250 m across, 74 m tall, among towers that reach 180 m. The weather file comes from the nearest EPW hub, five kilometres away.',
+        ],
         media: [
-          { type: 'image', src: 'projects/tsukiji/env1.webp', caption: 'Environmental analysis of the site and its dual-season climate.' },
-          { type: 'image', src: 'projects/tsukiji/env2.webp', caption: 'Building behaviour evaluated with Ladybug and Galapagos.' },
-          { type: 'image', src: 'projects/tsukiji/env3.webp', caption: 'Formal modifications driven by the analysis.' },
+          { type: 'image', src: 'projects/tsukiji/site-location.webp', caption: 'The plot at 5 Chome Tsukiji, Chuo City, with the 1979 land-use map of southern Tokyo and the EPW station 5 km out.' },
+          { type: 'image', src: 'projects/tsukiji/site-model.webp', caption: 'The brief and the Rhino site model: a 250 m venue at 74 m, ringed by towers reaching 180 m.' },
+        ],
+      },
+      {
+        heading: 'Tokyo’s climate is a dual battle',
+        body: [
+          'Tokyo is humid subtropical and the extremes sit at both ends of the year. The coldest stretch runs December to March and drops to 8°C; the hottest runs June to September and reaches 32°C with humidity above 85%.',
+          'Wind maps a dominant north–south axis across the site, moderate, peaking in spring and autumn. The psychrometric chart points at one strategy above all others: passive solar heating, worth more annual comfort hours than any other measure. The site fights cold stress most of the year and heat and humidity stress in summer, and total comfort is rarely met.',
+        ],
+        media: [
+          { type: 'image', src: 'projects/tsukiji/climate-analysis.webp', caption: 'Ladybug climate charts: down to 8°C from December to March, up to 32°C and past 85% humidity from June to September.' },
+          { type: 'image', src: 'projects/tsukiji/wind-analysis.webp', caption: 'The wind rose: a dominant north–south axis, with moderate speeds peaking in spring and autumn.' },
+          { type: 'image', src: 'projects/tsukiji/dual-battle.webp', caption: 'Hourly UTCI stress from Infrared.City, and the June and December comfort maps that make the dual battle visible.' },
+        ],
+      },
+      {
+        heading: 'Putting the proposal under the sun',
+        body: [
+          'The building itself goes under the same lenses. Incident radiation and direct sun hours, season by season: the roof takes 450 kWh/m² at its highest in spring and 310 at its lowest in winter, the façade 150 in winter down to 30 in summer. Sun hours split the same way, 1,172 on the roof in summer against 862 in winter. That sent us back to the roof, for energy and for cooling airflow.',
+          'Daylight is evaluated separately for the two programs. The stadium is a single space under a curtain wall and an open roof: average daylight factor 11.24, top lighting on the 115 by 80 m field, and it works as it is. The offices are the problem. Four-metre floors with curtain-wall openings average 5.46, and the inner corners of every floor stay dark because each volume has one light source.',
+        ],
+        media: [
+          { type: 'image', src: 'projects/tsukiji/radiation-sun-hours.webp', caption: 'Incident radiation and direct sun hours by season, with the roof peaking at 450 kWh/m² and 1,172 hours.' },
+          { type: 'image', src: 'projects/tsukiji/daylight-stadium.webp', caption: 'The stadium as a single space: average daylight factor 11.24, with top lighting over the 115 by 80 m field.' },
+          { type: 'image', src: 'projects/tsukiji/daylight-offices.webp', caption: 'The office volumes: average daylight factor 5.46, the inner corners of every floor left dark by a single light source.' },
+        ],
+      },
+      {
+        heading: 'Rotating the whole building',
+        body: [
+          'The last step is a validation loop: Infrared.City and Galapagos turning the massing through a full 360 degrees, shortlisting orientations by minimising high-velocity zones at 10 m/s while keeping airflow between 1.5 and 5 m/s. The site is well shielded, annual winds averaging 1.5 m/s, and the winning orientation is the one the proposal already had. Thermal comfort is good across 88% of the area, and bad in exactly the places the courtyards make.',
+        ],
+        media: [
+          { type: 'image', src: 'projects/tsukiji/rotation-study.webp', caption: 'The full 360° rotation, wind speed above and thermal comfort below. Top 1 is the orientation the proposal already had.' },
+          { type: 'image', src: 'projects/tsukiji/galapagos.webp', caption: 'Two Galapagos loops: culling the infrared mesh to plant trees where heat lingers, and rotating and scaling the original geometry.' },
+        ],
+      },
+      {
+        heading: 'Shape changes, not adjustments',
+        body: [
+          'We started from the hypothesis that minor modifications would be enough. They were not: the small changes barely moved the numbers. The exterior comfort results forced real shape revisions, so the towers around the stadium were rescaled and the zones where heat lingers were planted with trees.',
+          'The news is not all bad: orientation, interior daylight and wind resistance all perform well without major intervention. The project closes on a render of the optimized design set beside the existing proposal.',
+        ],
+        media: [
+          { type: 'image', src: 'projects/tsukiji/iterations.webp', caption: 'Five massing states: the initial shape, the radiation revision, the UTCI revision, and two daylight-comfort revisions.' },
+          { type: 'image', src: 'projects/tsukiji/renders.webp', caption: 'Left, the existing Tsukiji development proposal. Right, an AI-generated render of the optimized design from the same viewpoint.' },
         ],
       },
     ],
@@ -751,12 +856,54 @@ const _projects = [
     ],
     sections: [
       {
-        heading: 'Geometry into structure',
-        body: [],
+        heading: 'A surface chosen for its stability',
+        body: [
+          'The pavilion’s form is not drawn, it is solved. The Clebsch diagonal cubic is a cubic algebraic surface defined by x₀³ + x₁³ + x₂³ + x₃³ + x₄³ = 0 under the constraint x₀ + x₁ + x₂ + x₃ + x₄ = 0, and we picked it for the geometric stability that comes with it. To make it a building we deflated the geometry where the parts connect, then rotated and scaled it into a base domain of 8 by 8 m and 6 m high.',
+        ],
         media: [
-          { type: 'image', src: 'projects/clebsch-pavilion/render2.webp', caption: 'The pavilion built on the Clebsch Diagonal Cubic.' },
-          { type: 'image', src: 'projects/clebsch-pavilion/concept.webp', caption: 'The algebraic surface driving the form.' },
-          { type: 'image', src: 'projects/clebsch-pavilion/lattice.webp', caption: 'Surface to lattice: Crystallon generation, Alpaca analysis.' },
+          { type: 'image', src: 'projects/clebsch-pavilion/concept.webp', caption: 'The Clebsch diagonal cubic and its equations, deflated at the part connections and scaled into an 8 by 8 m base domain.' },
+          { type: 'image', src: 'projects/clebsch-pavilion/workflow.webp', caption: 'The definition in four stages: geometry, Crystallon lattice, Alpaca brick study, and the optimization loop.' },
+        ],
+      },
+      {
+        heading: 'From surface to lattice',
+        body: [
+          'The continuous surface is discretised into a high-resolution mesh, which becomes the boundary every structural layer is built inside. Crystallon fills that volume: the mesh is divided into twisted boxes that follow the curvature, an edge-octahedron cell is applied inside each box, and the cells are filled to make the webbing. Nothing about the lattice is drawn either; it inherits its direction from the surface it sits in.',
+        ],
+        media: [
+          { type: 'image', src: 'projects/clebsch-pavilion/lattice.webp', caption: 'Surface to lattice in four steps: geometry definition, an offset mesh at 0.25, twisted boxes, and the filled lattice.' },
+        ],
+      },
+      {
+        heading: 'The structural model',
+        body: [
+          'The model goes into Alpaca on fixed supports, carrying its own gravity load and a lateral wind load of 0.08 kN/m². The material is glass-reinforced recycled PET: Young’s modulus 9,470,000 kN/m², density 1710 kg/m³, drawn as a circular beam 0.05 in diameter with a wall of 0.025.',
+          'Millipede runs first, on a 0.005 m beam radius, and returns a stiffness distribution map: which parts of the lattice need to be thicker to carry the stress. That map is a guide for the Alpaca analysis rather than a result in itself.',
+        ],
+        media: [
+          { type: 'image', src: 'projects/clebsch-pavilion/structural-model.webp', caption: 'The Alpaca model: glass-reinforced recycled PET, fixed supports, gravity, and a lateral wind load of 0.08 kN/m².' },
+          { type: 'image', src: 'projects/clebsch-pavilion/stiffness-displacement.webp', caption: 'Millipede stiffness above and Alpaca displacement below, each beside its optimized result at a mass of 303 kg.' },
+        ],
+      },
+      {
+        heading: 'Nine iterations',
+        body: [
+          'Two things were tested. First the lattice module itself, holding beam radius and thickness constant and changing only the cell: 488 kg at a displacement of 0.611 m, then 334 kg at 0.627 m, then 303 kg at 0.599 m. The third module is lighter and stiffer at once, so it carries.',
+          'Then the beams. An evolutionary run in Wallacei, fed by the stiffness map, searched beam radius and thickness against two fitness objectives at once: lowest mass and lowest displacement. The optimum comes out of the nine individuals of generation 9 — 303 kg, 0.599 m of displacement, thickness graded from 0.0025 to 0.0035 m and diameter from 0.005 to 0.007 m, thicker exactly where the stiffness map said.',
+        ],
+        media: [
+          { type: 'image', src: 'projects/clebsch-pavilion/lattice-modules.webp', caption: 'Three lattice modules at the same beam radius and thickness: 488 kg, 334 kg and 303 kg.' },
+          { type: 'image', src: 'projects/clebsch-pavilion/optimum-solution.webp', caption: 'The optimum solution and the nine individuals of generation 9, scored on mass and displacement in Wallacei.' },
+        ],
+      },
+      {
+        heading: 'A vision of sustainable complexity',
+        body: [
+          'What comes out feels futuristic and is grounded in historical mathematics. Built in recycled PET reinforced with glass, the pavilion is an argument that complex optimized geometry and a sustainable material choice are not a trade-off.',
+        ],
+        media: [
+          { type: 'image', src: 'projects/clebsch-pavilion/render2.webp', caption: 'The pavilion at eye level, the lattice reading as one continuous surface.' },
+          { type: 'image', src: 'projects/clebsch-pavilion/renders.webp', caption: 'Aerial and close-up: the edge-octahedron webbing at the scale of a person.' },
         ],
       },
     ],
