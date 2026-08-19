@@ -8,9 +8,10 @@
  * A4 landscape, two pages per project: a title page carrying the writing and the
  * cover, then a plate of up to four images with their captions underneath.
  *
- * Eight projects, not nineteen. A booklet is a selection; /work is the index,
- * and the last page says so. SELECTION below is the only editorial decision in
- * the file and is meant to be edited.
+ * A selection, not the index. /work is the index and the last page says so, in
+ * counts read off the data rather than typed — typed once, they said nineteen
+ * long after the nineteenth project went away. SELECTION below is the only
+ * editorial decision in the file and is meant to be edited.
  *
  * Two things are inherited from cv-pdf.mjs because they are not optional:
  *
@@ -43,7 +44,7 @@ const PUBLIC = resolve(here, '../public')
 const PDF = resolve(PUBLIC, 'book.pdf')
 const STAMP = resolve(here, 'book.hash')
 
-/* The booklet's running order. Eight of the nineteen, across all four belts:
+/* The booklet's running order. A handful, across all four belts:
  * four from Computation & AI because that is the positioning and the strongest
  * work, one BIM, two Design & Research, one from practice so the book does not
  * read as though the architecture started at the master's. Three of the four
@@ -60,6 +61,16 @@ const SELECTION = [
 ]
 
 const PLATE_MAX = 4
+
+/* The two counts on the page are spelled out, so the booklet reads as writing
+ * rather than a spec sheet. Neither will plausibly leave this range. */
+const WORDS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight',
+  'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen',
+  'seventeen', 'eighteen', 'nineteen', 'twenty', 'twenty-one', 'twenty-two',
+  'twenty-three', 'twenty-four', 'twenty-five', 'twenty-six', 'twenty-seven',
+  'twenty-eight', 'twenty-nine', 'thirty']
+const word = (n) => WORDS[n] ?? String(n)
+const Word = (n) => word(n).replace(/^./, (c) => c.toUpperCase())
 
 const CHROME = [
   'C:/Program Files/Google/Chrome/Application/chrome.exe',
@@ -187,7 +198,7 @@ const contents = `
       )
       .join('')}
   </ol>
-  <p class="foot mono">Eight of nineteen. The rest at ${esc(contact.site ?? 'charlesabichahine.com')}/work</p>
+  <p class="foot mono">${Word(chosen.length)} of ${word(projects.length)}. The rest at ${esc(contact.site ?? 'charlesabichahine.com')}/work</p>
 </section>`
 
 async function projectPages(p, i) {
@@ -236,8 +247,8 @@ const closing = `
 <section class="page closing">
   <div>
     <p class="eyebrow">The rest of it</p>
-    <h2>Nineteen projects, four belts<span class="dot">.</span></h2>
-    <p class="lede">This booklet is a selection. Every project, with the full galleries and the write-ups, is on the site.</p>
+    <h2>${Word(projects.length)} projects, four belts<span class="dot">.</span></h2>
+    <p class="lede">This booklet is a selection. Every project, with its full gallery, is on the site.</p>
   </div>
   <div class="cover-foot">
     <p class="mono">${esc(contact.site ?? 'charlesabichahine.com')}/work</p>
