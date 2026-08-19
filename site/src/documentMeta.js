@@ -32,5 +32,15 @@ export function titleFor(pathname, projectTitle) {
   return `${label || 'Not found'} — Charles Abi Chahine`
 }
 
-// No query string: a filter or a share tag is the same page to a crawler.
-export const canonicalFor = (pathname) => ORIGIN + normalize(pathname)
+/*
+ * No query string: a filter or a share tag is the same page to a crawler.
+ *
+ * The trailing slash is the form the server actually answers with 200. Every
+ * route is a directory holding an index.html (see prerender.mjs), and GitHub
+ * Pages 301s /work to /work/ to reach it — so the slashless form named a URL
+ * that redirects, which is the one thing a canonical must never do.
+ */
+export const canonicalFor = (pathname) => {
+  const path = normalize(pathname)
+  return ORIGIN + (path === '/' ? path : `${path}/`)
+}

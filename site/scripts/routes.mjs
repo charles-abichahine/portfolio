@@ -37,6 +37,10 @@ if (projects.length === 0) {
 
 // Every path the router answers, in the order routes.jsx declares them. The
 // catch-all is deliberately absent: it has no URL of its own.
+//
+// These are paths, not public URLs: prerender.mjs joins them onto dist/ to make
+// the directory each one's index.html goes in. The URL a path is advertised as
+// is canonicalFor's job, and it adds the trailing slash the server serves.
 export const routes = [
   '/',
   '/work',

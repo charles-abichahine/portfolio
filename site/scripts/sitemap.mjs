@@ -9,6 +9,11 @@
  * files for: a URL that is listed here but has no file would be advertised to
  * crawlers and then answered with a 404.
  *
+ * The URL form comes from canonicalFor, the same function the canonical links
+ * use, because a sitemap and a canonical that disagree about the slash advertise
+ * two URLs for one page. /work is served as a 301 to /work/; the slash form is
+ * what answers 200.
+ *
  * Runs before `vite build`, so the generated file is picked up from public/ in
  * the same build.
  */
@@ -16,9 +21,9 @@ import { writeFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, resolve } from 'node:path'
 import { routes } from './routes.mjs'
+import { canonicalFor } from '../src/documentMeta.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
-const ORIGIN = 'https://charlesabichahine.com'
 
 const today = new Date().toISOString().slice(0, 10)
 
@@ -40,7 +45,7 @@ const xml = `<?xml version="1.0" encoding="UTF-8"?>
 ${urls
   .map(
     (u) => `  <url>
-    <loc>${ORIGIN}${u.loc}</loc>
+    <loc>${canonicalFor(u.loc)}</loc>
     <lastmod>${today}</lastmod>
     <changefreq>${u.changefreq}</changefreq>
     <priority>${u.priority}</priority>
