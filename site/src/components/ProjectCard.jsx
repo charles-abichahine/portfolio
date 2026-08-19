@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import MediaFrame from './MediaFrame.jsx'
 import MediaLightbox from './MediaLightbox.jsx'
 import { asset } from '../data/projects.js'
@@ -102,6 +102,36 @@ export default function ProjectCard({ project, onClose }) {
 
   const step = (d) => setAt((i) => (i + d + items.length) % items.length)
 
+  /*
+   * Whether the writing runs on past the bottom of its box.
+   *
+   * From lg up the box is 272px of a 622px card and Sensi puts 1,946px of prose
+   * in it, so it cut a line in half at the bottom edge with nothing to say it
+   * had — it read as a rendering fault rather than as something to scroll. This
+   * drives the fade below; the styled scrollbar beside it is the other half of
+   * the answer, and this is what makes the fade go away once you reach the end
+   * instead of hanging there over the last line.
+   */
+  const proseRef = useRef(null)
+  const [more, setMore] = useState(false)
+  useEffect(() => {
+    const el = proseRef.current
+    if (!el) return
+    // A pixel of slack: fractional layout means scrollTop rarely lands exactly.
+    const sync = () => setMore(el.scrollHeight - el.scrollTop - el.clientHeight > 4)
+    sync()
+    el.addEventListener('scroll', sync, { passive: true })
+    // The box changes size without scrolling: a wrapped caption takes room from
+    // it, and so does every resize of the window.
+    const ro = new ResizeObserver(sync)
+    ro.observe(el)
+    return () => {
+      el.removeEventListener('scroll', sync)
+      ro.disconnect()
+    }
+    // The content only changes with the project.
+  }, [project.slug])
+
   const record = [
     ['Year', project.year],
     ['Module', project.module],
@@ -126,8 +156,25 @@ export default function ProjectCard({ project, onClose }) {
        * rather than stretched, so its height is indefinite and the percentage
        * silently does nothing: at 1280x660 the card stayed 622px inside 580px of
        * room. 5rem is the padding the backdrop keeps on each side.
+       *
+       * That fixed height is a desktop idea and it does not survive a phone. At
+       * 375x812 it made a 788px card holding a 179px media well and a 213px box
+       * with 354px of writing in it: everything squeezed, everything cut. Below
+       * lg the height is a ceiling instead, the card scrolls as one thing, and
+       * the media and the writing take the room they need. 1.5rem and 3rem are
+       * twice the padding the backdrop keeps at those sizes.
+       *
+       * wide-short keeps the definite height. There the two halves sit side by
+       * side precisely because there is no vertical room to give, and the rail
+       * scrolls itself; a card that grew instead would have nowhere to grow.
+       *
+       * The third row is auto rather than 1fr for the same reason. A 1fr row in
+       * a grid whose height is capped gets the capped height, not the content's,
+       * so the rail was handed 786px for 2,251px of writing and the record drew
+       * straight through the prose. Auto rows size to what is in them and the
+       * card is what overflows.
        */
-      className="grid h-[calc(100svh-1.5rem)] max-h-full w-full max-w-[1180px] grid-cols-1 grid-rows-[auto_auto_minmax(0,1fr)] overflow-hidden rounded-[14px] border border-line bg-paper p-3.5 shadow-[0_24px_80px_-20px_rgba(0,0,0,0.45)] sm:h-[calc(100svh-3rem)] wide-short:grid-cols-[minmax(0,1.55fr)_24px_minmax(0,1fr)] wide-short:grid-rows-[minmax(0,1fr)] lg:h-[622px] lg:max-h-[calc(100vh-5rem)] lg:grid-cols-[760px_40px_minmax(0,1fr)] lg:grid-rows-[minmax(0,1fr)] lg:p-6"
+      className="grid max-h-[calc(100svh-1.5rem)] w-full max-w-[1180px] grid-cols-1 grid-rows-[auto_auto_auto] overflow-y-auto overscroll-contain rounded-[14px] border border-line bg-paper p-3.5 shadow-[0_24px_80px_-20px_rgba(0,0,0,0.45)] sm:max-h-[calc(100svh-3rem)] wide-short:h-[calc(100svh-3rem)] wide-short:grid-cols-[minmax(0,1.55fr)_24px_minmax(0,1fr)] wide-short:grid-rows-[minmax(0,1fr)] wide-short:overflow-hidden lg:h-[622px] lg:max-h-[calc(100vh-5rem)] lg:grid-cols-[760px_40px_minmax(0,1fr)] lg:grid-rows-[minmax(0,1fr)] lg:overflow-hidden lg:p-6"
       style={{ '--c': color }}
     >
       {/* ── the gallery ───────────────────────────────────────────────────── */}
@@ -140,11 +187,21 @@ export default function ProjectCard({ project, onClose }) {
           // height back the same way, which is what stopped the record being cut
           // off below the card edge.
           //
-          // Below lg the card is not a fixed height, so there the aspect still
-          // sets it.
-          className={`relative flex aspect-[16/9] max-h-[30svh] shrink-0 items-center justify-center overflow-hidden rounded-[10px] border border-line wide-short:aspect-auto wide-short:max-h-none wide-short:min-h-0 wide-short:shrink wide-short:flex-1 lg:aspect-auto lg:max-h-none lg:min-h-0 lg:shrink lg:flex-1 ${WELL}`}
+          // Below lg the card scrolls, so the well has room to be the shape of
+          // what is in it: no aspect of its own, height set by the media, which
+          // caps itself at half the viewport. It used to be a 16/9 box capped at
+          // 30svh, which on a phone drew every drawing 317x179 whatever shape it
+          // actually was — a 0.55 portrait plan came out three inches wide.
+          className={`relative flex shrink-0 items-center justify-center overflow-hidden rounded-[10px] border border-line wide-short:min-h-0 wide-short:shrink wide-short:flex-1 lg:min-h-0 lg:shrink lg:flex-1 ${WELL}`}
         >
-          <MediaFrame item={item} title={project.title} />
+          <MediaFrame
+            item={item}
+            title={project.title}
+            // max-h-full is what contains it wherever the well has a height of
+            // its own; the svh cap is what gives the well a height where it
+            // does not.
+            className="max-h-[50svh] max-w-full wide-short:max-h-full lg:max-h-full"
+          />
 
           {/* The way to native size. Everything in here is drawn smaller than it
               was made, so this is not a flourish: it is how a plot becomes
@@ -270,7 +327,13 @@ export default function ProjectCard({ project, onClose }) {
       <div aria-hidden="true" />
 
       {/* ── the rail ──────────────────────────────────────────────────────── */}
-      <div className="flex min-h-0 min-w-0 flex-col max-lg:mt-3.5 wide-short:mt-0 wide-short:overflow-y-auto wide-short:overscroll-contain">
+      {/* min-h-0 only where the rail is inside a box of a fixed height and has to
+          shrink into it. Below lg it is the opposite: a grid item is allowed to
+          be smaller than its content once min-height is 0, and the row was then
+          sized at 496px for 1,961px of writing, so the record drew over the
+          prose. Letting min-height stay auto is what makes the row grow and the
+          card, rather than anything inside it, do the scrolling. */}
+      <div className="flex min-w-0 flex-col max-lg:mt-3.5 wide-short:mt-0 wide-short:min-h-0 wide-short:overflow-y-auto wide-short:overscroll-contain lg:min-h-0">
         <div className="label-mono flex shrink-0 items-center gap-2.5 wide-short:sticky wide-short:top-0 wide-short:z-10 wide-short:bg-paper wide-short:pb-1.5">
           <span
             aria-hidden="true"
@@ -306,51 +369,77 @@ export default function ProjectCard({ project, onClose }) {
          * Giving this one box the overflow removes that whole class of problem.
          * The title above it and the record below it stay put, so nothing
          * scannable can be scrolled out of sight; the prose is what moves.
+         *
+         * Below lg it does not scroll at all any more. Two nested scrollers on a
+         * phone is one too many — the outer card is the one that moves now — and
+         * the writing simply runs on and the card gets longer.
+         *
+         * The scrollbar is drawn rather than left to the platform. An overlay
+         * scrollbar is invisible until you are already scrolling, which is no
+         * use to someone deciding whether there is anything down there.
          */}
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1.5 wide-short:flex-none wide-short:overflow-visible">
-          <p className="mt-2.5 font-serif text-[1.02rem] leading-[1.55] lg:mt-3">
-            {project.subtitle}
-          </p>
-          <p className="mt-2.5 font-serif text-[0.9rem] leading-[1.62] text-soft lg:mt-3">
-            {project.intro[0]}
-          </p>
+        <div className="relative lg:flex lg:min-h-0 lg:flex-1 lg:flex-col">
+          <div
+            ref={proseRef}
+            className="min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1.5 [scrollbar-color:color-mix(in_srgb,var(--color-line)_60%,var(--color-ink))_transparent] [scrollbar-width:thin] max-lg:flex-none max-lg:overflow-visible wide-short:flex-none wide-short:overflow-visible [&::-webkit-scrollbar]:w-[5px] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[color-mix(in_srgb,var(--color-line)_60%,var(--color-ink))] [&::-webkit-scrollbar-track]:bg-transparent"
+          >
+            <p className="mt-2.5 font-serif text-[1.02rem] leading-[1.55] lg:mt-3">
+              {project.subtitle}
+            </p>
+            <p className="mt-2.5 font-serif text-[0.9rem] leading-[1.62] text-soft lg:mt-3">
+              {project.intro[0]}
+            </p>
 
-          {/*
-           * The write-up, which until now was on no page of the site.
-           *
-           * Two thousand words of it sat in sections[].body and the card showed
-           * the subtitle and one intro paragraph — the booklet PDF was the only
-           * place the writing existed. The media of those same sections has
-           * always been on the card; this puts the words back beside it, headed
-           * by the label the caption already uses, so a paragraph and the images
-           * it is about say the same "03 · Shape".
-           *
-           * Twelve of the eighteen projects carry no body text, and they render
-           * exactly as before: the map yields nothing and the box ends at the
-           * intro.
-           */}
-          {project.sections.map((s, i) =>
-            s.body.length === 0 ? null : (
-              <section key={s.heading} className="mt-5 lg:mt-6">
-                <h3 className="font-mono text-[0.58rem] font-medium uppercase tracking-[0.13em] text-[var(--c)]">
-                  {sectionLabel(i, s.heading)}
-                </h3>
-                {s.body.map((para, j) => (
-                  <p
-                    key={j}
-                    className="mt-2 font-serif text-[0.9rem] leading-[1.62] text-soft lg:mt-2.5"
-                  >
-                    {para}
-                  </p>
-                ))}
-              </section>
-            ),
-          )}
+            {/*
+             * The write-up, which until now was on no page of the site.
+             *
+             * Two thousand words of it sat in sections[].body and the card showed
+             * the subtitle and one intro paragraph — the booklet PDF was the only
+             * place the writing existed. The media of those same sections has
+             * always been on the card; this puts the words back beside it, headed
+             * by the label the caption already uses, so a paragraph and the images
+             * it is about say the same "03 · Shape".
+             *
+             * Twelve of the eighteen projects carry no body text, and they render
+             * exactly as before: the map yields nothing and the box ends at the
+             * intro.
+             */}
+            {project.sections.map((s, i) =>
+              s.body.length === 0 ? null : (
+                <section key={s.heading} className="mt-5 lg:mt-6">
+                  <h3 className="font-mono text-[0.58rem] font-medium uppercase tracking-[0.13em] text-[var(--c)]">
+                    {sectionLabel(i, s.heading)}
+                  </h3>
+                  {s.body.map((para, j) => (
+                    <p
+                      key={j}
+                      className="mt-2 font-serif text-[0.9rem] leading-[1.62] text-soft lg:mt-2.5"
+                    >
+                      {para}
+                    </p>
+                  ))}
+                </section>
+              ),
+            )}
+          </div>
+
+          {/* The last line, half cut by the bottom edge, was the whole problem:
+              a hard edge reads as a bug, a soft one reads as more text. It
+              clears the scrollbar rather than covering it, and it goes away at
+              the end so it never sits over the final line pretending. */}
+          <div
+            aria-hidden="true"
+            className={`pointer-events-none absolute bottom-0 left-0 right-2 hidden h-9 bg-gradient-to-b from-transparent to-paper transition-opacity duration-200 lg:block ${
+              more ? 'opacity-100' : 'opacity-0'
+            }`}
+          />
         </div>
 
-        {/* Smaller than the page sets it, and pinned to the foot of the rail:
-            the writing leads, the record is there to be scanned once. */}
-        <dl className="mt-auto grid shrink-0 grid-cols-2 wide-short:mt-3 gap-x-[18px] gap-y-[7px] border-t border-rule pt-3 lg:mt-3 lg:gap-y-[9px] lg:pt-3.5">
+        {/* Smaller than the page sets it, and pinned to the foot of the rail
+            where the rail has a foot: the writing leads, the record is there to
+            be scanned once. Below lg the card is as tall as its content, so
+            there is no foot to pin to and it simply follows the writing. */}
+        <dl className="mt-auto grid shrink-0 grid-cols-2 max-lg:mt-3.5 wide-short:mt-3 gap-x-[18px] gap-y-[7px] border-t border-rule pt-3 lg:mt-3 lg:gap-y-[9px] lg:pt-3.5">
           {record.map(([k, v, wide]) => (
             <div key={k} className={wide ? 'col-span-2' : undefined}>
               <dt className="mb-0.5 font-mono text-[0.54rem] font-medium uppercase tracking-[0.14em] text-muted">
