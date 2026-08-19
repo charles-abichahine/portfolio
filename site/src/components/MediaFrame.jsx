@@ -1,4 +1,21 @@
+import { useEffect, useState } from 'react'
 import { asset } from '../data/projects.js'
+
+// Live, not read once: the setting can be changed with the card open, and the
+// same query is what /work's index already listens to.
+function useReducedMotion() {
+  const [reduce, setReduce] = useState(
+    () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+  )
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const apply = () => setReduce(mq.matches)
+    apply()
+    mq.addEventListener('change', apply)
+    return () => mq.removeEventListener('change', apply)
+  }, [])
+  return reduce
+}
 
 /*
  * One piece of gallery media, contained and never cropped.
@@ -13,6 +30,15 @@ import { asset } from '../data/projects.js'
  * capped by the viewport.
  */
 export default function MediaFrame({ item, title, className = 'max-h-full max-w-full' }) {
+  // A loop is decoration that moves on its own, so it is the one thing here a
+  // reduced-motion setting is actually about. /work's hover covers already gate
+  // on this and simply never mount; a gallery item cannot do that, because it is
+  // the piece of evidence you stepped to. So it keeps its poster and gains the
+  // controls it never needed while it was autoplaying: still there, still
+  // playable, just not moving until it is asked to. The 'video' kind below is
+  // already user-started and is left alone.
+  const still = useReducedMotion()
+
   if (item.kind === 'loop') {
     const stem = item.src.replace(/\.webm$/, '')
     return (
@@ -20,7 +46,8 @@ export default function MediaFrame({ item, title, className = 'max-h-full max-w-
         // Keyed, or React reuses the element between items and swapping
         // <source> children does not reload a video.
         key={item.src}
-        autoPlay
+        autoPlay={!still}
+        controls={still}
         muted
         loop
         playsInline
