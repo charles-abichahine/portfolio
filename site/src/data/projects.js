@@ -1076,11 +1076,11 @@ const _projects = [
     date: '2024-05-12',
     title: 'Rings of Mars: Ring 4000',
     subtitle:
-      'An international competition imagining architecture for life on Mars: our entry, with Emilie El Chidiac, was selected among the Top 50.',
+      'A habitat ring set into a crater rim in Valles Marineris, 3D-printed from the regolith it stands on: farming, transport and living in one closed loop. A two-person entry to Marsception, placed in the Top 50.',
     year: '2024',
     module: 'International Competition',
     team: ['Charles Abi Chahine', 'Emilie El Chidiac'],
-    tools: ['Rhino', 'Illustrator'],
+    tools: ['Rhino', 'SubD', 'AI workflows', 'V-Ray'],
     tag: 'COMP',
     toolsShort: 'COMPETITION',
     cover: 'projects/marception/cover.webp',
@@ -1088,15 +1088,40 @@ const _projects = [
     award: 'Top 50 · Volume Zero',
     links: {},
     intro: [
-      'Marsception 2024 was an international competition imagining architecture for life on Mars. Developed with Emilie El Chidiac, our entry was selected among the Top 50.',
+      'How do you design a habitat for Mars? Marsception, run by Volume Zero, asked that in 2024, and our answer was a ring. Ring 4000 sits on the rugged rim of a crater inside Valles Marineris, a 3D-printed regolith shell holding farming, research, living and a transportation ring in one closed loop, with the long game that every crater gets its own ring until the rings make a community. It was an early bet that generative tools belonged on an architect’s desk, made when that still raised eyebrows.',
     ],
     sections: [
       {
-        heading: 'Top 50',
-        body: [],
-        media: [
-          { type: 'image', src: 'projects/marception/badge.webp', caption: 'Selected among the Top 50 entries.' },
+        heading: 'A ring in a crater',
+        body: [
+          'Three concentric circles. The inner one is a controlled farm under a glass facade, visible from every room so the researchers far from home keep a piece of Earth’s green in view. The middle circle is transportation. The outer circle is living and working space, and on the lowest level five sleeping pods give the crew comfort and protection against the Martian environment. The shell is 3D-printed regolith on the outside, high-density polyethylene on the inside for an air-tight seal, and BIPV solar panels over the facade; the canyon walls of Valles Marineris do the rest of the radiation shielding.',
         ],
+        media: [
+          { type: 'image', src: 'projects/marception/render.webp', caption: 'Ring 4000 on its crater rim inside Valles Marineris.' },
+        ],
+      },
+      {
+        heading: 'Why a ring',
+        body: [
+          'The craters are the site Mars already gives you, so the ring takes their shape instead of fighting it. And a ring suits everything a habitat needs: the ecosystem closes on itself, water split by electrolysis into oxygen and hydrogen, plants turning the crew’s CO₂ into food, the carbon and water reacting back into HDPE for printing and fuel for back-up power and vehicles; the transport runs in a loop; and expansion is simply the next crater over, 4,000 km of canyon to grow along.',
+        ],
+        media: [],
+      },
+      {
+        heading: 'How it was made',
+        body: [
+          'First the research: regolith melted into a paste and printed by drone robotics, and every surface shaped to stand at an angle that needs no support, because support structures are the thing nobody wants to print on Mars. Then the model, in Rhino with SubD, from the massing of the ring down to the sleeping pods. Then the part that was new at the time: feeding the geometry to generative image tools, when image generation was only just becoming a thing, to render concepts straight from the model, and finishing them in V-Ray.',
+        ],
+        media: [
+          { type: 'image', src: 'projects/marception/board.webp', caption: 'The competition board: the ring exploded by level, the plan, the closed loops of water, oxygen, food, HDPE and fuel, the pods and the transportation ring, and the long section through the crater pit.' },
+        ],
+      },
+      {
+        heading: 'What came of it',
+        body: [
+          'Top 50 at Marsception, with both our names on the public results page. And our first proof that generative tools and architecture could share a desk: an early bet, and it aged well.',
+        ],
+        media: [],
       },
     ],
   },
