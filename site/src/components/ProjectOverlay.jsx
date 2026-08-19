@@ -45,9 +45,31 @@ export default function ProjectOverlay() {
     const { overflow } = document.body.style
     document.body.style.overflow = 'hidden'
 
+    /*
+     * And take it out of the tab order and out of the accessibility tree.
+     *
+     * Locking the scroll only stopped the page moving. Tab still walked out of
+     * the card into the eighteen tiles, the island and the footer behind the
+     * blur, and every one of those tiles was still announced, so a dialog that
+     * says aria-modal was neither modal for the keyboard nor for a reader.
+     *
+     * Imperative rather than an `inert` prop, which React 19 would happily take:
+     * these three elements are rendered by App, and the overlay is a sibling of
+     * App in a second route tree (see routes.jsx), so there is no prop to pass.
+     * The three are the whole of what is behind — the nav, the page, the band —
+     * and the nested MediaLightbox needs none of this because it opens inside
+     * the dialog rather than beside it.
+     */
+    const behind = ['main', 'nav[aria-label="Site"]', 'footer']
+      .map((sel) => document.querySelector(sel))
+      .filter(Boolean)
+    behind.forEach((el) => { el.inert = true })
+
     return () => {
       document.removeEventListener('keydown', onKey)
       document.body.style.overflow = overflow
+      behind.forEach((el) => { el.inert = false })
+      // After the background is interactive again, or the tile cannot take it.
       returnTo.current?.focus?.()
     }
     // close is stable for the life of the overlay: background cannot change
