@@ -304,7 +304,7 @@ export default function CV() {
         <a
           href={`${base}cv.pdf`}
           download="Charles-Abi-Chahine-CV.pdf"
-          className="chrome-label text-[0.56rem] text-muted transition-colors hover:text-accent"
+          className="chrome-label text-[0.6875rem] text-muted transition-colors hover:text-accent"
         >
           CV (PDF) ↓
         </a>

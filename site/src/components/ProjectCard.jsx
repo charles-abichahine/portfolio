@@ -266,7 +266,12 @@ export default function ProjectCard({ project, onClose }) {
             )}
           </div>
           {many && (
-            <span className="ml-auto shrink-0 font-mono text-[0.6rem] tabular-nums tracking-[0.11em] text-muted">
+            <span
+              // Stepping the gallery changes nothing else a reader would notice,
+              // so this is the only thing that can say you moved.
+              aria-live="polite"
+              className="ml-auto shrink-0 font-mono text-[0.6875rem] tabular-nums tracking-[0.11em] text-muted"
+            >
               {String(at + 1).padStart(2, '0')} / {String(items.length).padStart(2, '0')}
             </span>
           )}
@@ -344,7 +349,7 @@ export default function ProjectCard({ project, onClose }) {
           <button
             type="button"
             onClick={onClose}
-            className="label-mono ml-auto rounded-[8px] border border-line px-2.5 py-1.5 text-muted transition-colors hover:border-accent hover:text-accent"
+            className="label-mono ml-auto rounded-[8px] border border-line px-2.5 py-1.5 text-[0.6875rem] text-muted transition-colors hover:border-accent hover:text-accent"
           >
             Close ✕
           </button>
@@ -435,35 +440,41 @@ export default function ProjectCard({ project, onClose }) {
           />
         </div>
 
-        {/* Smaller than the page sets it, and pinned to the foot of the rail
-            where the rail has a foot: the writing leads, the record is there to
-            be scanned once. Below lg the card is as tall as its content, so
-            there is no foot to pin to and it simply follows the writing. */}
+        {/* Pinned to the foot of the rail where the rail has a foot: the writing
+            leads, the record is there to be scanned once. Below lg the card is
+            as tall as its content, so there is no foot to pin to and it simply
+            follows the writing.
+
+            It used to be smaller than the page sets it as well — 8.64px labels
+            over 10.08px values — which made the one block on the card you are
+            meant to scan the one block you could not. Both are on the site's
+            0.6875rem floor now. The card does not grow: its height is fixed and
+            the rail's prose box is what gives the room back. */}
         <dl className="mt-auto grid shrink-0 grid-cols-2 max-lg:mt-3.5 wide-short:mt-3 gap-x-[18px] gap-y-[7px] border-t border-rule pt-3 lg:mt-3 lg:gap-y-[9px] lg:pt-3.5">
           {record.map(([k, v, wide]) => (
             <div key={k} className={wide ? 'col-span-2' : undefined}>
-              <dt className="mb-0.5 font-mono text-[0.54rem] font-medium uppercase tracking-[0.14em] text-muted">
+              <dt className="mb-0.5 font-mono text-[0.6875rem] font-medium uppercase tracking-[0.14em] text-muted">
                 {k}
               </dt>
-              <dd className="font-mono text-[0.63rem] leading-[1.4]">{v}</dd>
+              <dd className="font-mono text-[0.6875rem] leading-[1.4]">{v}</dd>
             </div>
           ))}
 
           {project.award && (
             <div className="col-span-2">
-              <dt className="mb-0.5 font-mono text-[0.54rem] font-medium uppercase tracking-[0.14em] text-muted">
+              <dt className="mb-0.5 font-mono text-[0.6875rem] font-medium uppercase tracking-[0.14em] text-muted">
                 Award
               </dt>
-              <dd className="font-mono text-[0.63rem] leading-[1.4] text-accent">{project.award}</dd>
+              <dd className="font-mono text-[0.6875rem] leading-[1.4] text-accent">{project.award}</dd>
             </div>
           )}
 
           {(project.links?.github || project.links?.blog) && (
             <div className="col-span-2">
-              <dt className="mb-0.5 font-mono text-[0.54rem] font-medium uppercase tracking-[0.14em] text-muted">
+              <dt className="mb-0.5 font-mono text-[0.6875rem] font-medium uppercase tracking-[0.14em] text-muted">
                 Links
               </dt>
-              <dd className="flex gap-3.5 font-mono text-[0.63rem] leading-[1.4]">
+              <dd className="flex gap-3.5 font-mono text-[0.6875rem] leading-[1.4]">
                 {project.links.github && (
                   <a
                     href={project.links.github}
