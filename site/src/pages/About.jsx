@@ -647,13 +647,20 @@ export default function About() {
             <h2 className="mb-1.5 text-[0.98rem] font-light leading-tight text-ink">{active.name}</h2>
             <p className={`${MONO} mb-3.5 text-muted`}>{active.cities}</p>
             {active.photo && (
+              /*
+               * object-top, and tall enough to hold a head. The photo is a 332x534
+               * portrait; a 296x112 slot centre-cropped it to a collar and a pair of
+               * folded arms. Pinning it to the top is only half the fix — at 112px
+               * the window on the source is 126px tall and a face is not, so the box
+               * has to be deep enough for one before the crop point matters.
+               */
               <img
                 src={`${base}${active.photo}`}
                 alt={active.kind === 'now' ? 'Charles Abi Chahine' : active.name}
                 width="296"
-                height="112"
+                height="176"
                 decoding="async"
-                className="mb-3.5 block h-28 w-full object-cover"
+                className="mb-3.5 block h-44 w-full object-cover object-top"
               />
             )}
             {active.stints?.length > 0 && (
