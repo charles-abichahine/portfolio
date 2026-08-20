@@ -104,8 +104,11 @@ export const education = [
     work: [
       {
         slug: 'lau-anfeh',
-        name: 'Anfeh',
-        text: ' final-year thesis: an urban re-imagination of a coastal town in North Lebanon, from its salt ponds, fishing and olive terraces.',
+        name: 'Point Nought',
+        /* The title is the project's; the town is not, so Anfeh moves into the
+           sentence. Losing it entirely would strand the only place name the
+           entry has, and the thesis is about that coast specifically. */
+        text: ' final-year thesis: reimagining the coastal town of Anfeh in North Lebanon from its salt ponds, fishing and olive terraces.',
       },
     ],
   },
