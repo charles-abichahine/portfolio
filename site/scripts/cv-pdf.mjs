@@ -169,7 +169,11 @@ const html = `<!doctype html>
   * { box-sizing: border-box; }
   /* The ground stays white here even though the site's paper is a tinted grey:
      a CV is printed as often as it is read on screen, and a full-bleed tint is
-     both wrong on paper and expensive in toner. The ink ramp is the site's. */
+     both wrong on paper and expensive in toner. The ink ramp is the site's.
+     Written as literals rather than read from index.css because this document
+     is rendered in a bare Chrome with no Tailwind, so the values have to be
+     kept in step by hand: accent #c9261b and muted #6a707b are the retuned
+     light ramp. */
   body { margin: 0; font-family: "Space Grotesk", sans-serif;
          color: #16181d; font-size: 9.1pt; line-height: 1.32; -webkit-print-color-adjust: exact; }
   /* Prose, matching the page: every full sentence is set in the serif and
@@ -182,7 +186,7 @@ const html = `<!doctype html>
   header { display: flex; justify-content: space-between; align-items: flex-end;
            padding-bottom: 2pt; margin-bottom: 11pt; }
   h1 { font-size: 20pt; font-weight: 700; letter-spacing: -0.01em; margin: 0; line-height: 1; }
-  h1 span { color: #d92b1f; }
+  h1 span { color: #c9261b; }
   .role { color: #4e535c; margin-top: 4pt; }
   /* Not uppercased like the other mono labels: an address a recruiter copies
      out should read exactly as it is typed. */
@@ -213,7 +217,7 @@ const html = `<!doctype html>
        height: 0.8px; background: #c9ccd1; }
   h2 span { position: relative; display: inline-block; }
   h2 span::before { content: ''; position: absolute; left: 0; right: 0.1em; top: -4pt;
-       height: 0.8px; background: #d92b1f; }
+       height: 0.8px; background: #c9261b; }
   /* Sections may flow across the page break; only an individual entry is kept
      whole. Keeping whole sections together left half of page one empty. */
   section { margin-bottom: 8.5pt; }
@@ -232,14 +236,14 @@ const html = `<!doctype html>
    * than "2025–2026". Stacking is free here: every entry runs at least three
    * lines, so the second date sits inside height the row already had.
    */
-  .when { flex: 0 0 10mm; color: #d92b1f; font-variant-numeric: tabular-nums;
+  .when { flex: 0 0 10mm; color: #c9261b; font-variant-numeric: tabular-nums;
           letter-spacing: 0.02em; padding-top: 1pt; }
   .range { display: inline-flex; flex-direction: column; align-items: center; }
   /* 0.2mm is 0.76px, which matches the 0.8px hairline the section rules use.
      It was 0.35mm, or 1.31px, so the date rule sat 1.65x heavier than every
      other rule in the document: the width was given in mm and the hairlines in
      px, and the two drifted. On the page they already agree, both being 1px. */
-  .tick { width: 0.2mm; height: 1.8mm; background: #d92b1f; margin: 0.6mm 0; }
+  .tick { width: 0.2mm; height: 1.8mm; background: #c9261b; margin: 0.6mm 0; }
   /* Nothing closes an ongoing role, so the rule runs on past where the second
      year would have sat. That overrun is what reads as still running. */
   .tick.open { height: 3mm; }
@@ -249,7 +253,7 @@ const html = `<!doctype html>
   .what h3 { font-size: 9.6pt; font-weight: 600; margin: 0 0 3pt; }
   /* The place rides on the title line rather than taking one of its own, the
      same as the page. Eight entries, eight lines back. */
-  .where { color: #767d88; margin-left: 3mm; }
+  .where { color: #6a707b; margin-left: 3mm; }
   ul { margin: 0; padding-left: 3.4mm; color: #4e535c; }
   li { margin-bottom: 1.6pt; }
   .notes { color: #4e535c; margin: 0; }
@@ -262,7 +266,7 @@ const html = `<!doctype html>
    * reason anyone could read.
    */
   .grp { display: flex; gap: 6mm; margin-bottom: 2.2pt; break-inside: avoid; }
-  .grp b { flex: 0 0 12mm; color: #d92b1f; font-weight: 400; }
+  .grp b { flex: 0 0 12mm; color: #c9261b; font-weight: 400; }
   .grp p { margin: 0; flex: 1; color: #4e535c; }
   /*
    * Skills: one grid for the whole block rather than a flex row each. The label
@@ -272,7 +276,7 @@ const html = `<!doctype html>
    * why the labels were previously boxed into a fixed width and left to wrap.
    */
   .pairs { display: grid; grid-template-columns: max-content 1fr; column-gap: 6mm; row-gap: 2.2pt; }
-  .pairs b { color: #d92b1f; font-weight: 400; white-space: nowrap; }
+  .pairs b { color: #c9261b; font-weight: 400; white-space: nowrap; }
   .pairs p { margin: 0; color: #4e535c; font-family: "Space Grotesk", sans-serif; }
   /* The project names, matching the page: the only accent in the body, marking
      the work rather than the structure around it. On the page these are also

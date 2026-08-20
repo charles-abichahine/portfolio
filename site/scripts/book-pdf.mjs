@@ -267,6 +267,10 @@ ${FONTS}
 @page { size: A4 landscape; margin: 0; }
 * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 html, body { margin: 0; padding: 0; }
+/* The site's light ramp as literals: nothing here goes through Tailwind, so
+   accent #c9261b, muted #6a707b and blue #1a5fd0 are kept in step with
+   index.css by hand. White ground rather than the site's tinted paper, for the
+   same reason the CV uses one: this is a document that gets printed. */
 body { font-family: "Space Grotesk", sans-serif; color: #16181d; background: #fff; }
 
 .page { width: 297mm; height: 210mm; padding: 15mm 16mm; overflow: hidden;
@@ -276,8 +280,8 @@ body { font-family: "Space Grotesk", sans-serif; color: #16181d; background: #ff
 
 .mono, .eyebrow, .runner, dt { font-family: "IBM Plex Mono", monospace; }
 .eyebrow { font-size: 7pt; letter-spacing: 0.18em; text-transform: uppercase;
-           color: #767d88; margin: 0 0 6mm; }
-.dot { color: #d92b1f; }
+           color: #6a707b; margin: 0 0 6mm; }
+.dot { color: #c9261b; }
 .body, .lede, .sub, figcaption { font-family: "Spectral", Georgia, serif; }
 
 /* cover */
@@ -287,36 +291,36 @@ body { font-family: "Space Grotesk", sans-serif; color: #16181d; background: #ff
                margin: 5mm 0 0; letter-spacing: 0.06em; }
 .cover .lede { font-size: 13pt; line-height: 1.6; color: #4e535c; margin: 9mm 0 0; max-width: 150mm; }
 .cover-foot { display: flex; align-items: flex-end; justify-content: space-between; }
-.cover-foot .mono { font-size: 7.5pt; color: #767d88; margin: 0; letter-spacing: 0.1em; }
+.cover-foot .mono { font-size: 7.5pt; color: #6a707b; margin: 0; letter-spacing: 0.1em; }
 .belts { display: flex; gap: 3mm; }
 .belts i { display: block; width: 26mm; height: 2pt; }
-.b1 { background: #d92b1f } .b2 { background: #1f6feb } .b3 { background: #1a7f37 } .b4 { background: #a2571a }
+.b1 { background: #c9261b } .b2 { background: #1a5fd0 } .b3 { background: #1a7f37 } .b4 { background: #a2571a }
 
 /* contents */
 .contents ol { list-style: none; margin: 0; padding: 0; flex: 1; }
 .contents li { display: grid; grid-template-columns: 14mm 1fr 62mm 20mm;
                align-items: baseline; gap: 4mm; padding: 4.4mm 0;
                border-bottom: 0.4pt solid #e0e3e7; }
-.contents .num { font-family: "IBM Plex Mono", monospace; font-size: 7.5pt; color: #d92b1f; }
+.contents .num { font-family: "IBM Plex Mono", monospace; font-size: 7.5pt; color: #c9261b; }
 .contents .ct { font-size: 13pt; font-weight: 600; letter-spacing: -0.01em; }
 .contents .cm, .contents .cy { font-family: "IBM Plex Mono", monospace; font-size: 7.5pt;
-                               color: #767d88; letter-spacing: 0.08em; text-transform: uppercase; }
+                               color: #6a707b; letter-spacing: 0.08em; text-transform: uppercase; }
 .contents .cy { text-align: right; }
-.contents .foot { font-size: 7.5pt; color: #767d88; margin: 6mm 0 0; letter-spacing: 0.08em; }
+.contents .foot { font-size: 7.5pt; color: #6a707b; margin: 6mm 0 0; letter-spacing: 0.08em; }
 
 /* project title page */
 .pp { flex-direction: row; gap: 12mm; }
 .pp-left { width: 96mm; flex: none; display: flex; flex-direction: column; }
 .pp h2 { font-size: 24pt; font-weight: 700; letter-spacing: -0.02em; margin: 0; line-height: 1.08; }
 .award { font-family: "IBM Plex Mono", monospace; font-size: 7pt; letter-spacing: 0.14em;
-         text-transform: uppercase; color: #d92b1f; margin: 3.5mm 0 0; }
+         text-transform: uppercase; color: #c9261b; margin: 3.5mm 0 0; }
 .pp .sub { font-size: 11pt; line-height: 1.5; margin: 5mm 0 0; color: #16181d; }
 .pp .body { font-size: 9.2pt; line-height: 1.62; color: #4e535c; margin: 4mm 0 0; }
 .meta { margin: auto 0 0; padding-top: 4mm; border-top: 0.6pt solid #16181d;
         display: grid; grid-template-columns: 1fr 1fr; gap: 3mm 5mm; }
 .meta .wide { grid-column: span 2; }
 .meta dt { font-size: 6.4pt; letter-spacing: 0.16em; text-transform: uppercase;
-           color: #767d88; margin: 0 0 1mm; }
+           color: #6a707b; margin: 0 0 1mm; }
 .meta dd { font-family: "IBM Plex Mono", monospace; font-size: 7.4pt; margin: 0; line-height: 1.35; }
 .pp-hero { flex: 1; margin: 0; min-width: 0; display: flex; }
 .pp-hero img { width: 100%; height: 100%; object-fit: cover; border: 0.4pt solid #e0e3e7; }
@@ -329,7 +333,7 @@ body { font-family: "Space Grotesk", sans-serif; color: #16181d; background: #ff
 .cell img { width: 100%; flex: 1; min-height: 0; object-fit: contain; object-position: center top; }
 .cell figcaption { font-size: 7.6pt; line-height: 1.4; color: #4e535c; margin: 2.5mm 0 0; }
 .runner { font-size: 7pt; letter-spacing: 0.14em; text-transform: uppercase;
-          color: #767d88; margin: 6mm 0 0; }
+          color: #6a707b; margin: 6mm 0 0; }
 
 /* closing */
 .closing { justify-content: space-between; }

@@ -1,5 +1,6 @@
 import { Fragment } from 'react'
 import FooterSlot from '../components/FooterSlot.jsx'
+import { FooterDownload } from '../components/Footer.jsx'
 import ProjectLink from '../components/ProjectLink.jsx'
 import {
   awards,
@@ -192,11 +193,16 @@ export default function CV() {
             with paper type, and on a page whose whole job is handing over a
             file, the file is the one. 10px is the pills' radius, written out
             because it now appears in three files; worth a token if a fourth
-            wants it. */}
+            wants it.
+            Set at the site's 0.6875rem floor like every other label: at 0.6rem
+            this was 9.6px, which is smaller than the colophon under it and the
+            wrong size for the page's primary action. The padding is unchanged —
+            it was drawn around a 44px-ish target, and 1.4px of type does not
+            change what the block wants to be. */}
         <a
           href={`${base}cv.pdf`}
           download="Charles-Abi-Chahine-CV.pdf"
-          className="shrink-0 whitespace-nowrap rounded-[10px] border border-ink bg-ink px-5 py-3 font-mono text-[0.6rem] uppercase leading-none tracking-[0.14em] text-paper transition-colors hover:border-accent hover:bg-accent"
+          className="shrink-0 whitespace-nowrap rounded-[10px] border border-ink bg-ink px-5 py-3 font-mono text-[0.6875rem] uppercase leading-none tracking-[0.14em] text-paper transition-colors hover:border-accent hover:bg-accent"
         >
           Download PDF ↓
         </a>
@@ -301,13 +307,9 @@ export default function CV() {
           behind you by the time you have read to the end, which is also the
           moment you are most likely to want the file. */}
       <FooterSlot>
-        <a
-          href={`${base}cv.pdf`}
-          download="Charles-Abi-Chahine-CV.pdf"
-          className="chrome-label text-[0.6875rem] text-muted transition-colors hover:text-accent"
-        >
-          CV (PDF) ↓
-        </a>
+        <FooterDownload href={`${base}cv.pdf`} download="Charles-Abi-Chahine-CV.pdf">
+          Download CV (PDF)
+        </FooterDownload>
       </FooterSlot>
     </div>
   )

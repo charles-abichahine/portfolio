@@ -5,8 +5,14 @@ import { NOW, SITES, START, TIMELINE, TOUCHES } from '../data/journey.js'
 
 const base = import.meta.env.BASE_URL
 
-// One small uppercase size carries every label on this page.
-const MONO = 'font-mono text-[0.56rem] uppercase tracking-[0.2em] font-normal'
+// One small uppercase size carries every label on this page. 0.6875rem, the
+// site's floor for anything informational: at 0.56rem this was 8.96px, and it
+// sets the map's site names, the rail's years and everything in the place card,
+// which is most of the reading on the page. Nothing collides at the new size —
+// the site names are revealed one at a time on hover rather than all at once,
+// and the five year ticks sit a quarter of the rail apart, which is twice the
+// width of the widest of them.
+const MONO = 'font-mono text-[0.6875rem] uppercase tracking-[0.2em] font-normal'
 
 const CLOSE_DELAY = 160
 
@@ -612,7 +618,9 @@ export default function About() {
 
         {/* Four coloured bars mean nothing on their own, so the one you are
             pointing at says what it is. */}
-        <div className="relative mt-3 h-[9px]">
+        {/* The reserved height follows the type: 9px was drawn around the old
+            8.96px label. */}
+        <div className="relative mt-3 h-[11px]">
           {YEAR_TICKS.map((y) => (
             <span
               key={y}
