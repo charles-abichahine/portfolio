@@ -209,8 +209,8 @@ export default function Work() {
   const pillsRef = useRef(null)
   const stripRef = useRef(null)
   const trackRef = useRef(null)
-  const thumbRef = useRef(null)
   const indRef = useRef(null)
+  const jumpRef = useRef(() => {})
   const fadeLRef = useRef(null)
   const fadeRRef = useRef(null)
   const prevRef = useRef(null)
@@ -247,7 +247,6 @@ export default function Work() {
   useEffect(() => {
     const el = stripRef.current
     const track = trackRef.current
-    const thumb = thumbRef.current
     const ind = indRef.current
     const prev = prevRef.current
     const next = nextRef.current
@@ -261,16 +260,11 @@ export default function Work() {
     let cursor = null
 
     const syncThumb = () => {
-      if (!track || !thumb || !ind) return
+      if (!track || !ind) return
       const overflow = maxScroll()
       const can = overflow > 1
       ind.style.opacity = can ? '1' : '0'
       ind.style.pointerEvents = can ? 'auto' : 'none'
-      const trackW = track.clientWidth
-      const thumbW = Math.max(28, Math.round(trackW * (el.clientWidth / el.scrollWidth)))
-      const pos = overflow > 0 ? (el.scrollLeft / overflow) * (trackW - thumbW) : 0
-      thumb.style.width = `${thumbW}px`
-      thumb.style.transform = `translateX(${pos}px)`
       const atStart = el.scrollLeft <= 8
       const atEnd = el.scrollLeft >= overflow - 8
       if (fadeLRef.current) fadeLRef.current.style.opacity = can && !atStart ? '1' : '0'
@@ -289,22 +283,33 @@ export default function Work() {
         btn.style.pointerEvents = btn.disabled ? 'none' : 'auto'
       }
 
-      // "03 / 18": which tile the strip starts on. The first one whose left edge
-      // has not been scrolled past is the first you can actually see whole, and
-      // it is read off the tiles rather than divided out of the scroll position,
-      // which would go wrong the moment the tiles are not all one width.
-      if (countRef.current) {
-        const lis = el.querySelectorAll('li')
-        const edge = el.getBoundingClientRect().left - 1
-        let first = 0
-        for (let i = 0; i < lis.length; i++) {
-          if (lis[i].getBoundingClientRect().left >= edge) {
-            first = i
-            break
-          }
+      // The lit window: each glyph cell lights while its tile is on screen, so
+      // the strip below the cards is a map of where you are in them. Visibility
+      // is read off the tiles rather than divided out of the scroll position,
+      // which would go wrong the moment the tiles are not all one width; the
+      // 24px slack keeps a sliver of a tile from lighting its cell.
+      const lis = el.querySelectorAll('li')
+      const cells = track.querySelectorAll('button')
+      const box = el.getBoundingClientRect()
+      let first = -1
+      let last = -1
+      for (let i = 0; i < lis.length; i++) {
+        const r = lis[i].getBoundingClientRect()
+        const vis = r.right > box.left + 24 && r.left < box.right - 24
+        if (vis) {
+          if (first < 0) first = i
+          last = i
         }
+        if (cells[i]) cells[i].dataset.lit = vis ? 'true' : 'false'
+      }
+      if (countRef.current) {
         const pad = (n) => String(n).padStart(2, '0')
-        countRef.current.textContent = `${pad(first + 1)} / ${pad(lis.length)}`
+        countRef.current.textContent =
+          first < 0
+            ? ''
+            : first === last
+              ? `${pad(first + 1)} / ${pad(lis.length)}`
+              : `${pad(first + 1)}–${pad(last + 1)} / ${pad(lis.length)}`
         countRef.current.style.opacity = can ? '1' : '0'
       }
     }
@@ -465,17 +470,16 @@ export default function Work() {
       e.stopPropagation()
     }
 
-    // ── scrubber: the whole row is the target, not the 4px bar ────────────────
+    // ── the index strip: the whole row is the target, not just the glyphs ─────
     let scrubbing = false
+    let scrubMoved = false
     const scrub = (clientX) => {
-      if (!track || !thumb) return
+      if (!track) return
       const rect = track.getBoundingClientRect()
-      const thumbW = thumb.offsetWidth
-      const span = rect.width - thumbW
-      const x = Math.max(0, Math.min(clientX - rect.left - thumbW / 2, span))
-      const to = span > 0 ? (x / span) * maxScroll() : 0
-      // a click on the track eases across; a drag tracks the pointer exactly
-      if (scrubbing) {
+      const t = Math.max(0, Math.min((clientX - rect.left) / rect.width, 1))
+      const to = t * maxScroll()
+      // a press eases across; a drag tracks the pointer exactly
+      if (scrubMoved) {
         stopGlide()
         el.scrollLeft = to
       } else {
@@ -484,15 +488,27 @@ export default function Work() {
     }
     const onIndDown = (e) => {
       if (maxScroll() <= 0) return
-      scrub(e.clientX)
       scrubbing = true
+      scrubMoved = false
+      scrub(e.clientX)
       ind?.setPointerCapture?.(e.pointerId)
     }
     const onIndMove = (e) => {
-      if (scrubbing) scrub(e.clientX)
+      if (!scrubbing) return
+      scrubMoved = true
+      scrub(e.clientX)
     }
     const endScrub = () => {
       scrubbing = false
+    }
+    // A cell press travels to its exact project; a drag that happens to end on
+    // a cell must not. scrubMoved is the same idea the strip's own drag uses.
+    jumpRef.current = (i) => {
+      if (scrubMoved) {
+        scrubMoved = false
+        return
+      }
+      glideTo(Math.min(i * tileStep(), maxScroll()))
     }
 
     el.addEventListener('wheel', onWheel, { passive: false })
@@ -577,7 +593,7 @@ export default function Work() {
           fixed at top centre — a right-aligned pill row would otherwise run
           straight into it around 1024px. */}
       <div className="flex min-h-0 flex-1 flex-col pt-[68px] lg:justify-center lg:pt-[76px]">
-        <div className="flex shrink-0 flex-col gap-3 px-6 pb-4 lg:flex-row lg:items-center lg:justify-between lg:gap-6 lg:px-10">
+        <div className="flex shrink-0 flex-col gap-3 px-6 pb-4 lg:flex-row lg:items-center lg:justify-between lg:gap-6 lg:px-10 lg:pb-10">
           <div className="flex items-center gap-3.5">
             <span className={`${MONO} text-ink`}>Work</span>
             {/* Pressing a pill replaces the strip and changes nothing else that
@@ -703,25 +719,35 @@ export default function Work() {
           </button>
         </div>
 
-        {/* Scroll position (desktop filmstrip only). The whole row is the hit
-            target, not the bar — click to ease across, drag to scrub. The count
-            sits outside that target, so reading it is not a way to scrub by
-            accident. A bar says how far along; a number says how far along out
-            of how many, which is the thing you wanted to know. */}
-        <div className="mt-2.5 hidden shrink-0 items-center gap-3.5 px-10 lg:flex">
+        {/* The index strip (desktop filmstrip only): one glyph per project on
+            a hairline rule, the visible window lit in its belt colour and
+            marked on the rule above. Not a scrollbar wearing decoration but a
+            map of the collection: the categories read as bands, a press
+            travels to that project, and the whole row still scrubs. The cells
+            stay out of the tab order because the strip region already has
+            arrow keys, Home and End; eighteen extra stops would be noise, not
+            access. */}
+        <div className="mt-10 hidden shrink-0 items-center gap-3.5 px-10 lg:flex">
           <div
             ref={indRef}
-            className="group flex h-[26px] flex-1 cursor-pointer touch-none items-center transition-opacity duration-300"
+            className="flex flex-1 cursor-pointer touch-none transition-opacity duration-300"
           >
-            <div
-              ref={trackRef}
-              className={`relative h-[4px] w-full bg-line transition-[height] duration-150 group-hover:h-[7px] ${R}`}
-            >
-              <div
-                ref={thumbRef}
-                className={`absolute left-0 top-0 h-full bg-soft transition-colors duration-150 group-hover:bg-ink ${R}`}
-                style={{ width: '80px' }}
-              />
+            <div ref={trackRef} className="flex w-full items-stretch border-t border-line">
+              {filtered.map((p, i) => (
+                <button
+                  key={p.slug}
+                  type="button"
+                  tabIndex={-1}
+                  data-lit="false"
+                  title={p.title}
+                  aria-label={`Go to ${p.title}`}
+                  onClick={() => jumpRef.current(i)}
+                  style={{ '--b': beltFor(p).color }}
+                  className="relative flex h-[30px] flex-1 items-end justify-center pb-[4px] text-muted opacity-35 transition-[opacity,color] duration-200 after:absolute after:-top-px after:left-1.5 after:right-1.5 after:h-[1.5px] after:bg-[var(--b)] after:opacity-0 after:transition-opacity after:duration-200 hover:opacity-100 hover:text-[var(--b)] data-[lit=true]:opacity-100 data-[lit=true]:text-[var(--b)] data-[lit=true]:after:opacity-100"
+                >
+                  <ProjectGlyph slug={p.slug} className="h-[17px] w-[17px]" />
+                </button>
+              ))}
             </div>
           </div>
           <span
