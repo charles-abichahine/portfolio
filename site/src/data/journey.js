@@ -101,17 +101,6 @@ export const SITES = [
 ]
 
 /*
- * The work with no site at all. Not buildings, so they never leave the origin:
- * they ring the point he is standing on, and the strands that do reach out come
- * from the same place.
- */
-export const INSTRUMENTS = [
-  { slug: 'sensi', name: 'Sensi', yr: 2026, belt: 'accent' },
-  { slug: 'legoarch', name: 'lEgoarCh', yr: 2026, belt: 'accent' },
-  { slug: 'facadeiq', name: 'FacadeIQ', yr: 2026, belt: 'blue' },
-]
-
-/*
  * Everything that lights the world, with the year it first does. Three sources:
  * the posts and degrees above, the project sites, and the countries in places.js
  * he has travelled to. A visited country has no date in the data, so it lights
@@ -122,18 +111,3 @@ export const TOUCHES = [
   ...SITES.filter((s) => s.at).map((s) => ({ yr: s.yr, lon: s.at[0], lat: s.at[1] })),
   ...places.filter((p) => p.kind === 'visited').map((p) => ({ yr: 2025, lon: p.lon, lat: p.lat })),
 ]
-
-/*
- * Where the strands leave from, in a given year: the desk the most recent piece
- * of work was made at.
- *
- * Deliberately not "where he is". Deriving that from the CV put him in Kuwait
- * City in 2026, because the Kuwait post outlasts the master on paper — while
- * every 2026 project was made at IAAC in Barcelona. The drawing is about work,
- * so the work says where the origin is, and nothing here has to claim what his
- * current address is.
- */
-export const originAt = (year) => {
-  const done = SITES.filter((s) => s.yr <= year).sort((a, b) => b.yr - a.yr)
-  return done.length ? done[0].from : BYBLOS
-}

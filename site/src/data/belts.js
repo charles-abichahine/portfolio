@@ -7,10 +7,12 @@ import { projects } from './projects.js'
  * This is a landing-page grouping only. Design & Research was 11 of 19 and
  * swallowed the whole field; pulling these three out gives 5 / 3 / 8 / 3.
  *
- * `projects.js` is deliberately untouched, because /work filters on the three
- * real categories and has to keep working. That does mean the landing and /work
- * group the same nineteen projects differently, which is a known loose end: the
- * landing shows a Practice belt that /work has no filter for.
+ * `projects.js` is deliberately untouched: Practice is a predicate over slugs
+ * here rather than a fifth category on the records, so the project data stays
+ * the record of what a project is and this file stays the record of how the site
+ * groups it. /work builds its filter bar from BELTS, so the landing and the
+ * index show the same four groups drawn from the same definitions, and adding a
+ * belt adds a filter without touching either page.
  *
  * Rings of Mars (`marception`) is an international competition, not professional
  * practice, so it stays in Design & Research.

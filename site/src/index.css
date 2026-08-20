@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /*
- * Three self-hosted families, latin subset only, 128KB in total.
+ * Three self-hosted families, latin subset only, 106KB in total.
  *
  * Self-hosted rather than loaded from Google's CDN: fonts block first paint, and
  * a third-party connection on every visit costs a DNS lookup and a TLS handshake
@@ -11,7 +11,9 @@
  * Space Grotesk is one variable file covering 300 to 700 — every sans weight the
  * site uses for the price of a single request. Spectral and IBM Plex Mono are
  * not variable, so only the weights actually in use are shipped: Spectral has no
- * 600 here because headings are sans and body copy never goes past 500.
+ * 600 here because headings are sans and body copy never goes past 500, and no
+ * italic because nothing on the site sets one — the 400 and the 500 are both
+ * live, the 500 as the dark theme's serif (see the weight rule further down).
  *
  * font-display: swap everywhere. The fallback renders immediately and is
  * replaced when the file lands, which is the right trade for a portfolio: text
@@ -30,13 +32,6 @@
   font-weight: 400;
   font-display: swap;
   src: url("/fonts/spectral-400.woff2") format("woff2");
-}
-@font-face {
-  font-family: "Spectral";
-  font-style: italic;
-  font-weight: 400;
-  font-display: swap;
-  src: url("/fonts/spectral-400-italic.woff2") format("woff2");
 }
 @font-face {
   font-family: "Spectral";
