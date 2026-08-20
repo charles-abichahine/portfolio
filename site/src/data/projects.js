@@ -43,6 +43,12 @@ const _projects = [
     title: 'Sensi',
     subtitle:
       'A sensory copilot for floor plans: it reads a plan and scores how each room will feel across six coupled senses, personalized to the person who will live in it.',
+    // The card's one-line caption. The index renders it with no clamp and no
+    // truncation, so length is controlled here, not in CSS: one complete short
+    // sentence, ending in a period, and it has to fit one line on the
+    // narrowest desktop tile (~334px at a 660px window) — in practice, keep it
+    // under about 48 characters.
+    tagline: 'A sensory copilot for floor plans.',
     year: '2026',
     module: 'AIA Studio · MaCAD, IAAC',
     team: ['Charles Abi Chahine', 'Emilie El Chidiac', 'Lakzhmy Mari Zaro', 'María Sánchez Domínguez'],
@@ -112,6 +118,7 @@ const _projects = [
     title: 'Encoding Urban Risk',
     subtitle:
       'A machine-learning pipeline that classifies London street segments into low, medium, and high morphological-risk typologies from public spatial data alone, then tests whether the reading survives a move to another city.',
+    tagline: 'Street risk classified from open map data.',
     year: '2026',
     module: 'Data Encoding · MaCAD, IAAC',
     team: ['Charles Abi Chahine', 'Emilie El Chidiac', 'Lakzhmy Mari Zaro', 'María Sánchez Domínguez'],
@@ -193,6 +200,7 @@ const _projects = [
     title: 'lEgoarCh',
     subtitle:
       'From a one-sentence prompt to a priced, buildable LEGO set: generative AI proposes the form, deterministic computation proves it stands.',
+    tagline: 'A prompt becomes a buildable LEGO set.',
     year: '2026',
     module: 'Generative AI Seminar · MaCAD, IAAC',
     team: ['Charles Abi Chahine', 'Emilie El Chidiac'],
@@ -270,6 +278,7 @@ const _projects = [
     title: 'Breathing Mass',
     subtitle:
       'A hyperbuilding for Santiago conceived as a vertical lung: a tower that captures, cleans, and redistributes the city’s polluted air through a breathing core, resolved as a topology-optimized structure and a performance-driven facade.',
+    tagline: 'A tower that breathes for Santiago.',
     year: '2026',
     module: 'BIMSC Studio · MaCAD, IAAC',
     team: ['Charles Abi Chahine', 'Ramy Ayoub', 'Hani Karime'],
@@ -352,6 +361,7 @@ const _projects = [
     title: 'The Huddle',
     subtitle:
       'A wind-adaptive research & education hub with expedition basecamp in Punta Arenas, Chile: discrete modules aggregated against a perpetually windy subpolar climate.',
+    tagline: 'A research hub huddled against the wind.',
     year: '2025/26',
     module: 'ACESD Studio · MaCAD, IAAC',
     team: ['Charles Abi Chahine', 'Emilie El Chidiac', 'María Sánchez Domínguez', 'Lakzhmy Mari Zaro'],
@@ -440,6 +450,7 @@ const _projects = [
     title: 'The Luminous Stratum',
     subtitle:
       'A “volume of sedimented light” inserted into Cairo’s historic fabric: an independent lattice that hovers within a market void, filtering the harsh sun without ever touching the historic walls.',
+    tagline: 'Sedimented light over a Cairo market.',
     year: '2025',
     module: 'Complex Forming · MaCAD, IAAC',
     team: ['Charles Abi Chahine'],
@@ -503,6 +514,7 @@ const _projects = [
     title: 'FacadeIQ',
     subtitle:
       'An interactive tool that syncs facade design with live financial feasibility: linking geometry to real-time cost and efficiency so typologies can be prototyped against budget as they are drawn.',
+    tagline: 'Facade design priced as it is drawn.',
     year: '2026',
     module: 'Cloud Data Management · MaCAD, IAAC',
     team: ['Charles Abi Chahine'],
@@ -576,6 +588,7 @@ const _projects = [
     title: 'Analyzing Narkomfin Through Its Graph',
     subtitle:
       'The Narkomfin Building rebuilt as a spatial graph: centrality and community detection recover Ginzburg’s vertical living cells from topology alone, and a GraphSAGE classifier reads room types the plan cannot show.',
+    tagline: 'The Narkomfin building as a spatial graph.',
     year: '2026',
     module: 'Graph Machine Learning · MaCAD, IAAC',
     team: ['Charles Abi Chahine', 'Emilie El Chidiac', 'Lakzhmy Mari Zaro', 'María Sánchez Domínguez'],
@@ -671,6 +684,7 @@ const _projects = [
     title: 'Hyperbuilding 01 · Integrative Modeling',
     subtitle:
       'A data-driven parametric skyscraper complex inspired by the lung: three towers shaped by a deterministic Grasshopper script, with a lattice core, plug-in volumes, and an adaptive facade of 67,218 panels, documented through Speckle and Revit.',
+    tagline: 'Three towers from one deterministic script.',
     year: '2026',
     module: 'Integrative Modeling · MaCAD, IAAC',
     team: ['Ramy Ayoub', 'Charles Abi Chahine', 'Hani Karime'],
@@ -740,6 +754,7 @@ const _projects = [
     title: 'Hyperbuilding 01 · Collaborative Workflow',
     subtitle:
       'An automated Speckle pipeline that fires on every model push: traversing Grasshopper and Rhino geometry, extracting structured properties, and exporting to Excel and Google Sheets, so architectural analytics become repeatable instead of manual.',
+    tagline: 'Model data shipped on every push.',
     year: '2026',
     module: 'Collaborative Workflows · MaCAD, IAAC',
     team: ['Ramy Ayoub', 'Hani Karime', 'Charles Abi Chahine'],
@@ -795,6 +810,7 @@ const _projects = [
     title: 'Revitalizing the Tsukiji Fish Market',
     subtitle:
       'An environmental analysis of a 19-hectare redevelopment on Tokyo’s former Tsukiji market: reading the city’s climate and the building’s behaviour with Ladybug, Infrared, and Galapagos to drive formal change.',
+    tagline: 'The Tsukiji site put under Tokyo’s sun.',
     year: '2025',
     module: 'Environmental Analysis · MaCAD, IAAC',
     team: ['María Sánchez Domínguez', 'Charles Abi Chahine', 'Emilie El Chidiac', 'Lakzhmy Mari Zaro'],
@@ -874,6 +890,7 @@ const _projects = [
     title: 'The Clebsch Pavilion',
     subtitle:
       'A pavilion built on the Clebsch Diagonal Cubic: Crystallon lattices and Alpaca analysis, with evolutionary solvers minimizing mass and deflection across nine iterations, in glass-reinforced recycled PET.',
+    tagline: 'A pavilion solved on the Clebsch cubic.',
     year: '2025',
     module: 'Structural Optimization · MaCAD, IAAC',
     team: ['Charles Abi Chahine', 'Mahmoud Fathi'],
@@ -949,6 +966,7 @@ const _projects = [
     title: 'The Puffer Playscape',
     subtitle:
       'A Complex Forming study that develops a playscape from puffer-inspired geometry, iterated step by step into an inhabitable landscape.',
+    tagline: 'A playscape inflated from puffer geometry.',
     year: '2025',
     module: 'Complex Forming · MaCAD, IAAC',
     team: ['Charles Abi Chahine'],
@@ -1003,6 +1021,7 @@ const _projects = [
     title: 'The Wave Chair',
     subtitle:
       'A Complex Forming study that resolves an undulating surface into a fabricable, 3D-printed chair, developed through geometry iterations and print trials.',
+    tagline: 'An undulating surface resolved into a chair.',
     year: '2025',
     module: 'Complex Forming · MaCAD, IAAC',
     team: ['Charles Abi Chahine'],
@@ -1058,6 +1077,7 @@ const _projects = [
     title: 'The Cross-Cap House',
     subtitle:
       'A Complex Forming study developing an architecture on the cross-cap, a non-orientable, self-intersecting surface, through iterative geometry.',
+    tagline: 'A house on a self-intersecting surface.',
     year: '2025',
     module: 'Complex Forming · MaCAD, IAAC',
     team: ['Charles Abi Chahine'],
@@ -1112,6 +1132,7 @@ const _projects = [
     title: 'Rings of Mars: Ring 4000',
     subtitle:
       'A habitat ring set into a crater rim in Valles Marineris, 3D-printed from the regolith it stands on: farming, transport and living in one closed loop. A two-person entry to Marsception, placed in the Top 50.',
+    tagline: 'A regolith-printed habitat ring for Mars.',
     year: '2024',
     module: 'International Competition',
     team: ['Charles Abi Chahine', 'Emilie El Chidiac'],
@@ -1168,6 +1189,7 @@ const _projects = [
     title: 'Saria, Dubai Maritime City',
     subtitle:
       'A residential tower on the water at Dubai Maritime City, 38 levels over a podium, taken from pre-concept to design development at SOMA: parametric facade iterations, then the BIM model for delivery.',
+    tagline: 'A residential tower on the water in Dubai.',
     year: '2024',
     module: 'SOMA · Design Architect',
     team: ['SOMA: office project'],
@@ -1234,6 +1256,7 @@ const _projects = [
     title: 'Point Nought',
     subtitle:
       'My bachelor final-year thesis at LAU: reimagining the coastal town of Anfeh in North Lebanon through its landscape of salt ponds, fishing, and olives.',
+    tagline: 'Anfeh reimagined through its salt ponds.',
     year: '2023',
     module: 'B.Arch Final Year Project · LAU',
     team: ['Charles Abi Chahine'],

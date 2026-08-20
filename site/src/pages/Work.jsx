@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import ProjectLink from '../components/ProjectLink.jsx'
+import ProjectGlyph from '../components/projectGlyphs.jsx'
 import FooterSlot from '../components/FooterSlot.jsx'
 import { FooterDownload } from '../components/Footer.jsx'
 import { asset, imgSrcSet, projects } from '../data/projects.js'
@@ -47,8 +48,13 @@ const ARROW =
   'transition-[opacity,color,border-color] duration-300 hover:border-accent hover:text-accent lg:flex'
 
 // 38vh rather than the 46vh this page used to run at: three tiles plus a slice
-// of the fourth fit, and that slice is what tells you the strip scrolls.
-const FRAME = `relative aspect-[4/3] w-full overflow-hidden bg-line lg:h-[clamp(250px,38vh,400px)] lg:w-auto ${R}`
+// of the fourth fit, and that slice is what tells you the strip scrolls. The
+// clamp used to be the cover's height; now the whole tile is a card and the
+// text block below the cover is part of it, so the clamp sets the card's WIDTH
+// (the cover's 4:3 of the same height) and the cover follows from that. Same
+// density, and the card is the one bordered surface — no shadow, no plate.
+const CARD = `block overflow-hidden border border-line bg-paper lg:w-[calc(clamp(250px,38vh,400px)*4/3)] ${R}`
+const COVER = 'relative aspect-[4/3] w-full overflow-hidden bg-line'
 
 function ProjectTile({ p, hot, motionOk, onFocus, onBlur }) {
   const color = beltFor(p).color
@@ -84,9 +90,9 @@ function ProjectTile({ p, hot, motionOk, onFocus, onBlur }) {
       data-slug={p.slug}
       onFocus={onFocus}
       onBlur={onBlur}
-      className={`block ${R}`}
+      className={CARD}
     >
-      <div className={FRAME}>
+      <div className={COVER}>
         {/* The heading below is inside this link and names it, so an alt here
             would announce the project twice. */}
         {/* The tile is about 90vw on a phone and 405 to 533px on a desktop,
@@ -125,33 +131,48 @@ function ProjectTile({ p, hot, motionOk, onFocus, onBlur }) {
           </video>
         )}
       </div>
-      {/* Title under the image, so all nineteen can be read without hovering —
-          and mobile has no hover at all. The dot carries the category the pills
-          above have already introduced. */}
-      <div className="mt-3 flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
-        <span
-          aria-hidden="true"
-          className="h-[7px] w-[7px] shrink-0 -translate-y-px rounded-[2px]"
-          style={{ backgroundColor: color }}
-        />
-        <h2
-          className="min-w-0 truncate text-[0.82rem] font-medium transition-colors duration-300"
-          style={{ color: hot ? color : 'var(--color-ink)' }}
-        >
-          {p.title}
-        </h2>
-        {/* The award, named. Always the accent, never the category colour — a
-            distinction should read as itself, not as its group. Its own line
-            until lg, inline after: a tile narrower than about 340px cannot hold
-            the longest title and the longest award on one line, and it is the
-            title that gets cut. */}
-        {p.award && (
-          <span className={`order-last w-full shrink-0 lg:order-none lg:w-auto ${MONO} text-accent`}>
-            <span className="sr-only">Awarded: </span>
-            {p.award}
+      {/* The card's annotation, inside the same hairline: glyph, title and year
+          on one top-aligned row, then the tagline, then the award line. The
+          glyph replaces the category dot — it says what the project is, where
+          the dot only said which group it was in — and it tints with the
+          title, inheriting currentColor from the wrapper.
+
+          Every field is reserved, so every card is the same height: the title
+          gets two lines whether it needs them or not, and the award line is
+          kept blank when there is no award, the way the landing's belts
+          reserve it so their columns stay aligned. A drafted sheet keeps its
+          empty fields; that is what makes eighteen of them read as one set. */}
+      <div className="px-3.5 pb-3.5 pt-3">
+        <div className="flex items-start gap-2.5">
+          <span
+            aria-hidden="true"
+            className="mt-[3px] shrink-0 transition-colors duration-300"
+            style={{ color: hot ? color : 'var(--color-ink)' }}
+          >
+            <ProjectGlyph slug={p.slug} className="h-5 w-5" />
           </span>
-        )}
-        <span className={`ml-auto shrink-0 tabular-nums ${MONO} text-muted`}>{p.year}</span>
+          <h2
+            className="min-h-[2.6em] min-w-0 flex-1 text-[1.1rem] font-semibold leading-[1.3] transition-colors duration-300 sm:max-lg:min-h-[3.9em]"
+            style={{ color: hot ? color : 'var(--color-ink)' }}
+          >
+            {p.title}
+          </h2>
+          <span className={`shrink-0 pt-[7px] tabular-nums ${MONO} text-muted`}>{p.year}</span>
+        </div>
+        {/* No clamp and no truncation: the tagline's length is governed in
+            projects.js, where it can be read and shortened. */}
+        <p className="mt-1 min-h-[1.4em] font-serif text-[0.88rem] leading-snug text-soft sm:max-lg:min-h-[2.75em]">{p.tagline}</p>
+        {/* The award, named. Always the accent, never the category colour — a
+            distinction should read as itself, not as its group. The line is
+            reserved either way; see the block comment above. */}
+        <p className={`mt-2 min-h-[1.2em] leading-[1.2] ${MONO} text-accent`}>
+          {p.award && (
+            <>
+              <span className="sr-only">Awarded: </span>
+              {p.award}
+            </>
+          )}
+        </p>
       </div>
     </ProjectLink>
   )
@@ -612,9 +633,12 @@ export default function Work() {
             aria-label={filmstrip ? 'Projects: scroll sideways or use the arrow keys' : undefined}
             className="min-h-0 px-6 pb-6 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent lg:overflow-x-auto lg:overflow-y-hidden lg:overscroll-x-contain lg:px-0 lg:pb-0 lg:cursor-grab lg:[scrollbar-width:none] lg:[&::-webkit-scrollbar]:hidden"
           >
+            {/* items-start, not center: card heights differ with their text, and
+                tops on one line is what keeps uneven cards reading as a
+                filmstrip rather than a scatter. */}
             <ul
               key={filter}
-              className="fade-in grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:flex lg:h-full lg:items-center lg:gap-6 lg:px-10"
+              className="fade-in grid grid-cols-1 gap-x-8 gap-y-8 sm:grid-cols-2 lg:flex lg:h-full lg:items-start lg:gap-6 lg:px-10"
             >
               {filtered.map((p) => (
                 <li key={p.slug} className="lg:shrink-0">
