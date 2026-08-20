@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import ProjectLink from '../components/ProjectLink.jsx'
+import ProjectGlyph from '../components/projectGlyphs.jsx'
 import DataField from '../components/DataField.jsx'
 import { BELTS } from '../data/belts.js'
 import { imgSrcSet, projects } from '../data/projects.js'
@@ -184,7 +185,7 @@ export default function Home() {
             onMouseLeave={() => setFocus(null)}
             onFocus={() => setFocus(belt.id)}
             onBlur={() => setFocus(null)}
-            className="transition-opacity duration-300"
+            className="transition-opacity duration-300 sm:mx-auto sm:w-[min(100%,calc(30svh*4/3))]"
             style={{ opacity: !focus || focus === belt.id ? 1 : 0.34 }}
           >
             {/* The count is the true total, not the two shown, and it is the way
@@ -217,15 +218,30 @@ export default function Home() {
                   className={
                     i === 0
                       ? ''
-                      : 'hidden sm:block [@media(min-width:640px)_and_(max-height:520px)]:hidden'
+                      : 'hidden sm:block [@media(min-width:640px)_and_(max-height:760px)]:hidden'
                   }
                 >
-                  <ProjectLink slug={p.slug} className="group flex items-center gap-3 sm:block">
-                    {/* A row on a phone, a stacked card from sm up. Capped in svh
-                        as well as by the column, so two covers plus a header
-                        always fit the frame even on a wide, short window where
-                        the column alone would be too tall. */}
-                    <div className="aspect-[4/3] w-[62px] shrink-0 overflow-hidden rounded-[6px] bg-line sm:w-full sm:max-h-[26svh] sm:rounded-[8px]">
+                  <ProjectLink
+                    slug={p.slug}
+                    className="group flex items-center gap-3 sm:block sm:overflow-hidden sm:rounded-[10px] sm:border sm:border-line"
+                  >
+                    {/*
+                     * The same card /work draws, at the landing's size: the
+                     * cover clipped into the top of a hairline box, then the
+                     * glyph, the title and the year. The tagline stays on
+                     * /work; four columns of it here would be a second index
+                     * rather than a way into the first.
+                     *
+                     * The width is what holds the ratio. A cover capped by
+                     * max-height keeps its box but not its shape, and at 1280
+                     * by 660 that squeezed these to 1.59 while /work drew the
+                     * same picture at 1.33, so the two pages cropped the same
+                     * cover differently. Capping the width instead, at the
+                     * width 30svh of height allows, leaves the aspect to do the
+                     * sizing: shorter windows get a smaller card, never a
+                     * wider one.
+                     */}
+                    <div className="aspect-[4/3] w-[62px] shrink-0 overflow-hidden rounded-[6px] bg-line sm:w-full sm:rounded-none">
                       {/* The title is the next thing inside the same link, so
                           an alt here names the link twice over. */}
                       {/* 62px on a phone and the column's full width from sm up,
@@ -242,15 +258,22 @@ export default function Home() {
                         className="h-full w-full object-cover grayscale transition duration-500 ease-out group-hover:scale-[1.03] group-hover:grayscale-0"
                       />
                     </div>
-                    <span className="block min-w-0 flex-1 sm:mt-2">
-                      <span className="flex items-baseline gap-2">
+                    <span className="block min-w-0 flex-1 sm:mt-0 sm:px-2.5 sm:pb-2.5 sm:pt-2">
+                      <span className="flex items-baseline gap-2 sm:items-start">
                         <span
-                          className="min-w-0 truncate text-[0.82rem] font-medium leading-snug transition-colors duration-300 group-hover:text-[var(--c)]"
+                          aria-hidden="true"
+                          className="shrink-0 text-ink transition-colors duration-300 group-hover:text-[var(--c)] sm:mt-[3px]"
+                          style={{ '--c': belt.color }}
+                        >
+                          <ProjectGlyph slug={p.slug} className="h-[15px] w-[15px]" />
+                        </span>
+                        <span
+                          className="min-w-0 flex-1 truncate text-[0.82rem] font-medium leading-snug transition-colors duration-300 group-hover:text-[var(--c)] sm:min-h-[2.6em] sm:whitespace-normal sm:text-clip"
                           style={{ '--c': belt.color }}
                         >
                           {p.title}
                         </span>
-                        <span className={`ml-auto shrink-0 tabular-nums ${MONO} text-muted`}>
+                        <span className={`ml-auto shrink-0 tabular-nums ${MONO} text-muted sm:mt-[5px]`}>
                           {p.year}
                         </span>
                       </span>
