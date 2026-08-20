@@ -14,7 +14,7 @@ export const ORIGIN = 'https://charlesabichahine.com'
 
 // The static default in index.html, and the only route whose title is not a
 // label followed by the name.
-export const HOME_TITLE = 'Charles Abi Chahine | Architect & Computational Designer'
+export const HOME_TITLE = 'Charles Abi Chahine • Architect & Computational Designer'
 
 const PAGES = { '/work': 'Work', '/about': 'About', '/cv': 'CV' }
 
@@ -29,7 +29,7 @@ export function titleFor(pathname, projectTitle) {
   const path = normalize(pathname)
   if (path === '/') return HOME_TITLE
   const label = path.startsWith('/work/') ? projectTitle : PAGES[path]
-  return `${label || 'Not found'} — Charles Abi Chahine`
+  return `${label || 'Not found'} • Charles Abi Chahine`
 }
 
 /*
