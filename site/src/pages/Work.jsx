@@ -650,7 +650,7 @@ export default function Work() {
                 filmstrip rather than a scatter. */}
             <ul
               key={filter}
-              className="fade-in grid grid-cols-1 gap-x-8 gap-y-8 sm:grid-cols-2 lg:flex lg:h-full lg:items-start lg:gap-6 lg:px-10"
+              className="fade-in grid grid-cols-1 gap-x-8 gap-y-8 sm:grid-cols-2 lg:flex lg:h-full lg:w-max lg:items-start lg:gap-6 lg:px-10"
             >
               {filtered.map((p) => (
                 <li key={p.slug} className="lg:shrink-0">
