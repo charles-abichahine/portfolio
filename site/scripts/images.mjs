@@ -22,7 +22,7 @@
  * script rather than part of the build. The build never depends on it.
  */
 import sharp from 'sharp'
-import { readFileSync, writeFileSync, readdirSync, statSync, existsSync } from 'node:fs'
+import { readFileSync, writeFileSync, readdirSync, existsSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 

@@ -107,11 +107,16 @@ export default function DynamicIsland() {
   const open = !compact || hover
   const dark = theme === 'dark'
 
-  // re-measure the indicator once the expand transition has settled
+  // Re-measure the indicator once the expand transition has settled. activeTo
+  // belongs in the deps: a route change moves the pill to a different link, and
+  // if that happens while the island is collapsing or expanding the layout
+  // effect measures a width mid-transition. Re-running the timeout on the new
+  // target is the correction, so the last measurement is always of the link the
+  // pill is actually under.
   useEffect(() => {
     const id = setTimeout(() => placePill(activeTo), open ? 80 : 0)
     return () => clearTimeout(id)
-  }, [open])
+  }, [open, activeTo])
 
   return (
     <div className="fixed left-1/2 top-4 z-50 -translate-x-1/2">
