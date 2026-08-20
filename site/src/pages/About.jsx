@@ -574,6 +574,18 @@ export default function About() {
         }}
         className="absolute inset-x-0 bottom-0 z-[3] cursor-ew-resize touch-none px-5 pb-6 pt-8 outline-none focus-visible:ring-1 focus-visible:ring-accent sm:px-8 lg:px-12"
       >
+        {/* The page does not scroll, so a wheel gesture winds the clock instead
+            and nothing on screen says so: the map changes and the reason is
+            invisible. This says it once, in the tick row's own voice, and gets
+            out of the way as soon as it has been understood — which is exactly
+            the moment the year leaves the present. It sits in the rail's top
+            padding rather than in the flow, so it costs the lanes no height. */}
+        <span
+          className={`${MONO} pointer-events-none absolute right-5 top-1.5 whitespace-nowrap text-muted transition-opacity duration-300 motion-reduce:transition-none sm:right-8 lg:right-12`}
+          style={{ opacity: year < NOW ? 0 : 1 }}
+        >
+          Scroll to wind back · {START}–{Math.floor(NOW)}
+        </span>
         <div
           className="relative w-full"
           style={{ height: LANE_COUNT * LANE_H + (LANE_COUNT - 1) * LANE_GAP }}
