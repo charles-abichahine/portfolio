@@ -1,6 +1,4 @@
 import { Fragment } from 'react'
-import FooterSlot from '../components/FooterSlot.jsx'
-import { FooterDownload } from '../components/Footer.jsx'
 import ProjectLink from '../components/ProjectLink.jsx'
 import {
   awards,
@@ -301,16 +299,6 @@ export default function CV() {
           GitHub on every page including this one, and the PDF puts the same
           three in its top right corner, so a third copy at the bottom of the
           page was the same information a scroll further away. */}
-
-      {/* The download, again, in the middle of the shared footer. This is the
-          one page long enough that the button in its header is two screens
-          behind you by the time you have read to the end, which is also the
-          moment you are most likely to want the file. */}
-      <FooterSlot>
-        <FooterDownload href={`${base}cv.pdf`} download="Charles-Abi-Chahine-CV.pdf">
-          Download CV (PDF)
-        </FooterDownload>
-      </FooterSlot>
     </div>
   )
 }

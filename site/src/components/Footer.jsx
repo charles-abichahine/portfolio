@@ -27,41 +27,6 @@ import { contact, role } from '../data/cv.js'
    one you are on, accent under the cursor. */
 const MONO = 'chrome-label text-[0.6875rem]'
 
-/*
- * The page's own file, as an object rather than as a note in the margin.
- *
- * The book and the CV are the two things a visitor might actually leave with,
- * and both were set in the same muted 11px as the copyright line beside them,
- * which made them read as colophon: something printed at the bottom of a page,
- * not something to press. A hairline capsule is the smallest change that makes
- * them press-able — a border and a radius is all it takes for type to become an
- * object, and it is the same border the /work filters and the CV button already
- * use, so nothing new enters the site's vocabulary.
- *
- * Outlined and ink rather than filled and paper. The footer is the quiet end of
- * the page and the island at the top is still the only thing that floats; a
- * filled chip down here would be the loudest thing on the screen, which is not
- * what a download at the bottom of a page is. Ink instead of muted is the whole
- * lift it needs to be the most clickable-looking thing in the band.
- *
- * One constant, both callers, so /work and /cv cannot drift. Not a CSS utility:
- * see the note where the old capsule utility was removed in index.css.
- */
-const DOWNLOAD =
-  `${MONO} inline-flex items-center gap-2 rounded-[10px] border border-line px-3.5 py-2 text-ink transition-colors hover:border-accent hover:text-accent focus-visible:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent`
-
-/* The arrow is drawn separately from the label so the gap between them is the
-   chip's, not the tracking's: 0.16em of letter-spacing after a glyph would hang
-   the arrow off-centre inside the padding. aria-hidden because "download" is
-   already on the anchor and the label already says PDF. */
-export function FooterDownload({ children, ...props }) {
-  return (
-    <a className={DOWNLOAD} download {...props}>
-      {children}
-      <span aria-hidden="true">↓</span>
-    </a>
-  )
-}
 
 /*
  * The three contacts as marks rather than words.
