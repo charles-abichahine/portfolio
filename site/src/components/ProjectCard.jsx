@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import MediaFrame from './MediaFrame.jsx'
 import MediaLightbox from './MediaLightbox.jsx'
-import { asset } from '../data/projects.js'
+import { imgSrcSet } from '../data/projects.js'
 import { beltFor } from '../data/belts.js'
 
 /*
@@ -201,6 +201,11 @@ export default function ProjectCard({ project, onClose }) {
             // its own; the svh cap is what gives the well a height where it
             // does not.
             className="max-h-[50svh] max-w-full wide-short:max-h-full lg:max-h-full"
+            // The well is 760px at most and the card is nearly the full width
+            // below that, so this asks for the 960 on a desktop and the 480 on
+            // a phone. The viewer on top of it keeps the default and takes the
+            // original, which is the whole reason it exists.
+            sizes="(min-width: 1024px) 760px, 92vw"
           />
 
           {/* The way to native size. Everything in here is drawn smaller than it
@@ -304,7 +309,7 @@ export default function ProjectCard({ project, onClose }) {
                   // and the badge still says which are demos to press.
                   <span className="relative block h-full w-full max-lg:hidden">
                     <img
-                      src={asset(it.poster)}
+                      {...imgSrcSet(it.poster, '76px')}
                       alt=""
                       loading="lazy"
                       className="h-full w-full object-cover"
@@ -316,8 +321,12 @@ export default function ProjectCard({ project, onClose }) {
                     </span>
                   </span>
                 ) : (
+                  // 76px is the strip's cap, so this is the one place on the
+                  // site that only ever wants the smallest file. It used to pull
+                  // the full-size gallery: eleven originals, 1.5MB on huddle, to
+                  // draw eleven thumbnails you can cover with a thumb.
                   <img
-                    src={asset(it.poster ?? it.src)}
+                    {...imgSrcSet(it.poster ?? it.src, '76px')}
                     alt=""
                     loading="lazy"
                     className="h-full w-full object-cover max-lg:hidden"

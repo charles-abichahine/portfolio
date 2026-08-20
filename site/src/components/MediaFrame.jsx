@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { asset } from '../data/projects.js'
+import { asset, imgSrcSet } from '../data/projects.js'
 
 // Live, not read once: the setting can be changed with the card open, and the
 // same query is what /work's index already listens to.
@@ -28,8 +28,19 @@ function useReducedMotion() {
  * The bounds come in from outside because the same item is drawn twice: inside
  * the card, where it is capped by a 760x440 well, and full size, where it is
  * capped by the viewport.
+ *
+ * `sizes` comes in with them and for the same reason. A still in the card well
+ * is never wider than 760px, which is what the 960 variant is for; the viewer
+ * behind it wants the original, and gets it by leaving sizes at its 100vw
+ * default so the widest candidate is the one that wins. One prop, two answers,
+ * rather than two components that would then have to be kept in step.
  */
-export default function MediaFrame({ item, title, className = 'max-h-full max-w-full' }) {
+export default function MediaFrame({
+  item,
+  title,
+  className = 'max-h-full max-w-full',
+  sizes = '100vw',
+}) {
   // A loop is decoration that moves on its own, so it is the one thing here a
   // reduced-motion setting is actually about. /work's hover covers already gate
   // on this and simply never mount; a gallery item cannot do that, because it is
@@ -85,7 +96,7 @@ export default function MediaFrame({ item, title, className = 'max-h-full max-w-
   return (
     <img
       key={item.src}
-      src={asset(item.src)}
+      {...imgSrcSet(item.src, sizes)}
       alt={item.caption || title}
       className={`${className} object-contain`}
     />

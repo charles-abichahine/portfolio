@@ -1,5 +1,40 @@
+import { VARIANTS } from './imageVariants.js'
+
 const base = import.meta.env.BASE_URL
 export const asset = (p) => base + p
+
+/*
+ * The same picture, at the width the page is actually going to draw it.
+ *
+ * Every published image is sized for the full-size viewer, which is right for
+ * the viewer and wrong for the four places that are not it: a 62px belt
+ * thumbnail on the landing, a 405px tile on /work, a 76px strip thumbnail in a
+ * card, and the card's own well. srcSet hands the browser the candidates and
+ * sizes tells it how wide the box will be, and it picks; there is nothing to
+ * decide at runtime and nothing to keep in step with a media query.
+ *
+ * Spread onto the <img> rather than returning a string, so the two attributes
+ * are simply absent for a file with no variants: an SVG, a picture already
+ * narrower than the smallest step, anything scripts/variants.mjs left alone.
+ * An absent srcSet is exactly the markup these images had before, which is the
+ * point — nothing regresses to a 404 or to a plain src that no longer matches.
+ *
+ * `sizes` is the caller's, because only the caller knows its own box, and it is
+ * the one part of this that is wrong by default: without it the browser assumes
+ * 100vw and fetches the largest file for a thumbnail, which is the bug this is
+ * here to fix.
+ */
+export function imgSrcSet(src, sizes) {
+  const rec = VARIANTS[src]
+  if (!rec) return { src: asset(src) }
+  const [full, ...widths] = rec
+  const stem = src.replace(/\.webp$/, '')
+  return {
+    src: asset(src),
+    srcSet: [...widths.map((w) => `${asset(`${stem}-${w}.webp`)} ${w}w`), `${asset(src)} ${full}w`].join(', '),
+    sizes,
+  }
+}
 
 const _projects = [
   {

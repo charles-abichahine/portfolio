@@ -84,10 +84,13 @@ const dist = (a, b) => {
   return s / a.length
 }
 
-const raw = readFileSync(join(SITE, 'src/data/projects.js'), 'utf8').replace(
-  'import.meta.env.BASE_URL',
-  "'/'",
-)
+// Two substitutions before importing projects.js from memory: BASE_URL, which
+// only exists inside Vite, and the import of the variant manifest, which a
+// data: module has no base to resolve relatively. Only the paths are wanted
+// here, and neither substitution touches them.
+const raw = readFileSync(join(SITE, 'src/data/projects.js'), 'utf8')
+  .replace('import.meta.env.BASE_URL', "'/'")
+  .replace(/^import \{ VARIANTS \}.*$/m, 'const VARIANTS = {}')
 const { projects } = await import(
   'data:text/javascript;base64,' + Buffer.from(raw).toString('base64')
 )

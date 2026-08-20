@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import ProjectLink from '../components/ProjectLink.jsx'
 import DataField from '../components/DataField.jsx'
 import { BELTS } from '../data/belts.js'
-import { asset, projects } from '../data/projects.js'
+import { imgSrcSet, projects } from '../data/projects.js'
 import { summary } from '../data/cv.js'
 
 /*
@@ -228,8 +228,14 @@ export default function Home() {
                     <div className="aspect-[4/3] w-[62px] shrink-0 overflow-hidden rounded-[6px] bg-line sm:w-full sm:max-h-[26svh] sm:rounded-[8px]">
                       {/* The title is the next thing inside the same link, so
                           an alt here names the link twice over. */}
+                      {/* 62px on a phone and the column's full width from sm up,
+                          which measures 276 to 436px depending on how wide the
+                          window is. Naming the low end is enough: every width in
+                          that range takes the 480 at 1x, and this is the belt
+                          that was pulling 1400 to 2000px covers to draw them at
+                          62x47. */}
                       <img
-                        src={asset(posterFor(p))}
+                        {...imgSrcSet(posterFor(p), '(min-width: 640px) 276px, 62px')}
                         alt=""
                         loading="lazy"
                         draggable="false"
