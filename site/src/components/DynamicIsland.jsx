@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import Logo from './Logo.jsx'
+import { normalize } from '../documentMeta.js'
 
 /*
  * Dynamic Island — the site's whole navigation, persistent on every page.
@@ -53,6 +54,10 @@ const applyTheme = (theme) => {
 
 export default function DynamicIsland() {
   const { pathname } = useLocation()
+  // A refresh lands on /about/ and a Link produces /about, so the raw pathname
+  // matched a destination on a click and missed it on a direct load, leaving
+  // the indicator off the page you were actually on.
+  const route = normalize(pathname)
   const linkRefs = useRef({})
   const [compact, setCompact] = useState(false)
   const [hover, setHover] = useState(false)
@@ -63,7 +68,7 @@ export default function DynamicIsland() {
   const [theme, setTheme] = useState(readTheme)
 
   const activeTo =
-    links.find((l) => pathname === l.to || (l.to === '/work' && pathname.startsWith('/work')))?.to || null
+    links.find((l) => route === l.to || (l.to === '/work' && route.startsWith('/work')))?.to || null
 
   const placePill = (to) => {
     const el = linkRefs.current[to]

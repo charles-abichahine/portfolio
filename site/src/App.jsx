@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom'
 import DynamicIsland from './components/DynamicIsland.jsx'
 import Footer from './components/Footer.jsx'
 import { FooterSlotContext } from './components/footerSlotContext.js'
+import { normalize } from './documentMeta.js'
 
 function App() {
   const location = useLocation()
@@ -26,7 +27,11 @@ function App() {
    * left after the footer. That is why there is no footer height anywhere in
    * the CSS: the flex column measures it.
    */
-  const fullBleed = pathname === '/' || pathname === '/about' || pathname === '/work'
+  // Through normalize, because a refresh lands on /work/ and a Link produces
+  // /work: comparing the raw pathname dropped the flex column on every direct
+  // load, and the page inside it lost the height its centring resolves against.
+  const route = normalize(pathname)
+  const fullBleed = route === '/' || route === '/about' || route === '/work'
 
   // Held in state rather than a ref so that setting it re-renders and the
   // portal in FooterSlot finds its target on the pass after the footer mounts.

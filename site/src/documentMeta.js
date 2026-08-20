@@ -19,7 +19,15 @@ export const HOME_TITLE = 'Charles Abi Chahine • Architect & Computational Des
 const PAGES = { '/work': 'Work', '/about': 'About', '/cv': 'CV' }
 
 // A trailing slash is the same page; without this /work/ would title as a 404.
-const normalize = (pathname) => pathname.replace(/\/+$/, '') || '/'
+/*
+ * One reading of a path, for everything that has to decide which route it is
+ * looking at. Pages serves the prerendered routes at their directory form and
+ * 301s /work to /work/, while a Link inside the app produces the slashless one,
+ * so the same page arrives spelled two ways depending on how you got there.
+ * Anything comparing a pathname has to compare through this or it will be right
+ * on a click and wrong on a refresh.
+ */
+export const normalize = (pathname) => pathname.replace(/\/+$/, '') || '/'
 
 /*
  * projectTitle is the resolved project's title for /work/:slug, and undefined
