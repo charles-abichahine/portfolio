@@ -89,15 +89,14 @@ function ProjectTile({ p, hot, motionOk, onFocus, onBlur }) {
       <div className={FRAME}>
         {/* The heading below is inside this link and names it, so an alt here
             would announce the project twice. */}
-        {/* The file behind a tile is 2000px and the tile is nowhere near it:
-            about 90vw on a phone, and 405 to 533px on a desktop, because the
-            strip is sized off the window's HEIGHT (38vh, capped) and sizes has
-            no way to say that. It names the low end on purpose: with steps at
-            480 and 960 everything from 405 to 533 lands on the same file at 1x
-            and on the 960 at 2x, so the extra precision would buy nothing and
-            the low end is the one that cannot overshoot. */}
+        {/* The tile is about 90vw on a phone and 405 to 533px on a desktop,
+            because the strip is sized off the window's HEIGHT (38vh, capped)
+            and sizes cannot say that. So it names the high end: naming the low
+            end handed 1x desktops a 480 file stretched to 533px and every
+            cover went soft. Overshooting costs one step of bytes; undershooting
+            costs sharpness on the page whose whole job is the covers. */}
         <img
-          {...imgSrcSet(posterFor(p), '(min-width: 1024px) 405px, 90vw')}
+          {...imgSrcSet(posterFor(p), '(min-width: 1024px) 533px, 90vw')}
           alt=""
           loading="lazy"
           draggable="false"

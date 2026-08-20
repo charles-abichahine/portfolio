@@ -235,7 +235,7 @@ export default function Home() {
                           that was pulling 1400 to 2000px covers to draw them at
                           62x47. */}
                       <img
-                        {...imgSrcSet(posterFor(p), '(min-width: 640px) 276px, 62px')}
+                        {...imgSrcSet(posterFor(p), '(min-width: 640px) 25vw, 62px')}
                         alt=""
                         loading="lazy"
                         draggable="false"

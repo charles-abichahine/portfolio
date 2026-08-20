@@ -9,19 +9,15 @@
  * fetched 1400 to 2000px covers to draw them at 62x47, and opening a card
  * fetched the full gallery at full size to fill a strip of 76px thumbnails.
  *
- * So: a 480 and a 960 beside each original, and srcSet lets the browser pick.
- * Two steps rather than a ladder because there are only three jobs on the site —
- * a thumbnail, a tile or a card well, and the viewer — and at 1x and 2x each of
- * the three lands on one of the three files.
+ * Four steps: 480, 640, 960, 1440, and srcSet lets the browser pick.
  *
- * The gap is 3x. A /work tile is about 90vw on a phone, which at three device
- * pixels per CSS pixel asks for a little over 1000px, and the next candidate up
- * from 960 is the 2000px original, so a 3x phone takes the full file and saves
- * nothing on that page. Thumbnails are unaffected: 62px and 76px stay on the 480
- * at any density. Closing it means a third step here — 1440 covers 3x for both
- * the tile and the card well — at the cost of another set of files in the repo,
- * so it is a decision about repo weight rather than about the markup, which
- * already names whatever this script produces.
+ * 640 exists because the /work tiles are sized off the window HEIGHT (38vh,
+ * capped), so on a 1x desktop they render 456 to 533px wide. With 480 as the
+ * only sub-960 step, a 1x screen was handed a 480 stretched past its size and
+ * every cover on the index went soft; 640 covers that whole range sharp.
+ * 1440 exists for 3x phones and 2x tiles: a tile or card well at those
+ * densities asks for 900 to 1100px, and without 1440 the next candidate was
+ * the 2000px original, which cost the full file for a fraction of the use.
  *
  * A manifest rather than a naming convention. The markup has to know whether a
  * variant exists before it names one: an SVG, a file already under 480px, and
@@ -48,7 +44,7 @@ const MANIFEST = join(SITE, 'src/data/imageVariants.js')
 
 // The two steps, and the house encoder settings images.mjs already uses, so a
 // variant is the same file its original would have been at that width.
-const WIDTHS = [480, 960]
+const WIDTHS = [480, 640, 960, 1440]
 const QUALITY = 86
 const EFFORT = 6
 
