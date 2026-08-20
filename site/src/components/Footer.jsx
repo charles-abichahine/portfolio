@@ -28,6 +28,42 @@ import { contact, role } from '../data/cv.js'
 const MONO = 'chrome-label text-[0.6875rem]'
 
 /*
+ * The page's own file, as an object rather than as a note in the margin.
+ *
+ * The book and the CV are the two things a visitor might actually leave with,
+ * and both were set in the same muted 11px as the copyright line beside them,
+ * which made them read as colophon: something printed at the bottom of a page,
+ * not something to press. A hairline capsule is the smallest change that makes
+ * them press-able — a border and a radius is all it takes for type to become an
+ * object, and it is the same border the /work filters and the CV button already
+ * use, so nothing new enters the site's vocabulary.
+ *
+ * Outlined and ink rather than filled and paper. The footer is the quiet end of
+ * the page and the island at the top is still the only thing that floats; a
+ * filled chip down here would be the loudest thing on the screen, which is not
+ * what a download at the bottom of a page is. Ink instead of muted is the whole
+ * lift it needs to be the most clickable-looking thing in the band.
+ *
+ * One constant, both callers, so /work and /cv cannot drift. Not a CSS utility:
+ * see the note where the old capsule utility was removed in index.css.
+ */
+const DOWNLOAD =
+  `${MONO} inline-flex items-center gap-2 rounded-full border border-line px-3.5 py-2 text-ink transition-colors hover:border-accent hover:text-accent focus-visible:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent`
+
+/* The arrow is drawn separately from the label so the gap between them is the
+   chip's, not the tracking's: 0.16em of letter-spacing after a glyph would hang
+   the arrow off-centre inside the padding. aria-hidden because "download" is
+   already on the anchor and the label already says PDF. */
+export function FooterDownload({ children, ...props }) {
+  return (
+    <a className={DOWNLOAD} download {...props}>
+      {children}
+      <span aria-hidden="true">↓</span>
+    </a>
+  )
+}
+
+/*
  * The three contacts as marks rather than words.
  *
  * "Email LinkedIn GitHub" set in this voice is 170px, and on a phone it shared
@@ -70,9 +106,11 @@ const MARKS = [
 ]
 
 /* A 24px box around a 14px mark: the drawing stays as quiet as the type it sits
-   beside, while the target stays big enough to hit with a thumb. */
+   beside, while the target stays big enough to hit with a thumb. The box only
+   has to stay square while the mark is alone in it, so the width is a minimum
+   rather than a fixed 24px, and the name that appears at lg widens it. */
 const LINK =
-  'flex h-6 w-6 items-center justify-center rounded-full text-muted transition-colors hover:text-accent focus-visible:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent'
+  `${MONO} flex h-6 min-w-6 items-center justify-center gap-1.5 rounded-full text-muted transition-colors hover:text-accent focus-visible:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent lg:px-1`
 
 function Mark({ d }) {
   return (
@@ -160,9 +198,16 @@ export default function Footer({ slotRef }) {
             the same baseline as the type opposite them. */}
         {/* Named, because a landmark with no name is announced as "navigation"
             and there is a second one on the page. */}
+        {/* The names come back at lg, not at sm. The note above records that the
+            three words cost 170px and broke the phone row, and that is still
+            true anywhere the row is tight: at sm the identity, a page's chip and
+            three named marks want more than the 592px the row has. lg is the
+            first width where all three fit on one line with room to spare, and
+            it is already where the role joins the identity, so the footer fills
+            out in one step rather than two. */}
         <nav
           aria-label="Contact"
-          className="-my-1 -mr-1.5 flex justify-self-end gap-0.5 sm:col-start-3 sm:row-start-1"
+          className="-my-1 -mr-1.5 flex justify-self-end gap-0.5 sm:col-start-3 sm:row-start-1 lg:gap-2.5"
         >
           {MARKS.map((m) => (
             <a
@@ -173,6 +218,12 @@ export default function Footer({ slotRef }) {
               {...(m.away ? { target: '_blank', rel: 'noreferrer' } : {})}
             >
               <Mark d={m.d} />
+              {/* Hidden below lg rather than absent, and the aria-label stays on
+                  the anchor either way: display:none takes the span out of the
+                  accessible name, so without the label the phone version would
+                  be three unnamed links again. Where both are present they say
+                  the same word, so nothing is announced twice. */}
+              <span className="hidden lg:inline">{m.label}</span>
             </a>
           ))}
         </nav>
