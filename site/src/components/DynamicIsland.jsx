@@ -4,7 +4,10 @@ import Logo from './Logo.jsx'
 
 /*
  * Dynamic Island — the site's whole navigation, persistent on every page.
- * A rounded glass pill floating over the page. It used to stay dark in both
+ * A glass tab floating over the page, drawn at the site's one fillet: 10px on
+ * the shell, 7px on the controls inside it, the same family as the /work
+ * cards and filter pills. It was a full capsule until the index grew filleted
+ * cards and the two shapes argued; the fillet won everywhere. It used to stay dark in both
  * themes on the argument that an object over the page should keep its own
  * material; what that actually produced was a page with a theme and one control
  * without one, and once the footer became a band built from the same tokens the
@@ -143,12 +146,12 @@ export default function DynamicIsland() {
         onBlur={(e) => {
           if (!e.currentTarget.contains(e.relatedTarget)) setHover(false)
         }}
-        className="flex items-center gap-1 rounded-full border border-[var(--chrome-edge)] bg-[var(--chrome-glass)] px-2 py-1.5 shadow-[var(--chrome-lift)] backdrop-blur-md transition-colors sm:gap-1.5"
+        className="flex items-center gap-1 rounded-[10px] border border-[var(--chrome-edge)] bg-[var(--chrome-glass)] px-2 py-1.5 shadow-[var(--chrome-lift)] backdrop-blur-md transition-colors sm:gap-1.5"
       >
         {/* Logo only — the wordmark lives in the hero, and dropping it here keeps
             the pill compact enough for the nav links and the theme toggle at any
             width. aria-label carries the name for screen readers. */}
-        <Link to="/" className="flex items-center rounded-full px-2 py-1" aria-label="Home, Charles Abi Chahine">
+        <Link to="/" className="flex items-center rounded-[7px] px-2 py-1" aria-label="Home, Charles Abi Chahine">
           <Logo className="h-5 w-auto text-ink" />
         </Link>
         <span className={`h-4 w-px shrink-0 bg-[var(--chrome-edge)] transition-opacity duration-300 ${open ? 'opacity-100' : 'opacity-0'}`} />
@@ -158,7 +161,7 @@ export default function DynamicIsland() {
         >
           <span
             aria-hidden="true"
-            className="absolute top-1/2 -translate-y-1/2 rounded-full bg-[var(--chrome-wash)] transition-[left,width] duration-300 ease-out"
+            className="absolute top-1/2 -translate-y-1/2 rounded-[7px] bg-[var(--chrome-wash)] transition-[left,width] duration-300 ease-out"
             style={{ left: pill.left, width: pill.width, height: 'calc(100% - 4px)' }}
           />
           {links.map((l) => (
@@ -175,7 +178,7 @@ export default function DynamicIsland() {
                    and 10.24px above it were the smallest targets on the page
                    and they were the primary navigation. 11px costs the pill
                    about 12px of width, which the 360px case still has. */
-                `relative z-[1] whitespace-nowrap rounded-full px-2 py-1.5 text-[0.6875rem] transition-colors chrome-label sm:px-2.5 ${
+                `relative z-[1] whitespace-nowrap rounded-[7px] px-2 py-1.5 text-[0.6875rem] transition-colors chrome-label sm:px-2.5 ${
                   isActive ? 'text-ink' : 'text-soft hover:text-accent'
                 }`
               }
@@ -196,7 +199,7 @@ export default function DynamicIsland() {
           type="button"
           onClick={toggleTheme}
           aria-label={dark ? 'Switch to light theme' : 'Switch to dark theme'}
-          className="flex h-[27px] w-[27px] shrink-0 items-center justify-center rounded-full text-soft transition-colors hover:bg-[var(--chrome-wash)] hover:text-ink focus-visible:bg-[var(--chrome-wash)] focus-visible:text-ink focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent"
+          className="flex h-[27px] w-[27px] shrink-0 items-center justify-center rounded-[7px] text-soft transition-colors hover:bg-[var(--chrome-wash)] hover:text-ink focus-visible:bg-[var(--chrome-wash)] focus-visible:text-ink focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent"
         >
           <span className="relative block h-[15px] w-[15px]">
             <svg

@@ -216,7 +216,7 @@ export default function ProjectCard({ project, onClose }) {
             onClick={() => setFull(true)}
             aria-label="View full size"
             title="View full size"
-            className="absolute right-2.5 top-2.5 flex h-[34px] w-[34px] items-center justify-center rounded-full border border-line bg-paper/80 text-[0.95rem] text-ink transition-colors hover:border-[var(--c)] hover:text-[var(--c)]"
+            className="absolute right-2.5 top-2.5 flex h-[34px] w-[34px] items-center justify-center rounded-[10px] border border-line bg-paper/80 text-[0.95rem] text-ink transition-colors hover:border-[var(--c)] hover:text-[var(--c)]"
           >
             ⤢
           </button>
@@ -227,7 +227,7 @@ export default function ProjectCard({ project, onClose }) {
                 type="button"
                 onClick={() => step(-1)}
                 aria-label="Previous image"
-                className="absolute left-2.5 top-1/2 flex h-[34px] w-[34px] -translate-y-1/2 items-center justify-center rounded-full border border-line bg-paper/80 text-ink transition-colors hover:border-[var(--c)] hover:text-[var(--c)]"
+                className="absolute left-2.5 top-1/2 flex h-[34px] w-[34px] -translate-y-1/2 items-center justify-center rounded-[10px] border border-line bg-paper/80 text-ink transition-colors hover:border-[var(--c)] hover:text-[var(--c)]"
               >
                 ←
               </button>
@@ -235,7 +235,7 @@ export default function ProjectCard({ project, onClose }) {
                 type="button"
                 onClick={() => step(1)}
                 aria-label="Next image"
-                className="absolute right-2.5 top-1/2 flex h-[34px] w-[34px] -translate-y-1/2 items-center justify-center rounded-full border border-line bg-paper/80 text-ink transition-colors hover:border-[var(--c)] hover:text-[var(--c)]"
+                className="absolute right-2.5 top-1/2 flex h-[34px] w-[34px] -translate-y-1/2 items-center justify-center rounded-[10px] border border-line bg-paper/80 text-ink transition-colors hover:border-[var(--c)] hover:text-[var(--c)]"
               >
                 →
               </button>

@@ -44,7 +44,7 @@ const R = 'rounded-[10px]'
 // card, so the control is met on the index and recognised again in the card.
 const ARROW =
   'absolute top-1/2 z-[3] hidden h-[34px] w-[34px] -translate-y-1/2 items-center justify-center ' +
-  'rounded-full border border-line bg-paper/80 text-ink opacity-0 ' +
+  'rounded-[10px] border border-line bg-paper/80 text-ink opacity-0 ' +
   'transition-[opacity,color,border-color] duration-300 hover:border-accent hover:text-accent lg:flex'
 
 // 38vh rather than the 46vh this page used to run at: three tiles plus a slice

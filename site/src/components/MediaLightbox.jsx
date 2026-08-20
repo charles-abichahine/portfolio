@@ -41,7 +41,7 @@ export default function MediaLightbox({ items, at, onStep, onClose, title, color
   }, [onClose])
 
   const arrow =
-    'absolute top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-line bg-paper/85 text-ink transition-colors hover:border-[var(--c)] hover:text-[var(--c)]'
+    'absolute top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-[10px] border border-line bg-paper/85 text-ink transition-colors hover:border-[var(--c)] hover:text-[var(--c)]'
 
   return (
     <div

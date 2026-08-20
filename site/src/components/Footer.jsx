@@ -48,7 +48,7 @@ const MONO = 'chrome-label text-[0.6875rem]'
  * see the note where the old capsule utility was removed in index.css.
  */
 const DOWNLOAD =
-  `${MONO} inline-flex items-center gap-2 rounded-full border border-line px-3.5 py-2 text-ink transition-colors hover:border-accent hover:text-accent focus-visible:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent`
+  `${MONO} inline-flex items-center gap-2 rounded-[10px] border border-line px-3.5 py-2 text-ink transition-colors hover:border-accent hover:text-accent focus-visible:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent`
 
 /* The arrow is drawn separately from the label so the gap between them is the
    chip's, not the tracking's: 0.16em of letter-spacing after a glyph would hang
@@ -110,7 +110,7 @@ const MARKS = [
    has to stay square while the mark is alone in it, so the width is a minimum
    rather than a fixed 24px, and the name that appears at lg widens it. */
 const LINK =
-  `${MONO} flex h-6 min-w-6 items-center justify-center gap-1.5 rounded-full text-muted transition-colors hover:text-accent focus-visible:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent lg:px-1`
+  `${MONO} flex h-6 min-w-6 items-center justify-center gap-1.5 rounded-[7px] text-muted transition-colors hover:text-accent focus-visible:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent lg:px-1`
 
 function Mark({ d }) {
   return (
