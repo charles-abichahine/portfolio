@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { ContactMarks } from '../components/Footer.jsx'
 import { LAND_ROWS, VIEWBOX, byId, latToY, lonToX, places } from '../data/places.js'
-import { NOW, SITES, START, TIMELINE, TOUCHES } from '../data/journey.js'
+import { NOW, SITES, START, TIMELINE, TOUCHES, deskName } from '../data/journey.js'
 
 const base = import.meta.env.BASE_URL
 
@@ -12,7 +13,7 @@ const base = import.meta.env.BASE_URL
 // the site names are revealed one at a time on hover rather than all at once,
 // and the five year ticks sit a quarter of the rail apart, which is twice the
 // width of the widest of them.
-const MONO = 'font-mono text-[0.6875rem] uppercase tracking-[0.2em] font-normal'
+const MONO = 'font-mono text-[0.6875rem] uppercase tracking-[0.16em] font-normal'
 
 const CLOSE_DELAY = 160
 
@@ -47,24 +48,17 @@ const PER_SITE = 3
 const OFF_WORLD = { lon: 168, lat: 78 }
 
 /*
- * Lanes, so overlapping posts do not paint over each other. Eight stints on one
- * line came out as a single stripe, and the overlaps are the part worth seeing:
- * Kuwait runs alongside Barcelona, and a term in Ohio interrupts a Beirut
- * degree. Greedy, earliest start first — each takes the first lane whose last
- * occupant has ended.
+ * One line. The posts used to be dealt into four lanes so that overlapping ones
+ * could not paint over each other, which was true to the record and made four
+ * stacked rails out of what a reader takes in as a single span of time. They
+ * share the line now, and the overlaps read as the denser colour they are.
+ *
+ * Longest first, so the short posts land on top of the long ones rather than
+ * under them: a term inside a degree is the thing you would want to point at,
+ * and painting it last is what keeps it reachable.
  */
-const LANES = (() => {
-  const ends = []
-  return TIMELINE.map((t) => {
-    let lane = ends.findIndex((e) => e <= t.from)
-    if (lane === -1) lane = ends.length
-    ends[lane] = t.to
-    return { ...t, lane }
-  })
-})()
-const LANE_COUNT = Math.max(...LANES.map((l) => l.lane)) + 1
+const LANES = [...TIMELINE].sort((a, b) => b.to - b.from - (a.to - a.from))
 const LANE_H = 3
-const LANE_GAP = 3
 const YEAR_TICKS = [2018, 2020, 2022, 2024, 2026]
 
 /*
@@ -76,6 +70,9 @@ const YEAR_TICKS = [2018, 2020, 2022, 2024, 2026]
 const PLACE_R = 3
 const PLACE_YEAR = Object.fromEntries(
   places.map((p) => {
+    // A place that states its year is taken at its word. The search below is
+    // the fallback, and it is why two dots used to be missing: see places.js.
+    if (p.year) return [p.id, p.year]
     let best = Infinity
     for (const t of TOUCHES) {
       if (Math.hypot(lonToX(p.lon) - lonToX(t.lon), latToY(p.lat) - latToY(t.lat)) < PLACE_R && t.yr < best) {
@@ -225,8 +222,12 @@ export default function About() {
   const fit = (() => {
     const { w, h } = box
     if (!w || !h) return null
-    const top = w < 768 ? 250 : 150
-    const bottom = 70 + LANE_COUNT * (LANE_H + LANE_GAP) + 26
+    // The island is all that sits at the top now, so the drawing starts under
+    // it. The foot has to clear the rail and leave the writing in the corner
+    // room to sit against, though it is allowed to overlap the drawing the way
+    // it always did at the top: the map is a ground, not a panel.
+    const top = w < 768 ? 110 : 96
+    const bottom = 70 + LANE_H + 26 + (w < 768 ? 168 : 62)
     const s = Math.min((w - 48) / VIEWBOX.w, (h - top - bottom) / VIEWBOX.h)
     const ox = (w - VIEWBOX.w * s) / 2
     const oy = top + (h - top - bottom - VIEWBOX.h * s) / 2
@@ -339,7 +340,7 @@ export default function About() {
         const m = landLayer.getContext('2d')
         m.scale(dpr, dpr)
         m.fillStyle = pal.land
-        m.globalAlpha = pal.dark ? 0.17 : 0.22
+        m.globalAlpha = pal.dark ? 0.1 : 0.13
         for (const [px, py] of LAND_PTS) {
           m.beginPath()
           m.arc(fit.X(px - 180), fit.Y(90 - py), 0.7 * Math.max(1, fit.s), 0, Math.PI * 2)
@@ -448,6 +449,23 @@ export default function About() {
     return () => document.removeEventListener('keydown', onKey)
   }, [close])
 
+  /*
+   * A press on a dot pins its card open; a press anywhere else puts it away.
+   * Without this the pin had no release except Escape or another dot, so a
+   * pinned card followed you around the page. The dots are excluded because
+   * pressing one is how you open the next card, and the card is excluded so
+   * that reading it, or following its link, is not a way to dismiss it.
+   */
+  useEffect(() => {
+    if (!activeId) return
+    const onDown = (e) => {
+      if (e.target.closest?.('[data-card]') || e.target.closest?.('[data-place]')) return
+      close()
+    }
+    document.addEventListener('pointerdown', onDown)
+    return () => document.removeEventListener('pointerdown', onDown)
+  }, [activeId, close])
+
   const openPlace = (id) => { clearClose(); pinnedRef.current = false; setActiveId(id) }
   const pinPlace = (id) => { clearClose(); pinnedRef.current = true; setActiveId(id) }
 
@@ -484,10 +502,14 @@ export default function About() {
               <button
                 key={p.id}
                 type="button"
+                data-place
                 ref={(el) => { pinRefs.current[p.id] = el }}
                 aria-label={`${p.name}, ${p.cities}`}
                 className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full p-[7px] outline-none"
-                style={{ left: fit.X(p.lon), top: fit.Y(p.lat) }}
+                style={{
+                  left: fit.X(p.lon) + (p.nudge?.[0] ?? 0),
+                  top: fit.Y(p.lat) + (p.nudge?.[1] ?? 0),
+                }}
                 onPointerEnter={() => openPlace(p.id)}
                 onPointerLeave={scheduleClose}
                 onFocus={() => openPlace(p.id)}
@@ -512,7 +534,7 @@ export default function About() {
               <button
                 key={s.slug}
                 type="button"
-                aria-label={`${s.name}, made in ${s.from[0] === 2.17 ? 'Barcelona' : s.from[0] === 55.3 ? 'Dubai' : 'Byblos'}`}
+                aria-label={`${s.name}, made in ${deskName(s.from)}`}
                 className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full p-[7px] outline-none"
                 style={{ left: fit.X(to.lon), top: fit.Y(to.lat) }}
                 onPointerEnter={() => lookAt([s.slug], s.name)}
@@ -536,7 +558,10 @@ export default function About() {
         </div>
       )}
 
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-[3] px-5 pt-24 sm:px-8 lg:px-12">
+      {/* Bottom left, over the drawing and above the rail. The padding clears
+          the rail's own block: its 32px of lead, the 3px line, the tick row and
+          its 24px foot. */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-[104px] z-[3] px-5 sm:px-8 lg:px-12">
         <div className="max-w-[58ch] md:max-w-[48%]">
           <p className={`${MONO} mb-4 text-muted`}>About</p>
           <h1 className="max-w-[28ch] text-balance text-[clamp(1.2rem,1.85vw,1.6rem)] font-light leading-[1.32] text-ink">
@@ -546,6 +571,12 @@ export default function About() {
             Practice across Beirut, Dubai and Kuwait, then the MaCAD master at IAAC. Now I build the
             tools I used to ask for.
           </p>
+          {/* The contacts, out of the band and under the writing. This is the
+              page about the person, so it is where a way to reach him belongs;
+              the band below keeps the identity alone and centred. The block
+              above is pointer-events-none so the drawing stays reachable
+              through it, which the marks have to opt back out of. */}
+          <ContactMarks named className="pointer-events-auto mt-7 -ml-1.5 text-muted" />
         </div>
       </div>
 
@@ -586,17 +617,11 @@ export default function About() {
         >
           Scroll to wind back · {START}–{Math.floor(NOW)}
         </span>
-        <div
-          className="relative w-full"
-          style={{ height: LANE_COUNT * LANE_H + (LANE_COUNT - 1) * LANE_GAP }}
-        >
-          {Array.from({ length: LANE_COUNT }, (_, i) => (
-            <span
-              key={`lane-${i}`}
-              className="absolute inset-x-0 rounded-full bg-line"
-              style={{ top: i * (LANE_H + LANE_GAP), height: LANE_H }}
-            />
-          ))}
+        <div className="relative w-full" style={{ height: LANE_H }}>
+          <span
+            className="absolute inset-x-0 rounded-full bg-line"
+            style={{ top: 0, height: LANE_H }}
+          />
           {LANES.map((t) => {
             const lit = focusLabel === t.name
             return (
@@ -608,7 +633,7 @@ export default function About() {
                 style={{
                   left: `${tx(t.from)}%`,
                   width: `${Math.max(0, tx(Math.min(t.to, year)) - tx(t.from))}%`,
-                  top: t.lane * (LANE_H + LANE_GAP),
+                  top: 0,
                   height: LANE_H,
                   backgroundColor: `var(--color-${t.belt})`,
                   opacity: t.from > year ? 0 : focusLabel ? (lit ? 1 : 0.25) : 0.85,
@@ -624,7 +649,7 @@ export default function About() {
               all of them. */}
           <span
             className="absolute -top-1 w-px bg-accent"
-            style={{ left: `${tx(year)}%`, height: LANE_COUNT * (LANE_H + LANE_GAP) + 2 }}
+            style={{ left: `${tx(year)}%`, height: LANE_H + 2 }}
           />
         </div>
 
@@ -655,7 +680,7 @@ export default function About() {
         ref={cardRef}
         data-card
         aria-hidden={!active}
-        className={`absolute z-[7] max-h-[min(440px,68vh)] w-[296px] overflow-auto border border-line bg-paper p-[18px] pb-5 transition-[opacity,transform] duration-200 ease-out motion-reduce:transition-none max-md:inset-x-3.5 max-md:bottom-3.5 max-md:top-auto max-md:max-h-[52%] max-md:w-auto ${
+        className={`absolute z-[7] max-h-[min(440px,68vh)] w-[296px] overflow-auto rounded-[10px] border border-line bg-paper shadow-[var(--chrome-lift)] transition-[opacity,transform] duration-200 ease-out motion-reduce:transition-none max-md:inset-x-3.5 max-md:bottom-3.5 max-md:top-auto max-md:max-h-[52%] max-md:w-auto ${
           active ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-1 opacity-0'
         }`}
         onPointerEnter={clearClose}
@@ -663,9 +688,9 @@ export default function About() {
       >
         {active && (
           <>
-            <p className={`${MONO} mb-2.5 text-accent`}>{active.tag}</p>
-            <h2 className="mb-1.5 text-[0.98rem] font-light leading-tight text-ink">{active.name}</h2>
-            <p className={`${MONO} mb-3.5 text-muted`}>{active.cities}</p>
+            {/* The cover position: clipped into the top of the card by the
+                fillet, the way every project card on the site leads with its
+                image rather than framing one inside its padding. */}
             {active.photo && (
               /*
                * object-top, and tall enough to hold a head. The photo is a 332x534
@@ -680,28 +705,51 @@ export default function About() {
                 width="296"
                 height="176"
                 decoding="async"
-                className="mb-3.5 block h-44 w-full object-cover object-top"
+                className="block h-44 w-full object-cover object-top"
               />
             )}
-            {active.stints?.length > 0 && (
-              <dl className="mb-3.5">
-                {active.stints.map(([years, org, capacity]) => (
-                  <div key={`${years}-${org}`} className="pb-2.5">
-                    <dt className={`${MONO} mb-1 tabular-nums text-muted`}>{years}</dt>
-                    <dd className="m-0 text-[0.78rem] font-light leading-snug text-ink">
-                      {org}
-                      <span className="mt-0.5 block text-muted">{capacity}</span>
-                    </dd>
-                  </div>
-                ))}
-              </dl>
-            )}
-            {active.note && (
-              <p className="m-0 font-serif text-[0.85rem] leading-[1.7] text-soft">{active.note}</p>
-            )}
-            <Link to="/cv" className={`${MONO} mt-4 inline-block text-muted transition-colors hover:text-accent`}>
-              Full record → CV
-            </Link>
+            {/* Centred, because these cards are three or four short lines about
+                one place rather than a column of records: the page's left-aligned
+                setting is for things that run on. */}
+            <div className="p-[18px] pb-5 text-center">
+              <p className={`${MONO} mb-2.5 text-accent`}>{active.tag}</p>
+              <h2 className="mb-1.5 text-[0.98rem] font-medium leading-tight text-ink">
+                {active.name}
+              </h2>
+              <p className={`${MONO} mb-3.5 text-muted`}>{active.cities}</p>
+              {active.stints?.length > 0 && (
+                <dl className="mb-3.5">
+                  {active.stints.map(([years, org, capacity]) => (
+                    <div key={`${years}-${org}`} className="pb-2.5">
+                      <dt className={`${MONO} mb-1 tabular-nums text-muted`}>{years}</dt>
+                      <dd className="m-0 text-[0.78rem] font-light leading-snug text-ink">
+                        {org}
+                        <span className="mt-0.5 block text-muted">{capacity}</span>
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              )}
+              {active.note && (
+                <p className="m-0 font-serif text-[0.85rem] leading-[1.7] text-soft">
+                  {active.note}
+                </p>
+              )}
+              {/* Somewhere to go, but only where there is somewhere to go: a
+                  place he worked or studied in is on the CV, and a place he
+                  travelled to is not written up anywhere yet. Sending the second
+                  kind to the CV promised a record that does not mention it. */}
+              {active.kind === 'visited' ? (
+                <p className={`${MONO} mt-4 text-muted`}>Architecture blog in the works</p>
+              ) : (
+                <Link
+                  to="/cv"
+                  className={`${MONO} mt-4 inline-block text-muted transition-colors hover:text-accent`}
+                >
+                  Full record → CV
+                </Link>
+              )}
+            </div>
           </>
         )}
       </div>
