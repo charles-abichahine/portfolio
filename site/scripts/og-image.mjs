@@ -173,3 +173,7 @@ const { default: sharp } = await import('sharp')
 const buf = await sharp(out).resize(1200, 630).png({ palette: true, quality: 92 }).toBuffer()
 writeFileSync(out, buf)
 console.log(`og-image: wrote ${out} (${(buf.length / 1024).toFixed(1)} KB)`)
+/* Every unfurler that matters mirrors the card rather than hotlinking it, and
+   keys its copy on the URL. Writing new pixels to the same path leaves all of
+   them showing the old card forever. index.html carries the reason at length. */
+console.log('og-image: now bump ?v= on og:image and twitter:image in index.html')
