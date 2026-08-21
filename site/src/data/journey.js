@@ -86,13 +86,37 @@ export const TIMELINE = [
  * `at: null` means it has a site that is not on this planet.
  */
 const BYBLOS = [35.65, 34.12]
+const BEIRUT = [35.5, 33.9]
+const KENT = [-81.36, 41.15]
 const DUBAI = [55.3, 25.2]
 const BARCELONA = [2.17, 41.39]
 
+/*
+ * The desk a piece of work was made at, by name. The page used to read this off
+ * the longitude with a three-way ternary, so every desk that was not Barcelona
+ * or Dubai was announced as Byblos: the Kent State work and anything made in
+ * Beirut both claimed the wrong city. Named here, beside the coordinates they
+ * belong to, so a new desk cannot be silently mislabelled again.
+ */
+const DESKS = [
+  [BYBLOS, 'Byblos'],
+  [BEIRUT, 'Beirut'],
+  [KENT, 'Kent, Ohio'],
+  [DUBAI, 'Dubai'],
+  [BARCELONA, 'Barcelona'],
+]
+
+export const deskName = (from) =>
+  DESKS.find(([at]) => at[0] === from[0] && at[1] === from[1])?.[1] ?? 'the desk'
+
 export const SITES = [
-  { slug: 'lau-anfeh', name: 'Anfeh', yr: 2023, from: BYBLOS, at: [35.73, 34.35], belt: 'amber' },
+  { slug: 'lau-anfeh', name: 'Point Nought', yr: 2023, from: BYBLOS, at: [35.73, 34.35], belt: 'amber' },
+  // Made at Kent State during the semester abroad, about a site in Chicago. It
+  // has no page on the site yet, which the map does not mind: a site mark is a
+  // label on a strand rather than a link.
+  { slug: 'pilsen-v', name: 'The Pilsen V', yr: 2022, from: KENT, at: [-87.66, 41.85], belt: 'green' },
   { slug: 'saria', name: 'Saria', yr: 2024, from: DUBAI, at: [55.3, 25.2], belt: 'amber' },
-  { slug: 'marception', name: 'Rings of Mars', yr: 2024, from: DUBAI, at: null, belt: 'green' },
+  { slug: 'marception', name: 'Rings of Mars', yr: 2024, from: BEIRUT, at: null, belt: 'green' },
   { slug: 'tsukiji', name: 'Tsukiji', yr: 2025, from: BARCELONA, at: [139.7, 35.7], belt: 'green' },
   { slug: 'huddle', name: 'The Huddle', yr: 2025, from: BARCELONA, at: [-70.9, -53.16], belt: 'green' },
   { slug: 'urban-risk', name: 'Encoding Urban Risk', yr: 2026, from: BARCELONA, at: [-0.13, 51.5], belt: 'accent' },
@@ -109,5 +133,5 @@ export const SITES = [
 export const TOUCHES = [
   ...TIMELINE.filter((t) => t.lon !== null && t.lon !== undefined).map((t) => ({ yr: t.from, lon: t.lon, lat: t.lat })),
   ...SITES.filter((s) => s.at).map((s) => ({ yr: s.yr, lon: s.at[0], lat: s.at[1] })),
-  ...places.filter((p) => p.kind === 'visited').map((p) => ({ yr: 2025, lon: p.lon, lat: p.lat })),
+  ...places.filter((p) => p.kind === 'visited').map((p) => ({ yr: p.year ?? 2025, lon: p.lon, lat: p.lat })),
 ]

@@ -6,6 +6,10 @@
  */
 export const VIEWBOX = { x: 0, y: 7, w: 360, h: 139 }
 
+/* Reached before the rail starts. The clock runs from 2018, so a place with a
+   year under it is lit in the first frame rather than arriving on one. */
+const BEFORE = 2017
+
 export const lonToX = (lon) => lon + 180
 export const latToY = (lat) => 90 - lat
 
@@ -18,32 +22,43 @@ export const LAND_ROWS = ["00000000000000000000000000000000000000000000000000000
 
 
 /*
+ * `nudge` moves a dot by pixels at draw time without moving its coordinate. The
+ * map is about four pixels to the degree, so Beirut and Anfeh, half a degree
+ * apart, land on top of each other; the nudge separates the marks while the
+ * projection above stays true.
+ *
  * kind: 'now'   — where he is (the one red dot on the page)
  *       'lived' — lived, studied or worked in
  *       'visited' — travelled to
  * `note` is optional; a place without one simply renders without it, so the
  * page looks finished before every note is written.
+ *
+ * `year` is when the place first lights. It used to be worked out by finding a
+ * dated touch within three degrees of the dot, which quietly lost the two that
+ * matter most: the United States sat at the country's centre in Kansas while
+ * Kent State is in Ohio, and Spain sat near Madrid while IAAC is in Barcelona,
+ * so neither ever appeared. The dots now sit on the cities they are about and
+ * say their own year.
  */
 export const places = [
   {
     id: 'lebanon', name: 'Lebanon', kind: 'now', lon: 35.9, lat: 33.9,
-    cities: 'Beirut', tag: 'Home · Now', photo: 'headshot.webp',
+    nudge: [-9, 9],
+    cities: 'Beirut', tag: 'Home · Now',
     stints: [
       ['2018–2023', 'Lebanese American University', 'B.Arch'],
       ['2022', 'Jemma Chidiac Architects', 'Architectural Intern'],
       ['2023', 'BIM International', 'BIM Modeler'],
     ],
-    note:
-      'Charles Abi Chahine, architect and computational designer. My work sits where architecture meets computation: generative design, BIM workflows, and AI in AEC.',
   },
   {
-    id: 'usa', name: 'United States', kind: 'lived', lon: -98.5, lat: 39.8,
-    cities: 'Kent, Ohio · New York', tag: 'Studied · 2022',
+    id: 'usa', name: 'Ohio', kind: 'lived', lon: -81.36, lat: 41.15, year: 2022,
+    cities: 'Kent', tag: 'Studied · 2022',
     stints: [['2022', 'Kent State University', 'B.Arch, study abroad']],
   },
   {
-    id: 'uae', name: 'United Arab Emirates', kind: 'lived', lon: 54.0, lat: 24.0,
-    cities: 'Dubai', tag: 'Worked · Beirut / Dubai · 2023–2024',
+    id: 'uae', name: 'United Arab Emirates', kind: 'lived', lon: 54.0, lat: 24.0, year: 2020,
+    cities: 'Dubai', tag: 'Visited 2020 · worked · Beirut / Dubai · 2023–2024',
     stints: [['2023–2024', 'SOMA', 'Design Architect, split between Beirut and Dubai']],
   },
   {
@@ -55,16 +70,20 @@ export const places = [
     stints: [['2024–', 'Dynamic Solution Co.', 'Design Technology Architect, on site then remote']],
   },
   {
-    id: 'spain', name: 'Spain', kind: 'lived', lon: -3.7, lat: 40.4,
-    cities: 'Barcelona · Valencia', tag: 'Studied · 2025–2026',
+    id: 'spain', name: 'Spain', kind: 'lived', lon: 2.17, lat: 41.39, year: 2025,
+    cities: 'Barcelona', tag: 'Studied · 2025–2026',
     stints: [['2025–2026', 'IAAC', 'Master in Advanced Computation (MaCAD)']],
   },
-  { id: 'italy', name: 'Italy', kind: 'visited', lon: 12.6, lat: 42.8, cities: 'Milan · Venice · Rome', tag: 'Visited' },
-  { id: 'france', name: 'France', kind: 'visited', lon: 2.2, lat: 46.6, cities: 'Paris', tag: 'Visited' },
-  { id: 'netherlands', name: 'Netherlands', kind: 'visited', lon: 5.3, lat: 52.2, cities: 'Amsterdam', tag: 'Visited' },
-  { id: 'turkiye', name: 'Türkiye', kind: 'visited', lon: 35.2, lat: 39.0, cities: 'Antalya', tag: 'Visited' },
-  { id: 'saudi', name: 'Saudi Arabia', kind: 'visited', lon: 45.1, lat: 24.0, cities: 'Riyadh', tag: 'Visited' },
-  { id: 'georgia', name: 'Georgia', kind: 'visited', lon: 43.4, lat: 42.3, cities: 'Tbilisi', tag: 'Visited' },
+  { id: 'turkiye', name: 'Türkiye', kind: 'visited', lon: 35.2, lat: 39.0, year: BEFORE, cities: 'Antalya', tag: 'Visited' },
+  { id: 'jordan', name: 'Jordan', kind: 'visited', lon: 36.24, lat: 31.24, year: BEFORE, cities: 'Amman', tag: 'Visited' },
+  { id: 'valencia', name: 'Valencia', kind: 'visited', lon: -0.38, lat: 39.47, year: 2018, cities: 'Spain', tag: 'Visited' },
+  { id: 'italy', name: 'Italy', kind: 'visited', lon: 12.6, lat: 42.8, year: 2020, cities: 'Milan · Venice · Rome', tag: 'Visited' },
+  { id: 'new-york', name: 'New York', kind: 'visited', lon: -74.0, lat: 40.71, year: 2022, cities: 'New York City', tag: 'Visited' },
+  { id: 'pennsylvania', name: 'Pennsylvania', kind: 'visited', lon: -75.16, lat: 39.95, year: 2022, cities: 'Philadelphia', tag: 'Visited' },
+  { id: 'france', name: 'France', kind: 'visited', lon: 2.2, lat: 46.6, year: 2025, cities: 'Paris', tag: 'Visited' },
+  { id: 'saudi', name: 'Saudi Arabia', kind: 'visited', lon: 45.1, lat: 24.0, year: 2025, cities: 'Riyadh', tag: 'Visited' },
+  { id: 'georgia', name: 'Georgia', kind: 'visited', lon: 43.4, lat: 42.3, year: 2025, cities: 'Tbilisi', tag: 'Visited' },
+  { id: 'netherlands', name: 'Netherlands', kind: 'visited', lon: 5.3, lat: 52.2, year: 2026, cities: 'Amsterdam', tag: 'Visited' },
 ]
 
 export const byId = Object.fromEntries(places.map((p) => [p.id, p]))
