@@ -77,6 +77,11 @@ const html = `<!doctype html>
     font-weight: 400;
     src: url(data:font/woff2;base64,${font('ibm-plex-mono-400.woff2')}) format("woff2");
   }
+  @font-face {
+    font-family: "Spectral";
+    font-weight: 400;
+    src: url(data:font/woff2;base64,${font('spectral-400.woff2')}) format("woff2");
+  }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { width: 1200px; height: 630px; }
   body {
@@ -104,15 +109,7 @@ const html = `<!doctype html>
     color: ${INK};
   }
   .dot { color: ${ACCENT}; }
-  hr {
-    border: 0;
-    border-top: 1px solid ${LINE};
-    margin: 30px 0 20px;
-    /* Ends under the role line rather than running to the edge: it is a rule
-       between two pieces of the same block, not a divider across the card. */
-    width: 512px;
-  }
-  p {
+  .role {
     font-family: "IBM Plex Mono", monospace;
     font-weight: 400;
     font-size: 21px;
@@ -121,13 +118,34 @@ const html = `<!doctype html>
     text-transform: lowercase;
     letter-spacing: 0.08em;
     color: ${SOFT};
+    margin-top: 24px;
   }
-  svg { width: 322px; height: 293px; display: block; }
+  hr {
+    border: 0;
+    border-top: 1px solid ${LINE};
+    margin: 28px 0 24px;
+    /* Ends under the block rather than running to the edge: it is a rule
+       between two pieces of the same column, not a divider across the card. */
+    width: 512px;
+  }
+  /* The landing's one serif sentence, in the landing's serif. Every unfurler
+     also prints it under the card as the og:description, but the card travels
+     places the description does not — Messages, small share sheets — and the
+     sentence is the site's whole pitch. */
+  .summary {
+    font-family: "Spectral", serif;
+    font-weight: 400;
+    font-size: 27px;
+    line-height: 1.6;
+    color: ${SOFT};
+  }
+  svg { width: 224px; height: 204px; display: block; }
 </style>
 <div>
   <h1>Charles Abi<br>Chahine<span class="dot">.</span></h1>
+  <p class="role">architect · computational designer</p>
   <hr>
-  <p>architect · computational designer</p>
+  <p class="summary">design, computation, and the work of getting it built.</p>
 </div>
 <!-- public/logo.svg, inlined with the light theme's ink and accent in place of
      the file's own hard-coded pair. -->
