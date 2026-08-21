@@ -214,6 +214,48 @@ const _projects = [
       github: 'https://github.com/hi-em/genai-legoarch',
       blog: 'https://blog.iaac.net/legoarch-behind-the-sets/',
     },
+    /*
+     * The pipeline as a drawing, for the sheet in the portfolio PDF.
+     *
+     * The handoff in the middle is the project's whole argument, so it is the
+     * structure here too: two halves rather than a flat list of six, and which
+     * half a stage sits in is the thing being claimed. The write-up below says
+     * the same in prose; this says it in a shape, and both are read off this
+     * record so neither can drift from the other.
+     *
+     * `mark` names a drawn glyph the renderer owns, the way a project names one
+     * by slug. `color` follows belts.js and holds the token, not the hex.
+     *
+     * `replaces` names the flat image of this same diagram that sits in the
+     * sections below. Anything drawing the pipeline should skip it: printing
+     * both puts the same picture on the page twice, once drawn and once
+     * photographed.
+     */
+    pipeline: {
+      replaces: 'projects/legoarch/pipeline.svg',
+      halves: [
+        {
+          label: 'AI proposes',
+          note: 'probabilistic',
+          color: 'var(--color-amber)',
+          stages: [
+            { mark: 'prompt', title: 'Prompt', note: 'a building name' },
+            { mark: 'render', title: 'FLUX.2 + LoRA', note: 'render · 28 steps' },
+            { mark: 'mesh', title: 'TRELLIS-2', note: 'image to 3D mesh' },
+          ],
+        },
+        {
+          label: 'Computation proves',
+          note: 'deterministic',
+          color: 'var(--color-blue)',
+          stages: [
+            { mark: 'voxel', title: 'Voxelize', note: '32 studs wide' },
+            { mark: 'brick', title: 'Legolize', note: 'split + merge' },
+            { mark: 'check', title: 'Buildable set', note: 'stable & legal' },
+          ],
+        },
+      ],
+    },
     intro: [
       'You type a building, and a minute later a real LEGO set is sitting on a shelf: rendered, modelled, brick-built, priced, and catalog-legal. Most "AI makes LEGO" demos stop at a gorgeous render, but a render is a promise, not a product. lEgoarCh builds the downstream half: the machinery that forces the dream to obey real bricks, real colours, and real gravity.',
     ],

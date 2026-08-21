@@ -5,11 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "node scripts/sitemap.mjs && node scripts/cv-pdf.mjs --check && node scripts/book-pdf.mjs --check && vite build && node scripts/prerender.mjs && node -e \"require('fs').copyFileSync('dist/index.html','dist/404.html')\"",
+    "build": "node scripts/sitemap.mjs && node scripts/cv-pdf.mjs --check && node scripts/portfolio-pdf.mjs --check && vite build && node scripts/prerender.mjs && node -e \"require('fs').copyFileSync('dist/index.html','dist/404.html')\"",
     "cv": "node scripts/cv-pdf.mjs",
     "lint": "oxlint",
     "preview": "vite preview",
-    "book": "node scripts/book-pdf.mjs",
+    "portfolio": "node scripts/portfolio-pdf.mjs",
     "variants": "node scripts/variants.mjs"
   },
   "dependencies": {
