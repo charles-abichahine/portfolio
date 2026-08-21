@@ -602,20 +602,23 @@ export default function Work() {
             <span aria-live="polite" className={`${MONO} tabular-nums text-muted`}>
               {filtered.length} {filtered.length === 1 ? 'Project' : 'Projects'}
             </span>
-            {/* The portfolio PDF, in the CV page's own button, so the two
-                pages offer their files the same way. Between lg and xl the
-                filter pills leave the label row no room for the full wording
-                (the pills alone take 662px of a 944px line), so the button
-                keeps its size and drops to "PDF" there rather than hiding:
-                it is the only place the file is offered. */}
-            <a
-              href={asset('portfolio.pdf')}
-              download="Charles-Abi-Chahine-Portfolio.pdf"
-              className="inline-flex shrink-0 whitespace-nowrap rounded-[10px] border border-ink bg-ink px-4 py-2.5 font-mono text-[0.6875rem] uppercase leading-none tracking-[0.14em] text-paper transition-colors hover:border-accent hover:bg-accent"
-            >
-              <span className="lg:max-xl:hidden">Portfolio (PDF) ↓</span>
-              <span className="hidden lg:max-xl:inline">PDF ↓</span>
-            </a>
+            {/*
+             * No download here for now.
+             *
+             * The booklet is still being edited page by page, and a PDF is the
+             * one thing on this site that cannot be corrected after the fact:
+             * the site updates, a file in someone's downloads folder does not,
+             * and that is the copy that gets forwarded. Labelling it as a work
+             * in progress would only advertise that on the artifact someone
+             * keeps. The page itself carries all eighteen projects with their
+             * writing, against eight in the booklet, so nothing is lost by
+             * waiting.
+             *
+             * Everything behind it stays: scripts/portfolio-pdf.mjs still
+             * generates public/portfolio.pdf, npm run portfolio still runs, and
+             * the build still checks the file against its sources. Putting the
+             * button back is this block becoming an <a> again.
+             */}
           </div>
 
           {/* Below lg the row scrolls sideways rather than wrapping — four pills
