@@ -68,6 +68,8 @@ const _projects = [
     sections: [
       {
         heading: 'The sensory layer',
+        brief:
+          'Comfort research studies one sense at a time, but we take a room in through all of them at once, and they are coupled: one moderates another. Add a bigger window and the daylight improves, but the same glass is a thinner sound barrier and leaks heat. The room score is half mean, half worst, because the worst sense is the one you would actually feel. Scoring is deterministic; the LLM routes intent and explains results, it never decides them.',
         body: [
           'Comfort research studies one sense at a time: thermal has its own models, acoustic its own standards. But we take a room in through all of them at once, and the senses are coupled: one moderates another. We call it the ripple. Add a bigger window and the daylight improves, but the same glass is a thinner sound barrier and leaks heat, and the noise that gets in can even diminish the daylight you gained. One design move, a chain of consequences.',
           'The room score is not an average. It is half mean, half worst: the worst sense carries the room, because that is the one you would actually feel. A kitchen that scores fine on everything except smell does not get to hide behind its other senses. The scoring is deterministic: fixed rules over a coupling matrix. The LLM routes intent and explains results; it never decides the score. No black box.',
@@ -78,6 +80,8 @@ const _projects = [
       },
       {
         heading: 'Act 1 · Onboard: who is this for',
+        brief:
+          'Comfort is not universal, so Sensi opens by learning who you are: a few questions, then a moodboard where each image you keep quietly tags the senses you lean toward. It compiles into a persona drawn as a petal rose.',
         body: [
           'Comfort is not universal. The same plan read through two lenses tells two stories: a child who minds noise sees the loud living room light up; a grandmother who minds the cold sees the cold bedroom. So Sensi opens by learning who you are: a few questions, then a moodboard where each image you keep quietly tags the senses you lean toward. Your words become sense weights, the images nudge them, and it all compiles into a persona drawn as a petal rose.',
         ],
@@ -88,6 +92,8 @@ const _projects = [
       },
       {
         heading: 'Act 2 · Shape: comfort you can edit',
+        brief:
+          'The heart of the system. You talk to it in plain language and a fast routing model classifies your intent in about 0.6 seconds. An edit is planned, validated against the plan, applied and re-scored live, and kept as a checkpoint. Rooms are nodes and doors are edges, so comfort becomes a zoning problem you can see.',
         body: [
           'This is the heart of the system. You talk to it in plain language; a fast routing model classifies your intent in about 0.6 seconds: score a room, edit it, or explore the relationships. Ask a question and a heavier model reads the whole room and answers in words. Make an edit (change a material, add a window, place curtains, adjust ventilation) and the agent plans it, validates it against the plan, applies it, and re-scores, live. Every edit is kept as a checkpoint, so the plan improves honestly over time.',
           'Rooms are nodes, doors are edges: the kitchen’s noise and smell reaching the bedroom through the hallway makes comfort a zoning problem you can see. The galaxy view holds the whole project as one living map of rooms, senses, and the design levers behind them, so you can find the connection you did not know was there.',
@@ -101,6 +107,8 @@ const _projects = [
       },
       {
         heading: 'Act 3 · Report: closing the loop',
+        brief:
+          'Final scores write a prompt and a vision model renders each room under an honest rule: only the extreme senses speak, the comfortable middle stays quiet. You compare it back to the moodboard from Act 1. About $0.039 per room, 2.75× faster than the alternative we tested.',
         body: [
           'The last act closes the loop. Your final scores write a prompt and a vision model renders each room, under an honest rule: only the extreme senses speak. A clearly good or bad sense writes a phrase, the comfortable middle stays quiet, so the render stays grounded in what actually changed. You compare it back to the moodboard from Act 1; input and output meet. We benchmarked the renders across providers: about $0.039 per room and 2.75× faster than the alternative we tested.',
         ],
@@ -138,6 +146,8 @@ const _projects = [
     sections: [
       {
         heading: 'Grounded in sixty years of theory',
+        brief:
+          'Every feature traces to established urban-safety theory: Jacobs on eyes on the street, Newman on territorial clarity, Hillier and Hanson on network configuration. The unit is the segment, where risk clusters.',
         body: [
           'Every feature we chose traces back to established urban-safety theory. Jane Jacobs argued that active entrances create natural surveillance: “eyes on the street.” Oscar Newman showed that territorial clarity reduces the conditions for risk. Hillier and Hanson demonstrated through Space Syntax that network configuration shapes movement in predictable ways. Our unit of analysis is the segment, the stretch of street between two intersections, because risk clusters at that scale and a classified segment points a designer to a specific, addressable piece of street.',
         ],
@@ -147,6 +157,8 @@ const _projects = [
       },
       {
         heading: 'Hitting the wall',
+        brief:
+          'We first tried to predict crime directly, regressing 920,000 London incidents against our features. Three models returned R² under 0.064: street geometry cannot capture social forces. A finding, not a failure.',
         body: [
           'We first tried to predict crime directly: sourcing roughly 920,000 London incidents and regressing them against our spatial features across five boroughs. Three models, Linear Regression, Decision Tree, Random Forest, all returned R² under 0.064. The models failed to learn. Crime is driven by social and economic forces that street geometry alone cannot capture. We treated this as a finding, not a failure. Spatial form is too weak for direct regression against crime, so we pivoted to a more honest goal: a spatial typology that serves as a proxy for perceived risk.',
         ],
@@ -156,6 +168,8 @@ const _projects = [
       },
       {
         heading: 'The pivot: a spatial typology',
+        brief:
+          'Rebuilt in eight steps: fetch from OSM and Mapillary, seven normalised features per segment, collapsed into a weighted score, cut into three classes with K-Means, then trained. 31% low, 47% medium, 22% high.',
         body: [
           'We rebuilt the pipeline into eight steps: fetch from OSM and Mapillary, place seven normalised features onto each segment, collapse them into a weighted risk score, use PCA and a Kohonen map as diagnostics, cut into three classes with K-Means, train a classifier, and deploy to other cities. Across 36,000 segments the score is roughly normal, centred near 0.35, so rather than impose fixed cuts through the densest part, we let K-Means find the natural breakpoints. The split: 31% low, 47% medium, 22% high.',
         ],
@@ -166,6 +180,8 @@ const _projects = [
       },
       {
         heading: 'Coherent types, ambiguous risk',
+        brief:
+          'The Kohonen map organises into legible street types, but coloured by risk, near-identical cells differ sharply. Typologies describe character; they do not determine risk. That gap is the honest heart of it.',
         body: [
           'The Kohonen map sorts all seven features onto a 2D grid by similarity, and the network organises into legible street types. But coloured by risk, near-identical cells show quite different values. Typologies describe street character; they do not cleanly determine risk. That gap is the honest heart of the project.',
         ],
@@ -175,6 +191,8 @@ const _projects = [
       },
       {
         heading: 'What actually matters',
+        brief:
+          'Logistic Regression hits 99% and Random Forest 95%, expected since the label came from the same features. The ablation says more: transport leads, then connectivity and land use. Lighting barely registers.',
         body: [
           'Logistic Regression hits 99% accuracy and Random Forest 95%: expected by construction, since the label was built from the same features the classifiers train on. Accuracy tells us the rule is clean and learnable, not that it is correct. The ablation study is more informative: transport proximity is the single most important feature, followed by connectivity and land use. Lighting contributes almost nothing, because Mapillary lighting is inconsistently mapped, and a feature that does not vary cannot discriminate.',
         ],
@@ -184,6 +202,8 @@ const _projects = [
       },
       {
         heading: 'London trained, world tested',
+        brief:
+          'Applied to Barcelona’s Eixample and Trastevere, the reading breaks where morphology diverges. SHAP pinpoints it: land use and visibility hit values never seen. A distribution problem, not an architecture flaw.',
         body: [
           'With London as the training set, we applied the model to Barcelona’s Eixample and Trastevere in Rome. The Eixample comes out almost entirely high-risk, not because it is dangerous, but because its orthogonal grid, high enclosure, and high connectivity map onto London’s high-risk feature region. SHAP pinpoints the divergence: land use and visibility hit values the model has never seen, so it extrapolates into high-risk by default. Not an architecture flaw: a per-city normalisation and distribution-shift problem. English cities like Leeds and Birmingham, which share London’s morphological history, transfer far better; re-fitting the pipeline on Barcelona produces a contextually plausible spread of its own.',
         ],
@@ -262,6 +282,8 @@ const _projects = [
     sections: [
       {
         heading: 'One sentence, five moves',
+        brief:
+          'Text prompt, FLUX render, TRELLIS mesh, voxelize, legolize, a priced buildable set. The front half is probabilistic and invents the form. The back half is deterministic and proves it stands. The handoff in the middle is the entire idea.',
         body: [
           'The pipeline runs text prompt → FLUX render → TRELLIS 3D mesh → voxelize → legolize → a priced, buildable set. The front half is generative and probabilistic: it invents the form. The back half is deterministic: it proves the form stands. The handoff in the middle is the entire idea.',
         ],
@@ -272,6 +294,8 @@ const _projects = [
       },
       {
         heading: 'A LoRA that speaks LEGO',
+        brief:
+          'Base FLUX.2 does not speak fluent LEGO Architecture. We trained a LoRA on the visual grammar of real LEGO Architecture sets and swept its strength from 0 to 1.5: at 0 a plain building, at 1.0 the studs and brick seams snap in. The LEGO-ness lives in the fine-tune, not in the words.',
         body: [
           'Base FLUX.2 does not speak fluent LEGO Architecture: ask for a LEGO building and you get something vaguely blocky. So we trained a LoRA on the visual grammar of real LEGO Architecture sets and swept its strength from 0 to 1.5: at 0 the render is a plain building, at 1.0 the studs and brick seams snap in. The LEGO-ness genuinely lives in the fine-tune, not in the words.',
         ],
@@ -282,6 +306,8 @@ const _projects = [
       },
       {
         heading: 'From one photo to a whole object',
+        brief:
+          'TRELLIS-2 completes the full 3D form from the single render, openly guessing the unseen back. Then the deterministic half begins: the mesh is voxelized onto plate-height layers, pre-stretched 2.5× vertically because bricks are not cubes, and colours are exposure-matched back to the render.',
         body: [
           'TRELLIS-2 takes the single render and completes the full 3D form: openly guessing the unseen back from everything it knows about how buildings behave. Then the deterministic half begins: the mesh is voxelized onto plate-height layers (bricks are not cubes, so the mesh is pre-stretched 2.5× vertically), and colours are sampled and exposure-matched back to the original render.',
         ],
@@ -292,6 +318,8 @@ const _projects = [
       },
       {
         heading: 'The legolizer: where buildable gets earned',
+        brief:
+          'The computational centrepiece contains no AI at all. A split-and-merge solver covers each layer with the largest legal bricks that fit, with a slope pass that bevels staircases and a running-bond penalty that offsets seams. Colours snap to the nearest real LEGO colour in CIEDE2000, and 44 parts by 48 colours give 1,598 validated combinations.',
         body: [
           'The computational centrepiece contains no AI at all. A split-and-merge solver covers each layer with the largest legal bricks that fit, full-height bricks first, then plates, then smooth tiles, with a slope pass that bevels staircases (to our knowledge the first open implementation of a method published in 2019) and a running-bond penalty that offsets seams the way a real bricklayer would.',
           'Colours snap to the nearest real LEGO colour measured in CIEDE2000, the perceptual standard, not naive RGB distance. Every footprint is a real BrickLink part: 44 parts and 48 colours cross-validated between Rebrickable and LDraw into 1,598 legal combinations. Buildable means every piece goes in a cart.',
@@ -303,6 +331,8 @@ const _projects = [
       },
       {
         heading: 'A set you can keep',
+        brief:
+          'The output is a complete product: box art, a build booklet, a priced parts list, and a shelf that keeps every set you have generated.',
         body: [
           'The output is a complete product: box art, a build booklet, a priced parts list, and a shelf that keeps every set you have generated. Re-roll the render, re-tune the bricks, reopen any set.',
         ],
@@ -339,6 +369,8 @@ const _projects = [
     sections: [
       {
         heading: 'The alveolar spine: a lung analogy',
+        brief:
+          'The core takes its logic from the human lung: a porous structural core mirroring the bronchi, carrying load and moving air at once. The organising logic for both the structure and the way the tower breathes.',
         body: [
           'The core of the building is defined by the Alveolar Spine. Taking inspiration from the human lung, we developed a porous structural core that mirrors the function of the bronchi: a spine that carries load and moves air at the same time. The concept is not decorative; it is the organising logic for both the structure and the way the tower breathes.',
         ],
@@ -348,6 +380,8 @@ const _projects = [
       },
       {
         heading: 'A self-braced skeleton',
+        brief:
+          'Volumes plug onto the core, and three cores form a self-bracing triangle. Alpaca read the stress, the optimization stripped what was idle, and the voxels that survived became a lattice: 1,650 tonnes down to 235.',
         body: [
           'The structure rests on the core: each volume is plugged onto it, so load transfers from volume to core to foundation. Three cores form a triangle that turns vertical mass into a self-braced system. Using Alpaca we measured the stress at the points connecting the core to the volumes, ran a structural optimization to remove unnecessary material, and transformed the resulting voxels into a lattice: dense at high-load junctions, tapered where the loads fall away. The optimization cuts the primary structure from roughly 1,650 to 235 tonnes.',
         ],
@@ -358,6 +392,8 @@ const _projects = [
       },
       {
         heading: 'Growing the volumes',
+        brief:
+          'The plugin masses are grown along the lattice, placed by incident radiation, wind pressure and volumetric density, each candidate measured across 232 branches.',
         body: [
           'The plugin masses are computationally grown along the lattice, their placement and density optimized by incident radiation for thermal regulation, wind pressure for airflow, and volumetric density. A data-driven deterministic engine measures each candidate volume across 232 branches and normalises it, so every form is justified by data before it is committed.',
         ],
@@ -367,6 +403,8 @@ const _projects = [
       },
       {
         heading: 'The breathing core: an environmental machine',
+        brief:
+          'A water cascade, electrostatic precipitation and Climeworks-style capture pull CO₂ and particulates from the air before the spine redistributes it. Structure and environmental system are one object.',
         body: [
           'The core is where the tower earns its name. A water-cascade system, electrostatic precipitation for air purification, and Climeworks-style capture pull CO₂ and particulates from ambient air, cleaning it before it is redistributed through the spine and stored back into the ground. The structure and the environmental system are one and the same object.',
         ],
@@ -376,6 +414,8 @@ const _projects = [
       },
       {
         heading: 'Fixed vs. adaptive facade',
+        brief:
+          'A pattern from mashrabiya logic becomes a performative facade: adaptive where the skin must respond, fixed where it need not. Wind and radiation set it, and one grammar reads both ways.',
         body: [
           'The skin operates in two modes depending on the program behind it. A pattern derived from mashrabiya logic becomes a performative facade geometry: an adaptive, dynamic system where it needs to breathe and respond, and a fixed, collated system where it does not. Wind direction and radiation set the pattern; the same grammar reads as both a static and a moving skin.',
         ],
@@ -386,6 +426,8 @@ const _projects = [
       },
       {
         heading: 'The tower',
+        brief:
+          'Assembled, it reads as plugged volumes around a breathing spine: less an object than a piece of the city’s respiratory infrastructure.',
         body: [
           'Assembled, the system reads as a stack of plugged volumes around a breathing spine: a tower that behaves less like an object and more like a piece of the city’s respiratory infrastructure.',
         ],
@@ -422,6 +464,8 @@ const _projects = [
     sections: [
       {
         heading: 'Endurance, not shelter',
+        brief:
+          'Punta Arenas sits on the Magellan Strait, a departure point for Antarctic expeditions. We took the harder of two plots: open, windy, salt-worked, but facing the sea. The project accepts wind, not resists it.',
         body: [
           'Punta Arenas sits on the Magellan Strait, and its position is its programme: a departure point for expeditions toward the nearby islands and the Antarctic south. The hub is a research laboratory tied to the local university.',
           'We compared two plots and took the harder one: open, windy, worked on by salt and moisture, but with a direct relationship to the sea. Climate analysis confirmed the severity, so the project begins by accepting wind as an omnipresent force rather than resisting it.',
@@ -434,6 +478,8 @@ const _projects = [
       },
       {
         heading: 'Learning from the kawi',
+        brief:
+          'The typology comes from the kawis, the region’s native huts, already adapted to extreme wind. We reinterpreted it as 4×4×4 m units under a 16 m limit, the gaps becoming wind-protected courtyards.',
         body: [
           'The core typology comes from the kawis, the huts of the region’s native tribes, whose aerodynamic form is already adapted to extreme wind. We reinterpreted it as a modular system of 4×4×4 m units under a 16 m height limit, and the gaps the aggregation leaves become wind-protected courtyards and tunnels that accelerate the airflow.',
           'A topological map sorts a 50,000 m² programme into public, researcher-only and sensitive laboratory groups, with adjacency rules that keep the public accessible and the labs protected. The vertical cores are fixed; the dormitories, libraries and shared spaces scale with demand.',
@@ -445,6 +491,8 @@ const _projects = [
       },
       {
         heading: 'A workflow, not a shape',
+        brief:
+          'One chain: a program definition feeds two Kangaroo solvers, then Wasp aggregates the kit of parts. Because it is a system, the part count is known at every moment and the rules hold at 50 users or 1,000.',
         body: [
           'The definition runs as one chain. An adaptable program definition feeds two sequential Kangaroo solvers, the first placing the programme roughly through physics-based logic, the second refining it into precise subprogram locations. Wasp then aggregates the kit of parts under a rule layout grouped by part and access type.',
           'Because it is a system rather than an object, the part count is known at every moment: one iteration carries 23 private laboratory modules against 28 public ones. Whether the building holds 50 users or 1,000, the rules hold.',
@@ -456,6 +504,8 @@ const _projects = [
       },
       {
         heading: 'Program becomes massing',
+        brief:
+          'Public programme wraps around and shields the research and residential areas, on a single circulation spine. In section it stays compact under the height limit, the skin a buffer against the cold.',
         body: [
           'The layout is legible: public programme wraps around and shields the research and residential areas, and a single circulation spine connects everything. In section the building stays compact under the height limit, the skin acting as a buffer against the cold wind, and the courtyards it encloses are rare protected outdoor space here.',
         ],
@@ -466,6 +516,8 @@ const _projects = [
       },
       {
         heading: 'Timber, seismic forces, and a skin of three panels',
+        brief:
+          'Local timber, shear walls and bracing for wind, seismic isolators for movement, stable at roughly 709 tons. Three ETFE panels: the Shield for pressure, the Lens for solar gain, the Gill for ventilation.',
         body: [
           'The structure is grounded in local timber, which cuts the logistical and environmental footprint and ties the building back to the region’s vernacular. Shear walls and diagonal bracing take the lateral wind loads, and seismic isolators take the horizontal movement. Alpaca4D displacement maps confirmed stable behaviour at a mass of roughly 709 tons.',
           'The envelope is a kit of three ETFE panels. The Shield sits on windward faces and uses hoop-stress logic at 800 Pa to stop the membrane flapping; the Lens traps solar gain in argon-filled cushions; the Gill lets the mechanical zones breathe. A Global Index weights wind incidence, solar orientation and daylight need equally and picks the panel for each face, so the facade reads as a map of the climate on it.',
@@ -477,6 +529,8 @@ const _projects = [
       },
       {
         heading: 'Wind becomes a resource',
+        brief:
+          'The tunnels the aggregation opens accelerate the flow, and vertical turbines stand in those zones. What the building was shaped to survive ends up powering it.',
         body: [
           'The aggregation opens wind tunnels between the modules, and those tunnels accelerate the flow. Vertical turbines stand in exactly those zones and harvest the site’s most abundant force. The thing the building was shaped to survive ends up powering it.',
         ],
@@ -511,6 +565,8 @@ const _projects = [
     sections: [
       {
         heading: 'More than a roof',
+        brief:
+          'The system is deliberately independent: it revitalizes the market below without touching the historic walls. Voids are cut into the geometry precisely so the new form pulls away from its context. It reads as a continuous volume nested within the void, a porous buffer that protects the atrium without sealing it off.',
         body: [
           'The system is deliberately independent: it revitalizes the market below without touching the historic walls. Voids are cut into the geometry precisely so the new form pulls away from its context, respecting the constraint of independence. It reads as a continuous volume that nests within the void: a porous buffer that protects the atrium without sealing it off.',
         ],
@@ -521,6 +577,8 @@ const _projects = [
       },
       {
         heading: 'Computational form-finding',
+        brief:
+          'The geometry is generated through Kangaroo physics. A flat mesh, strategic voids, edge anchor points and OnCurve goals define the footprint, then vertical load forces pull the mesh into a relaxed catenary vault. The defining move comes next: mesh faces are sorted by their normal vectors, and that orientation dictates function.',
         body: [
           'The geometry is generated through Kangaroo physics. The process begins with a flat mesh; strategic voids are cut in to ensure the form pulls away from the historic context. Edge anchor points and specific ‘OnCurve’ goals define the footprint, then vertical load forces pull the mesh upward into a relaxed catenary vault. The most defining move comes next: mesh faces are sorted by their normal vectors, and that orientation dictates function.',
         ],
@@ -531,6 +589,8 @@ const _projects = [
       },
       {
         heading: 'Geometry becomes function',
+        brief:
+          'Vertical faces become gradient frosted louvers that control sun glare; horizontal faces become structural lamellas serving as shelving and walkable surfaces. All of it materializes at once from the relaxed mesh. The system is modular, and for the last vault different anchor points turn it into a continuous staircase.',
         body: [
           'Vertical faces become gradient frosted louvers that control sun glare; horizontal faces become structural lamellas that serve as shelving and walkable surfaces. The architectural elements all materialize simultaneously from the relaxed mesh: the form-finding is the generator, resolving the complex geometry into louvers, lamellas, and paths in one unified move. The system is modular, repeated along the market hall; for the last vault, different anchor points turn the workflow into a continuous staircase connecting the two levels.',
         ],
@@ -540,6 +600,8 @@ const _projects = [
       },
       {
         heading: 'An occupiable lattice',
+        brief:
+          'I tested vertical loads from a shallow 15% to a steep 75%, and calibrated the domains for the frosted louvers and structural lamellas to tune porosity against structure. The selected iteration uses a 35% vertical load, giving the optimal vault height and clearance for the layers below.',
         body: [
           'Form-finding is rarely linear. I tested vertical loads from a shallow 15% to a steep 75%, and calibrated the domains for the frosted louvers and structural lamellas to tune porosity: the balance between sun shading and structural integrity. The selected iteration uses a 35% vertical load, giving the optimal vault height and spatial clearance for the functional layers below. The result is an occupiable lattice of filtered light that respects the past while embracing a computational future.',
         ],
@@ -1191,6 +1253,8 @@ const _projects = [
     sections: [
       {
         heading: 'A ring in a crater',
+        brief:
+          'Three concentric circles. The inner one is a controlled farm under a glass facade, visible from every room. The middle circle is transportation. The outer is living and working space, with five sleeping pods on the lowest level. The shell is 3D-printed regolith outside and high-density polyethylene inside for an air-tight seal, with BIPV panels over the facade; the canyon walls do the rest of the shielding.',
         body: [
           'Three concentric circles. The inner one is a controlled farm under a glass facade, visible from every room so the researchers far from home keep a piece of Earth’s green in view. The middle circle is transportation. The outer circle is living and working space, and on the lowest level five sleeping pods give the crew comfort and protection against the Martian environment. The shell is 3D-printed regolith on the outside, high-density polyethylene on the inside for an air-tight seal, and BIPV solar panels over the facade; the canyon walls of Valles Marineris do the rest of the radiation shielding.',
         ],
@@ -1200,6 +1264,8 @@ const _projects = [
       },
       {
         heading: 'Why a ring',
+        brief:
+          'The craters are the site Mars already gives you, so the ring takes their shape instead of fighting it. The ecosystem closes on itself: water split into oxygen and hydrogen, plants turning the crew’s CO₂ into food, the carbon and water reacting back into HDPE for printing and fuel. Transport runs in a loop, and expansion is simply the next crater over.',
         body: [
           'The craters are the site Mars already gives you, so the ring takes their shape instead of fighting it. And a ring suits everything a habitat needs: the ecosystem closes on itself, water split by electrolysis into oxygen and hydrogen, plants turning the crew’s CO₂ into food, the carbon and water reacting back into HDPE for printing and fuel for back-up power and vehicles; the transport runs in a loop; and expansion is simply the next crater over, 4,000 km of canyon to grow along.',
         ],
@@ -1207,6 +1273,8 @@ const _projects = [
       },
       {
         heading: 'How it was made',
+        brief:
+          'Regolith melted into a paste and printed by drone robotics, every surface shaped to stand at an angle that needs no support. Then the model in Rhino with SubD, from the massing of the ring down to the sleeping pods. Then the part that was new at the time: feeding the geometry to generative image tools when image generation was only just becoming a thing, and finishing in V-Ray.',
         body: [
           'First the research: regolith melted into a paste and printed by drone robotics, and every surface shaped to stand at an angle that needs no support, because support structures are the thing nobody wants to print on Mars. Then the model, in Rhino with SubD, from the massing of the ring down to the sleeping pods. Then the part that was new at the time: feeding the geometry to generative image tools, when image generation was only just becoming a thing, to render concepts straight from the model, and finishing them in V-Ray.',
         ],
@@ -1216,6 +1284,8 @@ const _projects = [
       },
       {
         heading: 'What came of it',
+        brief:
+          'Top 50 at Marsception, with both our names on the public results page. And our first proof that generative tools and architecture could share a desk: an early bet, and it aged well.',
         body: [
           'Top 50 at Marsception, with both our names on the public results page. And our first proof that generative tools and architecture could share a desk: an early bet, and it aged well.',
         ],
@@ -1248,6 +1318,8 @@ const _projects = [
     sections: [
       {
         heading: 'A tower on the water',
+        brief:
+          'The plot sits at the edge of the Maritime City peninsula, so the tower is read from the water first: a slender square plan rising off a podium, with the skyline of Business Bay behind it. Four podium levels carry the parking under a landscaped deck; above sit 38 levels, the roof at 167 m. The rhythm breaks once at level 20 and again at the top two floors.',
         body: [
           'The plot sits at the edge of the Maritime City peninsula, so the tower is read from the water first: a slender square plan rising off a podium, with the skyline of Business Bay and the Burj behind it. Four levels of podium carry the parking under a landscaped deck; above it sit 38 levels, the roof at 167 m. The amenities are on the first level over the podium, a gym, a lounge and juice bar, an outdoor deck and a pool opening onto the planted terrace; the tower’s rhythm breaks once at level 20 and again at the top two floors, which have plans of their own.',
         ],
@@ -1259,6 +1331,8 @@ const _projects = [
       },
       {
         heading: 'The facade',
+        brief:
+          'The facade is where the parametric work went. The balconies shift and step across the elevation rather than stacking in a straight line, and the pattern was iterated in Rhino and Grasshopper: how far each band projects, where the planters sit, how the rhythm breaks. What survived went into the Revit model the drawings are cut from.',
         body: [
           'The facade is where the parametric work went. The balconies shift and step across the elevation rather than stacking in a straight line, and the pattern was iterated in Rhino and Grasshopper: how far each band projects, where the planters sit, how the rhythm breaks at level 20 and again at the crown. What survived the iterations went into the BIM model in Revit, which is what the set below is cut from.',
         ],
@@ -1269,6 +1343,8 @@ const _projects = [
       },
       {
         heading: 'The podium and the ground',
+        brief:
+          'At street level the podium is wrapped in planting and opens under a deep canopy at the entrance; the landscape runs over the podium roof and down to the promenade, so the tower lands in a garden rather than on a car park.',
         body: [
           'At street level the podium is wrapped in planting and opens under a deep canopy at the entrance; the landscape runs over the podium roof and down to the promenade, so the tower lands in a garden rather than on a car park. The ground floor takes the lobby and the drop-off, the podium levels the parking, and the deck above carries the pool and the outdoor amenity.',
         ],
@@ -1280,6 +1356,8 @@ const _projects = [
       },
       {
         heading: 'The drawings',
+        brief:
+          'The concept set: the master plan on its plot, the ground floor with the lobby and drop-off, the amenity level over the podium, and a typical residential floor running from the 12th to the 34th, core in the middle and apartments around it.',
         body: [
           'The concept set: the master plan on its plot, the ground floor with the lobby and drop-off, the amenity level over the podium, and a typical residential floor, which runs from the 12th to the 34th with the core in the middle and the apartments around it.',
         ],

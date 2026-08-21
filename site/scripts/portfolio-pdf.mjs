@@ -104,10 +104,9 @@ const PAGE_H = 186
 const TB_W = 64
 const PLATE_W = PAGE_W - TB_W - 8
 
-/* The verso's frame: the runner and the gap under it, and the gutter between
- * cells, used both across and down so the field reads as one grid. */
+/* The runner at the head of a verso, and the gap under it. What is left is
+ * the column both the writing and the plates are measured against. */
 const VERSO_HEAD = 14
-const VERSO_GAP = 8
 
 /* The strip a pipeline drawing takes at the foot of a sheet. Fixed, because
  * the cover above it is what should give way: a diagram that grew with its
@@ -368,9 +367,8 @@ const SAFETY = 1.07
 const HEAD_MM = 4.6
 const CAP_MM = 8.2
 
-function sectionTextMm(section, widthMm) {
-  const chars = section.body.join(' ').length
-  const lines = chars / (widthMm / CHAR_MM) + section.body.length * 0.9
+function sectionTextMm(text, widthMm) {
+  const lines = text.length / (widthMm / CHAR_MM) + 0.9
   return HEAD_MM + Math.ceil(lines) * LINE_MM * SAFETY
 }
 
@@ -450,152 +448,45 @@ async function sectionPlates(p, used) {
  * at full size rather than six at thumbnail size, taken in the order the
  * sections argue. Every drop is reported by the run.
  */
-const VERSO_COLS = [2, 3]
-const MAX_CELL_PLATE = 72
-/* How much a plate gives back per round when the page asks it to, and the
- * floor it is dropped at rather than shrunk past.
+/* The verso, in two parts: the writing down the left third, the plates in the
+ * right two.
  *
- * A cell plate is drawn at the full width of its column, so it is only ever
- * this small when it is tall and narrow. It sits directly under the paragraph
- * that explains it, which is why the floor is lower than the sheet's: it is
- * read WITH the words rather than instead of them. Below it the picture stops
- * being worth the room and the cell prints as writing. */
-const PLATE_STEP = 6
-const GOOD_CELL_PLATE = 42
-
-/*
- * How tall a cell stands: its writing, and its plate with the caption under
- * it. The 3mm is the air below every cell whether or not it carries one.
+ * The full write-up cannot go in a third of a page. Measured against the type
+ * this document sets, the eight projects wanted between 159 and 310mm of an
+ * 85mm column against the 172mm there is, so seven of the eight overran, one
+ * of them by nearly double. That is why every section carries a `brief` in
+ * projects.js: the long form is what the site shows, the short form is what a
+ * page this shape can hold. Nothing here truncates, so if a brief ever
+ * outgrows the column the run says so rather than the page eating a paragraph.
+ *
+ * The plates take one of two arrangements, two large or four small, and which
+ * one is alternated by sheet rather than chosen: both are on the table until
+ * the set has been looked at. Alternating rather than randomising is the point
+ * of it, since the same sources have to keep producing the same PDF.
  */
-const cellTall = (c) => c.text + (c.plate ? c.h + CAP_MM + 3 : 3)
+const TEXT_COL = 85
+const VERSO_GUTTER = 11
 
-/*
- * Which cells go in which column, decided here rather than by the browser.
- *
- * CSS column balancing cannot help: a cell must not split, or its plate ends
- * up in a different column from the paragraph it belongs to, and a column of
- * unsplittable blocks balances by moving whole sections, which left the middle
- * column ending half a page short of the other two.
- *
- * The sections have to stay in reading order, so the only freedom is where the
- * two breaks fall. With at most seven of them every pair of break points can
- * simply be tried, and the one whose tallest column is shortest wins. That is
- * the flattest bottom edge the reading order allows.
- */
-function balance(cells, cols) {
-  const n = cells.length
-  let best = null
-  /* Every ordered cut into `cols` contiguous groups. Two columns have one
-   * break to place and three have two, which is few enough to simply try. */
-  const cuts = []
-  if (cols === 2) {
-    for (let a = 0; a <= n; a++) cuts.push([cells.slice(0, a), cells.slice(a)])
-  } else {
-    for (let a = 0; a <= n; a++) {
-      for (let b = a; b <= n; b++) cuts.push([cells.slice(0, a), cells.slice(a, b), cells.slice(b)])
-    }
-  }
-  for (const cut of cuts) {
-    const worst = Math.max(...cut.map((g) => g.reduce((t, c) => t + cellTall(c), 0)))
-    if (!best || worst < best.worst) best = { cut, worst }
-  }
-  return best
-}
-
-/*
- * The verso's field: three columns of section cells, and the page decides how
- * big the plates are.
- *
- * The first attempt at this budgeted the plates against the total column
- * length, three columns' worth, and then partitioned. That is the wrong order
- * and it clipped: the sections cannot be reordered, so an ordered cut of four
- * tall cells into three columns has no even split available, and a total that
- * fits in aggregate still overflows one column.
- *
- * So the partition is the authority. Every section starts with its plate at
- * full size, the columns are balanced, and while the tallest column is over
- * the page the biggest plate on the page gives back six millimetres and the
- * columns are balanced again. A plate that shrinks past the point of being
- * worth printing is dropped instead, and the run reports it. What settles is
- * the largest set of plates this page can actually hold, rather than a guess
- * that has to be trimmed later.
- */
-function versoAt(p, plates, cols) {
-  const cellW = (PAGE_W - VERSO_GAP * (cols - 1)) / cols
+function versoLayout(p, plates, sheetIndex) {
   const colH = PAGE_H - VERSO_HEAD
+  const text = p.sections.reduce((a, sec) => a + sectionTextMm(sec.brief ?? '', TEXT_COL), 0)
+  const artW = PAGE_W - TEXT_COL - VERSO_GUTTER
 
-  const cells = p.sections.map((sec, si) => {
-    const plate = plates[si]
-    return {
-      sec,
-      plate,
-      dropped: null,
-      text: sectionTextMm(sec, cellW),
-      h: plate ? Math.min(MAX_CELL_PLATE, cellW / plate.a) : 0,
-    }
+  const have = plates.filter(Boolean)
+  /* Four small only when the project brought four: below that a 2x2 grid is
+   * mostly holes, and two large is the honest arrangement. */
+  const four = have.length >= 4 && sheetIndex % 2 === 0
+  const cols = four ? 2 : 1
+  const cellW = (artW - (cols - 1) * VERSO_GUTTER) / cols
+  const cellH = (colH - VERSO_GUTTER) / 2
+
+  const cells = have.slice(0, four ? 4 : 2).map((plate) => {
+    // Contained in its cell at its own aspect, never cropped, never filled.
+    const h = Math.min(cellH - CAP_MM, cellW / plate.a)
+    return { plate, w: h * plate.a, h }
   })
 
-  /*
-   * Who pays, and how. The plate that pays is always one in the column that
-   * is actually over, because shrinking a plate in a short column buys the
-   * page nothing. It gives back a step at a time down to GOOD_CELL_PLATE and
-   * is then dropped rather than shrunk further: three plates worth looking at
-   * beats six the reader has to squint at, which is the whole reason the old
-   * thumbnail strip went.
-   */
-  let best = balance(cells, cols)
-  // Bounded by construction: every round either shrinks a plate by a fixed
-  // step or removes one, so it cannot run longer than the plates allow.
-  let guard = cells.length * Math.ceil(MAX_CELL_PLATE / PLATE_STEP) + 4
-  while (best.worst > colH && guard-- > 0) {
-    const over =
-      best.cut.find((g) => g.reduce((t, c) => t + cellTall(c), 0) === best.worst) ?? []
-    let victim = null
-    for (const group of [over, cells]) {
-      for (const c of group) if (c.plate && (!victim || c.h > victim.h)) victim = c
-      if (victim) break
-    }
-    if (!victim) break
-    if (victim.h - PLATE_STEP >= GOOD_CELL_PLATE) {
-      victim.h -= PLATE_STEP
-    } else {
-      victim.dropped = victim.plate
-      victim.plate = null
-      victim.h = 0
-    }
-    best = balance(cells, cols)
-  }
-
-  for (const c of cells) if (c.plate) c.w = c.h * c.plate.a
-  const area = cells.reduce((t, c) => t + (c.plate ? c.w * c.h : 0), 0)
-  return { cols, cellW, cells, columns: best.cut, over: best.worst - colH, area }
-}
-
-/*
- * Two columns or three, chosen by what actually gets printed.
- *
- * The measure is total plate area, because that is the thing being traded: a
- * wider column carries a bigger picture but fewer of them, a narrower one the
- * reverse, and which wins depends entirely on how much this project wrote and
- * what shape its images are. Guessing it from the section count was wrong
- * often enough to be worth simply laying out both and comparing.
- *
- * A layout that does not fit never wins, however handsome, and if neither
- * fits the closest one is drawn and the run says so.
- */
-function versoLayout(p, plates) {
-  const tries = VERSO_COLS.map((n) => versoAt(p, plates, n))
-  const fits = tries.filter((t) => t.over <= 0)
-  if (!fits.length) {
-    const best = tries.reduce((a, b) => (a.over <= b.over ? a : b))
-    console.log(
-      `  note: ${p.slug} overruns its verso by ${Math.round(best.over)}mm at every column count.
-` +
-        '        Its writing alone does not fit the page; look at it.',
-    )
-    return best
-  }
-  return fits.reduce((a, b) => (b.area > a.area ? b : a))
+  return { cols, cellW, cells, text, over: text - colH, spare: have.length - cells.length }
 }
 
 /*
@@ -605,7 +496,7 @@ function versoLayout(p, plates) {
  * columns, and a write-up too long for either simply keeps the whole page,
  * with a note so the run says which project is text bound.
  */
-async function layout(p) {
+async function layout(p, sheetIndex) {
   const pool = await figPool(p)
   const used = new Set()
 
@@ -615,8 +506,7 @@ async function layout(p) {
    * that was about it. Whatever the verso could not fit is released, so the
    * sheet can still use a picture the writing had no room for. */
   const plates = await sectionPlates(p, used)
-  const verso = versoLayout(p, plates)
-  for (const c of verso.cells) if (c.dropped) used.delete(c.dropped.src)
+  const verso = versoLayout(p, plates, sheetIndex)
 
   const coverA = await aspectOf(posterFor(p))
   /* A pipeline strip is the sheet's second element when the project carries
@@ -633,7 +523,15 @@ async function layout(p) {
 }
 
 // ── pages ─────────────────────────────────────────────────────────────────
-const site = (contact.site ?? 'https://charlesabichahine.com').replace(/^https?:\/\//, '')
+const siteUrl = (contact.site ?? 'https://charlesabichahine.com').replace(/\/+$/, '')
+const site = siteUrl.replace(/^https?:\/\//, '')
+
+/* A sheet is a page of a project that has a page of its own, and this is it:
+ * the card /work opens, prerendered at its own URL. Printed it reads as the
+ * address, and on screen it is the way to the demos, the full gallery and the
+ * write-up that would not fit here. */
+const cardUrl = (p) => `${siteUrl}/work/${p.slug}`
+const cardLabel = (p) => `${site}/work/${p.slug}`
 const years = projects.map((p) => p.date.slice(0, 4))
 const span = `${years.reduce((a, b) => (b < a ? b : a))}–${years.reduce((a, b) => (b > a ? b : a))}`
 const inBook = (p) => chosen.includes(p)
@@ -660,37 +558,103 @@ const strip = (litOf, size, sub = null) =>
  * order, kept clear of the type in the middle and the belts at the foot; they
  * are design, not data, which is why they are literals.
  */
-const FIELD = [
-  [26, 26], [95, 16], [172, 22], [238, 32], [56, 50],
-  [14, 82], [252, 62], [214, 44], [32, 118], [134, 20],
-  [256, 96], [230, 124], [56, 136], [10, 52], [108, 136],
-  [202, 138], [248, 16], [158, 130],
-]
+/*
+ * The cover's field: a fragment of the cross-cap, surveyed.
+ *
+ * The surface is The Cross-Cap House's, and these are its own equations,
+ * lifted off the submission board that project prints rather than reinvented:
+ *
+ *   u = (i / (U - 1)) * b * PI          v = (j / (V - 1)) * c * PI
+ *   x = d * a * sin(u) * sin(e * v)
+ *   y = a * sin(e * u) * sin(v) ** 2
+ *   z = a * cos(e * u) * sin(v) ** 2
+ *
+ * with the board's defaults a=60 b=1 c=1 d=0.5 e=2. What is design rather than
+ * data is everything below: which way the thing is turned, how far in the page
+ * is zoomed, and where the frame sits on it. The page shows a fragment and
+ * runs off every edge, because a cover that contained the whole object would
+ * be a diagram of it; this is a detail of something larger, which is the
+ * relationship the booklet has to the work.
+ *
+ * Every point carries its index in the grid, the way a survey drawing numbers
+ * its stations. That is a real property of the drawing and not a decoration:
+ * the numbers are what say this is a computed surface rather than a texture.
+ */
+const CC = { U: 112, V: 46, a: 60, b: 1, c: 1, d: 0.5, e: 2 }
+/* Turned so the pinch, where the surface crosses itself and every point piles
+ * up, sits high and right. Centred it ran a dense smear straight down through
+ * the name; off to a corner it becomes the thing the eye lands on and the rest
+ * of the page stays open. */
+const CC_VIEW = { yaw: 90, pitch: 34, zoom: 2.4, cx: 0.86, cy: 0.3 }
+
+function crossCap() {
+  const pts = []
+  for (let i = 0; i < CC.U; i++) {
+    const u = (i / (CC.U - 1)) * CC.b * Math.PI
+    for (let j = 0; j < CC.V; j++) {
+      const v = (j / (CC.V - 1)) * CC.c * Math.PI
+      const s2 = Math.sin(v) ** 2
+      pts.push({
+        id: i * CC.V + j,
+        x: CC.d * CC.a * Math.sin(u) * Math.sin(CC.e * v),
+        y: CC.a * Math.sin(CC.e * u) * s2,
+        z: CC.a * Math.cos(CC.e * u) * s2,
+      })
+    }
+  }
+  return pts
+}
+
+/* Orthographic, yaw about Z then pitch about X, then fitted to the page at
+ * CC_VIEW.zoom times its natural size. Points outside the trim plus a small
+ * bleed are dropped rather than drawn and clipped, because a page carrying a
+ * thousand invisible circles is a page nobody's reader can open. */
+function coverField() {
+  const yaw = (CC_VIEW.yaw * Math.PI) / 180
+  const pitch = (CC_VIEW.pitch * Math.PI) / 180
+  const cy = Math.cos(yaw)
+  const sy = Math.sin(yaw)
+  const cp = Math.cos(pitch)
+  const sp = Math.sin(pitch)
+  const flat = crossCap().map((p) => {
+    const x1 = p.x * cy - p.y * sy
+    const y1 = p.x * sy + p.y * cy
+    return { id: p.id, px: x1, py: y1 * cp - p.z * sp, depth: y1 * sp + p.z * cp }
+  })
+  const xs = flat.map((p) => p.px)
+  const ys = flat.map((p) => p.py)
+  const spanX = Math.max(...xs) - Math.min(...xs)
+  const spanY = Math.max(...ys) - Math.min(...ys)
+  const k = (PAGE_MM.w * CC_VIEW.zoom) / Math.max(spanX, spanY)
+  const ox = PAGE_MM.w * CC_VIEW.cx - ((Math.min(...xs) + Math.max(...xs)) / 2) * k
+  const oy = PAGE_MM.h * CC_VIEW.cy + ((Math.min(...ys) + Math.max(...ys)) / 2) * k
+  const bleed = 6
+  return flat
+    .map((p) => ({ id: p.id, X: ox + p.px * k, Y: oy - p.py * k, depth: p.depth }))
+    .filter((p) => p.X > -bleed && p.X < PAGE_MM.w + bleed && p.Y > -bleed && p.Y < PAGE_MM.h + bleed)
+    .sort((m, n) => m.depth - n.depth)
+}
+
+const PAGE_MM = { w: 297, h: 210 }
 
 const cover = `
 <section class="page cover">
   <p class="eyebrow" style="position:absolute;left:12mm;top:12mm">Selected work · ${span}</p>
-  ${grouped
-    .map((p, i) => {
-      const [x, y] = FIELD[i % FIELD.length]
-      const on = inBook(p)
-      return `<span class="fmark${on ? ' on' : ''}" style="left:${x + 12}mm;top:${y + 12}mm;--b:${beltFor(p).color}">${glyph(p.slug, 10.5)}</span>`
-    })
-    .join('')}
+  <svg class="ccfield" viewBox="0 0 ${PAGE_MM.w} ${PAGE_MM.h}" width="${PAGE_MM.w}mm" height="${PAGE_MM.h}mm">
+    ${coverField()
+      .map(
+        (p) =>
+          `<circle cx="${p.X.toFixed(2)}" cy="${p.Y.toFixed(2)}" r="0.32"/><text x="${(p.X + 1.7).toFixed(2)}" y="${(p.Y + 0.85).toFixed(2)}">${String(p.id).padStart(4, '0')}</text>`,
+      )
+      .join('')}
+  </svg>
   <div class="name">
+    <span class="wash" aria-hidden="true"></span>
     <h1>Charles Abi Chahine<span class="dot">.</span></h1>
     <p class="role">${esc(role)}</p>
     <p class="lede">${esc(summary)}</p>
   </div>
-  <div class="belts">
-    ${BELTS.map(
-      (b) => `<div class="belt" style="--b:${b.color}">
-      <span class="bl">${esc(b.label)}</span>
-      <span class="bc">${pad(b.items.length)}</span>
-    </div>`,
-    ).join('')}
-  </div>
-  <div class="cover-foot"><p>${esc(site)}</p><p>${Word(chosen.length)} of ${word(projects.length)} projects</p></div>
+  <div class="cover-foot"><p>${esc(site)}</p></div>
 </section>`
 
 /* The index names the eight that are printed; the other ten are marks on the
@@ -746,7 +710,7 @@ async function sheet(p, i, lay) {
     ${fig}
   </div>
   <div class="tb">
-    <p class="sno">SHEET ${pad(i + 1)} / ${pad(chosen.length)}</p>
+    <p class="sno"><a href="${cardUrl(p)}">${esc(cardLabel(p))}</a></p>
     <span class="g" style="color:${b.color}">${glyph(p.slug, 12)}</span>
     <h2>${esc(p.title)}<span class="dot">.</span></h2>
     <p class="yr">${esc(p.year)}</p>
@@ -763,47 +727,32 @@ async function sheet(p, i, lay) {
 </section>`
 }
 
-/*
- * The verso: one cell per section, and the section is the unit.
- *
- * The write-up used to print as a single block of columns with every plate
- * swept into a band at the foot, so a paragraph and the picture it was about
- * ended up on opposite halves of the page. The data never said that: a
- * section carries its own heading, its own words and its own media, and the
- * grid just draws what the record already groups.
- *
- * Plates hang from the bottom of their cell rather than following the text,
- * so along a row they share a baseline however long the paragraphs above them
- * run. That register is what stops a grid of unequal writing reading as a
- * ragged one.
- */
 async function verso(p, i, lay) {
   const b = beltFor(p)
-  const index = new Map(lay.cells.map((c, si) => [c, si]))
-  const cols = []
-  for (const group of lay.columns) {
-    const cells = []
-    for (const cell of group) {
-      const si = index.get(cell)
-    let plate = ''
-    if (cell.plate) {
-      plate = `<figure class="vfig">
-        <img src="${await img(cell.plate.src, Math.min(2000, Math.round(cell.w * 8)))}" alt="" style="width:${mm(cell.w)};height:${mm(cell.h)}">
-        <p class="ct">${cell.plate.m.type !== 'image' ? '<span class="fl">DEMO · </span>' : ''}${esc(cell.plate.m.caption ?? '')}</p>
-      </figure>`
-    }
-      cells.push(`<div class="vcell">
-      <h4 style="color:${b.color}">${pad(si + 1)} · ${esc(cell.sec.heading)}</h4>
-      ${cell.sec.body.map((t) => `<p>${esc(t)}</p>`).join('')}
-      ${plate}
-    </div>`)
-    }
-    cols.push(`<div class="vcol">${cells.join('')}</div>`)
+  const write = p.sections
+    .map(
+      (sec, si) => `<div class="ws">
+      <h4 style="color:${b.color}">${pad(si + 1)} · ${esc(sec.heading)}</h4>
+      <p>${esc(sec.brief ?? '')}</p>
+    </div>`,
+    )
+    .join('')
+
+  const plates = []
+  for (const c of lay.cells) {
+    plates.push(`<figure class="vfig">
+      <img src="${await img(c.plate.src, Math.min(2000, Math.round(c.w * 8)))}" alt="" style="width:${mm(c.w)};height:${mm(c.h)}">
+      <p class="ct">${c.plate.m.type !== 'image' ? '<span class="fl">DEMO · </span>' : ''}${esc(c.plate.m.caption ?? '')}</p>
+    </figure>`)
   }
+
   return `
 <section class="page verso">
-  <div class="run"><span>${pad(i + 1)} / ${pad(chosen.length)} · ${esc(p.title)}</span><span style="color:${b.color}">${esc(b.label)}</span></div>
-  <div class="vgrid">${cols.join('')}</div>
+  <div class="run"><span><a class="rl" href="${cardUrl(p)}">${esc(cardLabel(p))}</a> · ${esc(p.title)}</span><span style="color:${b.color}">${esc(b.label)}</span></div>
+  <div class="vbody">
+    <div class="vtext">${write}</div>
+    <div class="vart" style="grid-template-columns:repeat(${lay.cols},minmax(0,1fr))">${plates.join('')}</div>
+  </div>
 </section>`
 }
 
@@ -822,23 +771,26 @@ const closing = `
 
 const spreads = []
 for (const [i, p] of chosen.entries()) {
-  const lay = await layout(p)
+  const lay = await layout(p, i)
   spreads.push(await sheet(p, i, lay))
   spreads.push(await verso(p, i, lay))
-  /* What the run prints is what a look at the page would tell you: how many
-   * of the sections got their plate, how big those plates are, and which ones
-   * were too crowded to carry one. A silent drop is the failure mode here. */
-  const drawn = lay.cells.filter((c) => c.plate)
-  const dropped = lay.cells.filter((c) => c.dropped).length
-  const edges = drawn.map((c) => Math.round(Math.max(c.w, c.h)))
+  /* What the run prints is what a look at the page would tell you: how the
+   * plates were arranged, how big they are, how close the writing came to the
+   * foot of its column, and how many plates the project had left over. */
+  const edges = lay.cells.map((c) => Math.round(Math.max(c.w, c.h)))
+  if (lay.over > 0) {
+    console.log(
+      `  note: ${p.slug} needs ${Math.round(lay.over)}mm more text column than the page has.\n` +
+        '        Shorten a brief in projects.js; nothing here truncates.',
+    )
+  }
   console.log(
     `  ${p.slug}: cover ${Math.round(lay.coverW)}x${Math.round(lay.coverH)}` +
       (p.pipeline ? ` + pipeline (${p.pipeline.halves.reduce((a, h) => a + h.stages.length, 0)} stages)` : '') +
       (lay.sheetFig ? `, sheet fig ${Math.round(lay.sheetFig.w)}x${Math.round(lay.sheetFig.h)}` : '') +
-      `, verso ${lay.cols} cols of ${lay.cells.length} sections` +
-      `, ${drawn.length} plated` +
-      (edges.length ? ` (${edges.join('/')}mm)` : '') +
-      (dropped ? `, ${dropped} too crowded to plate` : ''),
+      `, verso ${lay.cells.length} plates ${lay.cols === 2 ? '2x2' : 'stacked'} (${edges.join('/')}mm)` +
+      `, text ${Math.round(lay.text)}mm of ${PAGE_H - VERSO_HEAD}mm` +
+      (lay.spare ? `, ${lay.spare} spare` : ''),
   )
 }
 
@@ -869,10 +821,13 @@ ${FONTS}
    'var(--color-accent)' and friends) and the ones four glyphs use for their
    one accent stroke, so they must exist here under exactly those names. */
 :root { --accent: #c9261b; --ink: #16181d; --soft: #4e535c; --muted: #6a707b;
-        --line: #e0e3e7;
+        --line: #e0e3e7; --faint: #b9bec5;
         --color-accent: #c9261b; --color-blue: #1a5fd0;
         --color-green: #1a7f37; --color-amber: #a2571a; }
 body { font-family: "Space Grotesk", sans-serif; color: var(--ink); background: #fff; }
+/* Chrome turns an anchor into a real PDF link annotation, which is the point.
+   It should not also turn it blue and underlined: on paper this is an address. */
+a { color: inherit; text-decoration: none; }
 img, svg { display: block; }
 
 .page { width: 297mm; height: 210mm; padding: 12mm; overflow: hidden;
@@ -908,23 +863,37 @@ figure { margin: 0; }
 
 /* cover: the landing, translated. The marks are the drawing; the type is the
    subject; the belts close the sheet. */
-.cover .fmark { position: absolute; color: var(--line); }
-.cover .fmark.on { color: var(--b); }
+/* The surveyed cross-cap, behind everything. Hairline circles with their grid
+   index beside them, in the pale grey the site keeps for marks that are ground
+   rather than figure. */
+.ccfield { position: absolute; left: 0; top: 0; }
+/* Filled, not open. At the size this started, an open ring was the only way to
+   keep the field light; small and dark it is a dot, and a dot is what holds the
+   arcs together as a surface rather than a scatter. The numbers stay quieter
+   than the points they label, but not so quiet they read as paper grain. */
+.ccfield circle { fill: var(--ink); }
+.ccfield text { font-family: "IBM Plex Mono", monospace; font-size: 1.4px; fill: var(--faint); }
 .cover .name { position: absolute; left: 50%; top: 76mm; transform: translate(-50%, -50%);
                width: 165mm; text-align: center; }
+/* The landing solves this exact problem the same way: the type has to stay
+   legible where it crosses the field, and a panel with an edge would cut the
+   drawing in half, so the ground is brought back up under it with no edge at
+   all. */
+.cover .wash { position: absolute; inset: -14mm -18mm; z-index: -1; display: block;
+               background: radial-gradient(ellipse at center, #ffffff 0%, #ffffff 46%,
+                           rgba(255, 255, 255, 0) 100%); }
 .cover h1 { font-size: 37pt; font-weight: 400; letter-spacing: -0.024em; line-height: 1.03; }
 .cover .role { font-family: "IBM Plex Mono", monospace; font-size: 9pt; color: var(--soft);
                letter-spacing: 0.08em; margin-top: 4.5mm; text-transform: lowercase; }
 .cover .lede { font-family: "Spectral", Georgia, serif; font-size: 12pt; line-height: 1.6;
                color: var(--soft); margin-top: 5.5mm; }
-.cover .belts { margin-top: auto; display: grid; grid-template-columns: repeat(4, 1fr);
-                gap: 8mm; margin-bottom: 6mm; }
-.cover .belt { border-top: 0.75pt solid var(--b); padding-top: 2.4mm; display: flex;
-               align-items: baseline; }
-.cover .belt .bl { font-family: "IBM Plex Mono", monospace; font-size: 7pt; letter-spacing: 0.14em;
-                   text-transform: uppercase; color: var(--b); }
-.cover .belt .bc { font-family: "IBM Plex Mono", monospace; font-size: 7pt; color: var(--muted);
-                   margin-left: auto; }
+/* The field runs to the trim on every edge and is left to. It used to be
+   washed out along the foot to keep four belt bars and a count line clear;
+   with those gone there is one address down there, and hiding the bottom of
+   the drawing to protect it costs more than it saves.
+   Positioned, so it paints over the field: the field is absolutely positioned
+   and would otherwise stack above anything static, address included. */
+.cover .cover-foot { position: relative; margin-top: auto; }
 
 /* index page */
 .sidx .strip { margin-top: 9mm; }
@@ -966,7 +935,12 @@ figure { margin: 0; }
 
 .tb { width: 64mm; flex: none; padding-left: 7mm;
       display: flex; flex-direction: column; }
-.tb .sno { font-family: "IBM Plex Mono", monospace; font-size: 7pt; letter-spacing: 0.14em; color: var(--muted); }
+/* The tracking that suited SHEET NN / 08 does not suit a forty-odd character
+   URL in a 57mm column. Untracked at 6pt the longest slug clears the trim
+   margin by 14mm, and overflow-wrap means a longer one ever arriving wraps
+   rather than running into the edge. */
+.tb .sno { font-family: "IBM Plex Mono", monospace; font-size: 6pt; letter-spacing: 0;
+           color: var(--muted); overflow-wrap: anywhere; }
 .tb .g { margin: 5mm 0 4mm; }
 .tb h2 { font-size: 16.5pt; font-weight: 700; letter-spacing: -0.02em; line-height: 1.12; }
 .tb .yr { font-family: "IBM Plex Mono", monospace; font-size: 7.5pt; color: var(--muted); margin-top: 2mm; }
@@ -985,20 +959,29 @@ figure { margin: 0; }
                text-transform: uppercase; color: var(--muted); margin: 2.2mm 0 0.7mm; }
 .tb .meta dd { font-family: "IBM Plex Mono", monospace; font-size: 6.8pt; line-height: 1.4; }
 
-/* the verso: a field of section cells, each holding its own writing and its
-   own plate. The plate is pushed to the foot of its cell with margin-top auto,
-   which is what puts every plate in a row on one baseline. */
+/* the verso: the writing in a single measured column on the left, the plates
+   in a grid on the right. The text column is a fixed third, so all eight
+   spreads open the same way and the eye always knows where the reading is. */
 .verso .run { display: flex; justify-content: space-between; font-family: "IBM Plex Mono", monospace;
               font-size: 7pt; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted);
               border-bottom: 0.5pt solid var(--line); padding-bottom: 2.4mm; }
-.vgrid { display: flex; gap: 8mm; flex: 1; min-height: 0; overflow: hidden; margin-top: 6mm; }
-.vcol { flex: 1; min-width: 0; }
-.vcell { margin-bottom: 7mm; }
+/* The runner is set in tracked capitals and an address is neither: a path can
+   be case sensitive, so the link opts out of both and reads as what it is. */
+.verso .run .rl { text-transform: none; letter-spacing: 0; }
+.vbody { display: flex; gap: 11mm; flex: 1; min-height: 0; margin-top: 6mm; }
+.vtext { width: 85mm; flex: none; }
+.ws + .ws { margin-top: 5mm; }
 .verso h4 { font-family: "IBM Plex Mono", monospace; font-size: 6.8pt; letter-spacing: 0.14em;
             text-transform: uppercase; margin: 0 0 2mm; }
-.vcell p { font-family: "Spectral", Georgia, serif; font-size: 7.9pt; line-height: 1.52;
-           color: var(--soft); margin-bottom: 2.2mm; }
-.vfig { margin: 3mm 0 0; }
+.vtext p { font-family: "Spectral", Georgia, serif; font-size: 7.9pt; line-height: 1.52;
+           color: var(--soft); }
+/* Rows sized to their plates, then pushed to the head and the foot of the
+   column. Equal rows left every plate hanging from the top of its own band and
+   pooled the slack under the last one, so the art stopped short of the page
+   while the writing beside it ran the full height. */
+.vart { flex: 1; min-width: 0; display: grid; grid-auto-rows: min-content;
+        align-content: space-between; column-gap: 11mm; row-gap: 11mm; }
+.vfig { display: flex; flex-direction: column; justify-content: flex-start; min-width: 0; }
 .vfig .ct { font-family: "Spectral", Georgia, serif; font-size: 6.8pt; line-height: 1.35;
             color: var(--soft); margin: 1.8mm 0 0; display: -webkit-box; -webkit-line-clamp: 2;
             -webkit-box-orient: vertical; overflow: hidden; }
