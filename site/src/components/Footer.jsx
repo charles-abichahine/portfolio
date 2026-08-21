@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef } from 'react'
+import { useLocation } from 'react-router-dom'
 import { contact, role } from '../data/cv.js'
+import { normalize } from '../documentMeta.js'
 
 /*
  * One footer, on every route.
@@ -77,6 +79,31 @@ const MARKS = [
 const LINK =
   `${MONO} flex h-6 min-w-6 items-center justify-center gap-1.5 rounded-[7px] text-muted transition-colors hover:text-accent focus-visible:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent lg:px-1`
 
+/*
+ * The three contacts, as a row of marks. Exported because /about takes them out
+ * of the band and sets them under its own text, where a page about the person
+ * is the right place to offer a way to reach him: the paths, the states and the
+ * target size are defined once here and the two callers share them.
+ */
+export function ContactMarks({ className = '', named = false }) {
+  return (
+    <nav aria-label="Contact" className={`flex gap-0.5 ${named ? 'gap-2.5' : ''} ${className}`}>
+      {MARKS.map((m) => (
+        <a
+          key={m.key}
+          className={LINK}
+          aria-label={m.label}
+          href={m.href(contact)}
+          {...(m.away ? { target: '_blank', rel: 'noreferrer' } : {})}
+        >
+          <Mark d={m.d} />
+          {named && <span className={MONO}>{m.label}</span>}
+        </a>
+      ))}
+    </nav>
+  )
+}
+
 function Mark({ d }) {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" fillRule="evenodd" aria-hidden="true" className="h-[14px] w-[14px]">
@@ -87,6 +114,12 @@ function Mark({ d }) {
 
 export default function Footer({ slotRef }) {
   const bandRef = useRef(null)
+  /*
+   * /about carries the contacts in its own text, so the band there is the
+   * identity and nothing else. Two corners need two things to sit in them; one
+   * line alone belongs in the middle.
+   */
+  const bare = normalize(useLocation().pathname) === '/about'
 
   /* The landing is built to be exactly two screens with nothing to scroll past,
      which it can only stay if it knows how tall this band is. Published as a
@@ -142,6 +175,12 @@ export default function Footer({ slotRef }) {
           it across two lines. A route with no slot collapses it, and the name
           and the marks fall back onto a single line together, which is the
           arrangement the reference actually shows. */}
+      {bare ? (
+        <p className={`${MONO} px-6 pb-4 pt-2 text-center text-muted sm:pb-5 lg:px-10`}>
+          © 2026 Charles Abi Chahine
+          <span className="hidden lg:inline"> · {role}</span>
+        </p>
+      ) : (
       <div className="grid grid-cols-[1fr_auto] items-end gap-x-4 gap-y-1 px-6 pb-4 pt-2 sm:grid-cols-[1fr_auto_auto] sm:items-center sm:gap-x-5 sm:gap-y-0 sm:pb-5 lg:px-10">
         {/* flex, so this is the height of what a page puts in it rather than of
             a line box — pages hand it an <a> or a <button> as often as a <p>,
@@ -193,6 +232,7 @@ export default function Footer({ slotRef }) {
           ))}
         </nav>
       </div>
+      )}
     </footer>
   )
 }
