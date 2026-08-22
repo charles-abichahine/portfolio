@@ -1,155 +1,438 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
-import ProjectLink from '../components/ProjectLink.jsx'
-import ProjectGlyph from '../components/projectGlyphs.jsx'
-import DataField from '../components/DataField.jsx'
-import { BELTS } from '../data/belts.js'
-import { imgSrcSet, projects } from '../data/projects.js'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { projects } from '../data/projects.js'
 import { summary } from '../data/cv.js'
+import { markHandoff } from '../handoff.js'
+import { CC, crossCap, makeProjector } from '../lib/crosscap.js'
 
 /*
- * The landing.
+ * The cover.
  *
- * Exactly two screens and then it stops. The first is the name, centred, with a
- * cue. The second is the four belts. Everything is absolutely positioned inside
- * one 200svh box, including the footer, so the document is exactly that tall and
- * there is nothing to scroll past: the belts frame is the end of the page.
+ * One screen, the name and nothing else to read. The page is exactly the
+ * viewport, so there is no document to scroll: scrolling down is not movement on
+ * this page but the gesture that opens the next one. A wheel down, an upward
+ * swipe, ArrowDown / PageDown / Space / End, or the cue itself all run the same
+ * handoff, the name eases up and out, and the site lands on /work at its real
+ * URL, where the filmstrip's own fade-in serves as the arrival.
  *
- * Between them runs one uninterrupted fan, no gates and nothing to read. Belt
- * length no longer shows volume, because each belt is capped at two projects to
- * keep the frame; the count in the header carries that instead and links to the
- * rest on /work. That cap is also what stops this page being a second copy of
- * /work: eight projects here, all of them there.
+ * A scroll builds toward that departure rather than tripping it, so the gesture
+ * is answered while it accumulates. One progress value p, the wheel's fraction of
+ * the threshold, drives two things: the whole block gives a little in the
+ * direction it is about to leave, and the cross-cap survey in the corner sweeps
+ * itself in u-row by u-row, the same drawing the printed portfolio's cover
+ * carries, off the same equations (src/lib/crosscap.js). Both are wheel only; the
+ * keyboard and the cue have no gesture to meter, so they go straight to the leave.
  *
- * The name is not pinned. It is centred on the first screen and scrolls away
- * like any other block: the field is what stays, the type is what leaves.
+ * This replaced a two-screen landing whose second screen was a canvas strand
+ * field fanning down into four columns of project cards. Those cards live in
+ * full on /work; the drawing (DataField) is gone, recoverable from git.
  */
 
-// The same floor /work sets, for the same reason: this voice is the belt labels,
-// the belt counts, the years and the cue at the top, all of which are read or
-// pressed. The four belt columns are measured for the fan, so the caps follow
-// the wider header rather than drifting off it.
+// The site's floor for anything set in this voice: the role line and the cue.
 const MONO = 'font-mono text-[0.6875rem] uppercase tracking-[0.16em]'
 
-// Two per belt, newest first. The header keeps the true count and links onward,
-// so nothing is hidden, it is just not all on the landing.
-const PER_BELT = 2
+// The wheel intent the handoff needs, and the window it must arrive in. Tuned
+// for a deliberate scroll rather than a graze: roughly three notches of a wheel,
+// or a sustained trackpad push, has to land inside one window — a single flick
+// no longer departs. The window is a shade wider so a slower, considered scroll
+// still accumulates before it resets; stray single ticks decay between windows
+// rather than adding up into an accidental departure.
+const WHEEL_THRESHOLD = 320
+const WHEEL_WINDOW_MS = 500
 
-// The three animated covers are video. This page shows their stills only.
-const posterFor = (p) =>
-  p.cover.endsWith('.webm') ? p.cover.replace(/cover\.webm$/, 'poster.webp') : p.cover
+// An upward swipe past this many pixels reads as a deliberate "go", not a graze.
+const SWIPE_MIN = 60
 
-// /work groups by the same four belts, so every one of them can open filtered,
-// Practice included. That is what makes pressing a count read as travelling
-// further along the same thing rather than as landing on a different page.
-const beltHref = (belt) => `/work?category=${encodeURIComponent(belt.label)}`
+// The leave: the name lifts and fades, same ease and travel as before but given
+// a touch more room — 0.5s, so the departure is a shade more deliberate than the
+// snappier arrival that answers it, where /work's cards rise into place.
+const LEAVE_MS = 500
+
+// The give: as the gesture accumulates, the whole block lifts a little in the
+// direction it is about to go, so a scroll that has not yet committed is still
+// answered. Kept small so it does not compete with the survey for the same job;
+// drop toward 6 if the two together read busy. It shares progress p with the
+// survey sweep, and at the threshold it hands off to the full lift-and-fade.
+const GIVE_TRAVEL = 12
+
+// The timing p moves on: quick while the gesture is live, the give's own ease
+// back when it lapses, a short snap to shut the survey as the leave begins. The
+// give reads these through a CSS transition, the survey through a matched tween.
+const P_LIVE_MS = 90
+const P_LAPSE_MS = 250
+const P_COMPLETE_MS = 120
+
+/*
+ * The homepage's own view of the shared surface. The mathematics is shared with
+ * the printed cover; the framing is not, and must not be — the PDF frames for A4
+ * landscape, the screen for a portrait-ish viewport, so each surface names its
+ * own yaw, pitch, zoom and anchor. Turned like the print so the pinch sits high
+ * and to the right, off the centred name, and zoomed past the frame so only a
+ * fragment shows and it runs off the top and right edges. ax/ay place the cloud's
+ * centre as a fraction of the canvas.
+ */
+const CC_HOME_VIEW = { yaw: 90, pitch: 30, zoom: 1.5, ax: 0.9, ay: 0.14 }
+// At rest this fraction of the u-rows is drawn: a partial survey, visibly still
+// computing. The sweep fills it from here to whole as p reaches 1.
+const REST_ROWS = 0.12
+const POINT_R = 0.7 // muted-ink station points, in CSS px
+const LABEL_PX = 8 // the station numbers, in the mono voice
+const LABEL_EVERY = 17 // only a sparse subset carry their number, survey-style
+const TAU = Math.PI * 2
 
 export default function Home() {
-  const stageRef = useRef(null)
-  const cueRef = useRef(null)
-  const beltsRef = useRef(null)
-  const [metrics, setMetrics] = useState(null)
-  const [focus, setFocus] = useState(null)
+  const navigate = useNavigate()
+  const [leaving, setLeaving] = useState(false)
+  // How far the current gesture has accumulated toward the threshold, 0..1. One
+  // value drives both the give and the survey sweep, so they read as one response.
+  const [p, setP] = useState(0)
+  // The transition time for the current change in p (see P_* above).
+  const [pMs, setPMs] = useState(P_LIVE_MS)
+  const [motionOk, setMotionOk] = useState(
+    () => !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  )
+  // Fire-once, so rapid wheel or a double tap cannot queue two navigations.
+  const firedRef = useRef(false)
+  const canvasRef = useRef(null)
+  const nameRef = useRef(null)
+  // Set by the survey effect; the progress effect calls it to retarget the sweep.
+  const sweepToRef = useRef(null)
+  const motionOkRef = useRef(motionOk)
+  motionOkRef.current = motionOk
 
-  // The fan runs from the bottom of the cue to the top of the belts, and both of
-  // those depend on content and viewport, so both are measured. Guessing either
-  // put the strands through the cue at short viewports.
   useEffect(() => {
-    const measure = () => {
-      const stage = stageRef.current
-      const cue = cueRef.current
-      const belts = beltsRef.current
-      if (!stage || !cue || !belts) return
-      const box = stage.getBoundingClientRect()
-      setMetrics((m) => {
-        const next = {
-          w: box.width,
-          originY: cue.getBoundingClientRect().bottom - box.top + 38,
-          beltsTop: belts.getBoundingClientRect().top - box.top,
-        }
-        return m && m.w === next.w && m.originY === next.originY && m.beltsTop === next.beltsTop
-          ? m
-          : next
-      })
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const apply = () => setMotionOk(!mq.matches)
+    apply()
+    mq.addEventListener('change', apply)
+    return () => mq.removeEventListener('change', apply)
+  }, [])
+
+  // Reset on every mount, and on a bfcache restore, so returning here with the
+  // back button never shows the faded-out hero the handoff left behind.
+  useEffect(() => {
+    firedRef.current = false
+    setLeaving(false)
+    setP(0)
+    setPMs(P_LIVE_MS)
+    const onShow = (e) => {
+      if (!e.persisted) return
+      firedRef.current = false
+      setLeaving(false)
+      setP(0)
+      setPMs(P_LIVE_MS)
     }
-    measure()
-    const ro = new ResizeObserver(measure)
-    if (stageRef.current) ro.observe(stageRef.current)
-    if (beltsRef.current) ro.observe(beltsRef.current)
-    window.addEventListener('resize', measure)
+    window.addEventListener('pageshow', onShow)
+    return () => window.removeEventListener('pageshow', onShow)
+  }, [])
+
+  // One handoff, however it was triggered. The momentum mark is set on both
+  // paths — trackpad inertia outlives the gesture whether or not we animate — so
+  // /work can swallow the tail of the wheel; see handoff.js. Under reduced
+  // motion the animation is skipped and the navigation is immediate.
+  const fire = useCallback(() => {
+    if (firedRef.current) return
+    firedRef.current = true
+    markHandoff()
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      navigate('/work')
+      return
+    }
+    setLeaving(true)
+    window.setTimeout(() => navigate('/work'), LEAVE_MS)
+  }, [navigate])
+
+  // Wheel, touch and keyboard on the window. Only downward wheel and upward
+  // swipes count: up is not a direction this page can go. The wheel path meters
+  // the progress the give and the survey read; the keyboard and cue paths go
+  // straight to the leave, with no sweep, because there is no gesture to meter.
+  useEffect(() => {
+    let acc = 0
+    let lapse = 0
+    const clearLapse = () => {
+      if (lapse) {
+        window.clearTimeout(lapse)
+        lapse = 0
+      }
+    }
+    // A whole window with no wheel means the gesture was abandoned: ease the
+    // survey back to its rest fraction and start the accumulation fresh.
+    const armLapse = () => {
+      clearLapse()
+      lapse = window.setTimeout(() => {
+        acc = 0
+        setPMs(P_LAPSE_MS)
+        setP(0)
+      }, WHEEL_WINDOW_MS)
+    }
+
+    const onWheel = (e) => {
+      if (e.deltaY <= 0) return
+      acc += e.deltaY
+      if (acc >= WHEEL_THRESHOLD) {
+        clearLapse()
+        setPMs(P_COMPLETE_MS)
+        setP(1)
+        fire()
+        return
+      }
+      setPMs(P_LIVE_MS)
+      setP(acc / WHEEL_THRESHOLD)
+      armLapse()
+    }
+
+    let startY = null
+    const onTouchStart = (e) => {
+      startY = e.touches[0]?.clientY ?? null
+    }
+    const onTouchMove = (e) => {
+      if (startY == null) return
+      if (startY - (e.touches[0]?.clientY ?? startY) > SWIPE_MIN) fire()
+    }
+
+    const onKeyDown = (e) => {
+      if (!['ArrowDown', 'PageDown', 'End', ' '].includes(e.key)) return
+      // Leave a focused control its own keys: Space presses the island's theme
+      // button, Enter follows the cue link. The gesture is for when the page
+      // itself has focus, not a control on it.
+      const el = document.activeElement
+      const tag = el?.tagName
+      if (
+        tag === 'BUTTON' ||
+        tag === 'A' ||
+        tag === 'INPUT' ||
+        tag === 'SELECT' ||
+        tag === 'TEXTAREA' ||
+        el?.isContentEditable
+      )
+        return
+      e.preventDefault()
+      fire()
+    }
+
+    window.addEventListener('wheel', onWheel, { passive: true })
+    window.addEventListener('touchstart', onTouchStart, { passive: true })
+    window.addEventListener('touchmove', onTouchMove, { passive: true })
+    window.addEventListener('keydown', onKeyDown)
     return () => {
+      clearLapse()
+      window.removeEventListener('wheel', onWheel)
+      window.removeEventListener('touchstart', onTouchStart)
+      window.removeEventListener('touchmove', onTouchMove)
+      window.removeEventListener('keydown', onKeyDown)
+    }
+  }, [fire])
+
+  /*
+   * The survey on the cover.
+   *
+   * The projection is computed once, on mount and on resize, into a flat list of
+   * canvas-space points — this is a static drawing redrawn on demand, not a
+   * per-frame loop. The gesture sweeps it: `sweep` runs 0..1, drawing u-rows from
+   * the rest fraction to whole, and a short tween carries it between targets so a
+   * lapse eases back and completion snaps shut. The palette and the mono face are
+   * read from the tokens, so the drawing flips with the theme.
+   */
+  useEffect(() => {
+    const cv = canvasRef.current
+    if (!cv) return
+    const ctx = cv.getContext('2d')
+    const size = { w: 0, h: 0 }
+    let field = null
+    let pal = null
+    let sweep = motionOkRef.current ? 0 : 1
+    let from = sweep
+    let to = sweep
+    let dur = 0
+    let t0 = 0
+    let raf = 0
+
+    const readPalette = () => {
+      const s = getComputedStyle(document.documentElement)
+      return {
+        point: s.getPropertyValue('--color-muted').trim() || '#6a707b',
+        mono: s.getPropertyValue('--font-mono').trim() || 'monospace',
+      }
+    }
+
+    const compute = () => {
+      const { w, h } = size
+      if (!w || !h) return
+      const project = makeProjector(CC_HOME_VIEW.yaw, CC_HOME_VIEW.pitch)
+      const flat = crossCap().map(project)
+      const xs = flat.map((q) => q.px)
+      const ys = flat.map((q) => q.py)
+      const minX = Math.min(...xs)
+      const maxX = Math.max(...xs)
+      const minY = Math.min(...ys)
+      const maxY = Math.max(...ys)
+      const k = (CC_HOME_VIEW.zoom * w) / Math.max(maxX - minX, maxY - minY)
+      const ox = CC_HOME_VIEW.ax * w - ((minX + maxX) / 2) * k
+      const oy = CC_HOME_VIEW.ay * h + ((minY + maxY) / 2) * k
+      const bleed = 24
+      // Numbers become noise at phone size; below sm the survey is points alone.
+      const showLabels = w >= 640
+      field = flat
+        .map((q) => ({ row: q.row, id: q.id, X: ox + q.px * k, Y: oy - q.py * k }))
+        .filter((q) => q.X > -bleed && q.X < w + bleed && q.Y > -bleed && q.Y < h + bleed)
+        .map((q) => ({ ...q, label: showLabels && q.id % LABEL_EVERY === 0 }))
+    }
+
+    const draw = () => {
+      if (!field || !pal) return
+      const { w, h } = size
+      ctx.clearRect(0, 0, w, h)
+      const rows = motionOkRef.current
+        ? Math.round((REST_ROWS + (1 - REST_ROWS) * sweep) * CC.U)
+        : CC.U
+
+      // The name's box, in the canvas's own pixels, so the probe (and the eye)
+      // can confirm the survey stays off the type. Both rects carry the same
+      // give/leave transform, so subtracting the origins cancels it out.
+      let box = null
+      let hits = 0
+      const nb = nameRef.current?.getBoundingClientRect()
+      const cb = cv.getBoundingClientRect()
+      const pad = 16
+      if (nb && cb)
+        box = { l: nb.left - cb.left - pad, t: nb.top - cb.top - pad, r: nb.right - cb.left + pad, b: nb.bottom - cb.top + pad }
+
+      ctx.fillStyle = pal.point
+      ctx.globalAlpha = 0.9
+      let drawn = 0
+      const labels = []
+      for (const q of field) {
+        if (q.row >= rows) continue
+        // The name is the one thing the survey may not cross. The framing keeps
+        // the field in the corner; this is the guarantee the sparse tail never
+        // lands on the type, at any size.
+        if (box && q.X > box.l && q.X < box.r && q.Y > box.t && q.Y < box.b) {
+          hits++
+          continue
+        }
+        drawn++
+        ctx.beginPath()
+        ctx.arc(q.X, q.Y, POINT_R, 0, TAU)
+        ctx.fill()
+        if (q.label) labels.push(q)
+      }
+      if (labels.length) {
+        ctx.font = `${LABEL_PX}px ${pal.mono}`
+        ctx.globalAlpha = 0.65
+        ctx.textBaseline = 'alphabetic'
+        for (const q of labels) ctx.fillText(String(q.id).padStart(4, '0'), q.X + 2.5, q.Y + 2)
+      }
+      ctx.globalAlpha = 1
+
+      if (import.meta.env.DEV) {
+        cv.dataset.ccRows = String(rows)
+        cv.dataset.ccTotal = String(CC.U)
+        cv.dataset.ccDrawn = String(drawn)
+        cv.dataset.ccNamehits = String(hits)
+      }
+    }
+
+    const step = (now) => {
+      const k = dur > 0 ? Math.min(1, (now - t0) / dur) : 1
+      const e = k < 0.5 ? 2 * k * k : 1 - (-2 * k + 2) ** 2 / 2 // easeInOutQuad
+      sweep = from + (to - from) * e
+      draw()
+      raf = k < 1 ? requestAnimationFrame(step) : 0
+    }
+    // Retarget the sweep. Under reduced motion the survey is simply whole and
+    // still; there is nothing to tween.
+    const sweepTo = (target, ms) => {
+      if (!motionOkRef.current) {
+        if (raf) cancelAnimationFrame(raf)
+        raf = 0
+        sweep = 1
+        draw()
+        return
+      }
+      from = sweep
+      to = target
+      dur = ms
+      t0 = performance.now()
+      if (!raf) raf = requestAnimationFrame(step)
+    }
+    sweepToRef.current = sweepTo
+
+    const measure = () => {
+      const dpr = Math.min(2, window.devicePixelRatio || 1)
+      const w = cv.clientWidth
+      const h = cv.clientHeight
+      if (!w || !h) return
+      size.w = w
+      size.h = h
+      cv.width = Math.round(w * dpr)
+      cv.height = Math.round(h * dpr)
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+      compute()
+      draw()
+    }
+
+    pal = readPalette()
+    measure()
+
+    const ro = new ResizeObserver(measure)
+    ro.observe(cv)
+    // Repaint on a theme flip: the tokens changed, the geometry did not.
+    const repaint = () => {
+      pal = readPalette()
+      draw()
+    }
+    const themeObs = new MutationObserver(repaint)
+    themeObs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'class'] })
+    const scheme = window.matchMedia('(prefers-color-scheme: dark)')
+    scheme.addEventListener('change', repaint)
+
+    return () => {
+      if (raf) cancelAnimationFrame(raf)
+      sweepToRef.current = null
       ro.disconnect()
-      window.removeEventListener('resize', measure)
+      themeObs.disconnect()
+      scheme.removeEventListener('change', repaint)
     }
   }, [])
 
-  const heads = useMemo(() => {
-    if (!metrics || !metrics.w) return null
-    const { w, beltsTop } = metrics
-    // One column on a phone: the belts become four stacked terminals, so the fan
-    // still lands at four points across the width and colour ties each landing
-    // to the terminal below it.
-    const cols = w < 640 ? 1 : BELTS.length
-    // Matches the px-6 / lg:px-10 and gap-x-6 / lg:gap-x-8 on the belts below,
-    // or the caps sit off the columns they are supposed to be feeding.
-    const padX = w >= 1024 ? 40 : 24
-    const gap = w >= 1024 ? 32 : 24
-    const inner = w - padX * 2
-    const colW = (inner - gap * (cols - 1)) / cols
+  // Feed p into the survey sweep, matched to the same timing the give moves on.
+  useEffect(() => {
+    sweepToRef.current?.(p, pMs)
+  }, [p, pMs, motionOk])
 
-    // On a phone the belts are a two by two grid, so only two of the four sit at
-    // the top. The caps land side by side just above the whole block instead, in
-    // the order the belts appear, and colour ties each landing to its belt.
-    const stacked = cols !== BELTS.length
+  // Enter on the focused cue dispatches a click too, so this one handler
+  // animates both the pointer and the keyboard; the Link keeps its href, so the
+  // cue still navigates with JS off.
+  const onCue = (e) => {
+    e.preventDefault()
+    fire()
+  }
 
-    return BELTS.map((b, i) => ({
-      id: b.id,
-      x: stacked
-        ? padX + (inner * (i + 0.5)) / BELTS.length
-        : padX + i * (colW + gap) + colW / 2,
-      y: stacked ? beltsTop - 30 : beltsTop,
-      spread: stacked ? (inner / BELTS.length) * 0.6 : colW * 0.94,
-    }))
-  }, [metrics])
+  // The give lifts the block toward the leave as p grows; reduced motion takes
+  // none of it. At the leave the full lift-and-fade takes the transform over.
+  const give = motionOk ? GIVE_TRAVEL * p : 0
 
   return (
-    /*
-     * Two screens everywhere, phones included. This used to collapse to one
-     * screen below sm, which meant a phone got the name and all four belts at
-     * once: no scroll, no fan to speak of, and none of the thing this page is
-     * for. What made that necessary was two projects per belt; at one each the
-     * belts fit the second screen with room over.
-     *
-     * On a phone the height is one screen plus a fixed run rather than two
-     * screens, because two screens of a phone are two very different distances
-     * depending on which way it is held. Portrait gave the fan 760px to cross
-     * and landscape 241px, so the same drawing read as stretched one way and
-     * squashed the other. A fixed run makes it about 470px in both, which is
-     * also why the page gets shorter in portrait and longer in landscape.
-     *
-     * A laptop keeps 200svh: there the two are close enough already.
-     */
     <div
-      ref={stageRef}
-      className="relative h-[calc(100svh+560px-var(--footer-h))] sm:h-[calc(200svh-var(--footer-h))] [@media(min-width:640px)_and_(max-height:520px)]:h-[calc(100svh+560px-var(--footer-h))]"
+      className="relative flex flex-1 flex-col items-center justify-center overflow-hidden px-4 text-center"
+      style={{
+        transition: leaving
+          ? `opacity ${LEAVE_MS}ms ease, transform ${LEAVE_MS}ms ease`
+          : `transform ${motionOk ? `${pMs}ms ease` : '0ms'}`,
+        opacity: leaving ? 0 : 1,
+        transform: leaving ? 'translateY(-24px)' : `translateY(${-give}px)`,
+      }}
     >
-      <DataField originY={metrics?.originY ?? null} heads={heads} focus={focus} />
+      {/* The survey, computed on the cross-cap and swept in by the gesture. A
+          background field behind the type, running off the top and right edges;
+          see the survey effect above and CC_HOME_VIEW for the framing. */}
+      <canvas
+        ref={canvasRef}
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 z-0 h-full w-full"
+      />
 
-      {/* Centred on the first screen. The wash is a soft ellipse of the page
-          ground with no edge: the type has to stay legible as it crosses the top
-          of the fan on its way out, and a plate with a border would cut the
-          drawing in half instead. Its horizontal bleed is capped against the
-          viewport, because a flat 70px each side is wider than the page on a
-          phone and pushed the whole document sideways. */}
-      <div className="absolute left-1/2 top-[50svh] z-[2] w-[min(560px,88vw)] -translate-x-1/2 -translate-y-1/2 px-4 text-center">
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute -inset-x-[min(70px,5vw)] -inset-y-[46px] -z-10"
-          style={{
-            background:
-              'radial-gradient(ellipse at center, var(--color-paper) 0%, color-mix(in srgb, var(--color-paper) 82%, transparent) 52%, color-mix(in srgb, var(--color-paper) 0%, transparent) 100%)',
-          }}
-        />
+      <div ref={nameRef} className="relative z-10 w-[min(560px,88vw)]">
         {/* font-light, not lighter: Space Grotesk stops at 300, and asking for a
             weight it does not have just gets 300 with the browser guessing. */}
         <h1 className="text-[clamp(2rem,4.4vw,3.25rem)] font-light leading-[1.03] tracking-[-0.024em]">
@@ -158,157 +441,24 @@ export default function Home() {
         <p className="mt-3.5 font-mono text-[0.72rem] lowercase tracking-[0.08em] text-soft">
           architect · computational designer
         </p>
-        {/* The one sentence on the landing, so it is set as one: the serif here
-            is what tells you the rest of the site has writing in it. */}
+        {/* The one sentence on the cover, so it is set as one: the serif here is
+            what tells you the rest of the site has writing in it. */}
         <p className="mt-5 font-serif text-[clamp(0.95rem,1.2vw,1.05rem)] leading-[1.6] text-soft">
           {summary}
         </p>
-        {/* The cue reads the same everywhere now that a phone has a second
-            screen to scroll to. The rule under it is also the fan's origin.
-            The count is read from the data, not typed: it said 19 for a day
-            after two SOMA projects became one, while /work counted 18. */}
-        <p ref={cueRef} className={`mx-auto mt-6 w-fit border-t border-line pt-3 text-muted sm:mt-9 ${MONO}`}>
+        {/* The cue is the handoff made visible and the handoff made a link: a
+            real anchor to /work, so it reads as a link and works with JS off,
+            with the animated leave grafted onto its activation. The count is
+            read from the data, never typed. The rule under it is the same mark
+            the belts used to hang from. */}
+        <Link
+          to="/work"
+          onClick={onCue}
+          className={`mx-auto mt-9 block w-fit border-t border-line pt-3 text-muted transition-colors hover:text-ink focus-visible:text-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent ${MONO}`}
+        >
           Scroll · {projects.length} projects ↓
-        </p>
+        </Link>
       </div>
-
-      {/* The belts, anchored above the footer so the second screen ends the page.
-          Two by two on a phone, four across from sm up. */}
-      <div
-        ref={beltsRef}
-        className="absolute inset-x-0 bottom-6 z-[2] grid grid-cols-1 gap-y-3.5 px-6 sm:bottom-7 sm:grid-cols-4 sm:gap-x-6 sm:gap-y-0 lg:gap-x-8 lg:px-10"
-      >
-        {BELTS.map((belt) => (
-          <section
-            key={belt.id}
-            onMouseEnter={() => setFocus(belt.id)}
-            onMouseLeave={() => setFocus(null)}
-            onFocus={() => setFocus(belt.id)}
-            onBlur={() => setFocus(null)}
-            className="transition-opacity duration-300 sm:mx-auto sm:w-[min(100%,calc(30svh*4/3))]"
-            style={{ opacity: !focus || focus === belt.id ? 1 : 0.34 }}
-          >
-            {/* The count is the true total, not the two shown, and it is the way
-                to the rest of them. */}
-            <h2 className="border-t pt-2 sm:pt-3" style={{ borderColor: belt.color }}>
-              <Link
-                to={beltHref(belt)}
-                className="flex items-baseline gap-2.5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
-              >
-                <span className={MONO} style={{ color: belt.color }}>
-                  {belt.label}
-                </span>
-                <span className={`ml-auto tabular-nums ${MONO} text-muted`}>
-                  {String(belt.items.length).padStart(2, '0')} →
-                </span>
-              </Link>
-            </h2>
-
-            <ul className="mt-2 grid grid-cols-1 gap-y-5 sm:mt-4">
-              {belt.items.slice(0, PER_BELT).map((p, i) => (
-                // Only the lead project on a phone, in either orientation.
-                // Stacked, the second one is what pushed the belts past the
-                // second screen; in landscape it is worse, because a phone on
-                // its side has about 390px of height and two covers per column
-                // put the belt headers above the fold, so the frame leaked onto
-                // the first screen. The height query catches a phone lying down
-                // without touching a tablet, which has the room for both.
-                <li
-                  key={p.slug}
-                  className={
-                    i === 0
-                      ? ''
-                      : 'hidden sm:block [@media(min-width:640px)_and_(max-height:760px)]:hidden'
-                  }
-                >
-                  <ProjectLink
-                    slug={p.slug}
-                    className="group flex items-center gap-3 sm:block sm:overflow-hidden sm:rounded-[10px] sm:border sm:border-line"
-                  >
-                    {/*
-                     * The same card /work draws, at the landing's size: the
-                     * cover clipped into the top of a hairline box, then the
-                     * glyph, the title and the year. The tagline stays on
-                     * /work; four columns of it here would be a second index
-                     * rather than a way into the first.
-                     *
-                     * The width is what holds the ratio. A cover capped by
-                     * max-height keeps its box but not its shape, and at 1280
-                     * by 660 that squeezed these to 1.59 while /work drew the
-                     * same picture at 1.33, so the two pages cropped the same
-                     * cover differently. Capping the width instead, at the
-                     * width 30svh of height allows, leaves the aspect to do the
-                     * sizing: shorter windows get a smaller card, never a
-                     * wider one.
-                     */}
-                    <div className="aspect-[4/3] w-[62px] shrink-0 overflow-hidden rounded-[6px] bg-line sm:w-full sm:rounded-none">
-                      {/* The title is the next thing inside the same link, so
-                          an alt here names the link twice over. */}
-                      {/* 62px on a phone and the column's full width from sm up,
-                          which measures 276 to 436px depending on how wide the
-                          window is. Naming the low end is enough: every width in
-                          that range takes the 480 at 1x, and this is the belt
-                          that was pulling 1400 to 2000px covers to draw them at
-                          62x47. */}
-                      <img
-                        {...imgSrcSet(posterFor(p), '(min-width: 640px) 25vw, 62px')}
-                        alt=""
-                        loading="lazy"
-                        draggable="false"
-                        className="h-full w-full object-cover grayscale transition duration-500 ease-out group-hover:scale-[1.03] group-hover:grayscale-0"
-                      />
-                    </div>
-                    <span className="block min-w-0 flex-1 sm:mt-0 sm:px-2.5 sm:pb-2.5 sm:pt-2">
-                      <span className="flex items-baseline gap-2 sm:items-start">
-                        <span
-                          aria-hidden="true"
-                          className="shrink-0 text-ink transition-colors duration-300 group-hover:text-[var(--c)] sm:mt-[3px]"
-                          style={{ '--c': belt.color }}
-                        >
-                          <ProjectGlyph slug={p.slug} className="h-[15px] w-[15px]" />
-                        </span>
-                        <span
-                          className="min-w-0 flex-1 truncate text-[0.82rem] font-medium leading-snug transition-colors duration-300 group-hover:text-[var(--c)] sm:min-h-[2.6em] sm:whitespace-normal sm:text-clip"
-                          style={{ '--c': belt.color }}
-                        >
-                          {p.title}
-                        </span>
-                        <span className={`ml-auto shrink-0 tabular-nums ${MONO} text-muted sm:mt-[5px]`}>
-                          {p.year}
-                        </span>
-                      </span>
-                      {/* The award, named. Always the accent, never the belt
-                          colour: a distinction should read as itself, not as its
-                          group, which is the same rule /work follows. The line is
-                          reserved whether or not there is an award, so all four
-                          belts stay aligned side by side. */}
-                      {/* The reserved line keeps the four sm+ columns aligned;
-                          stacked on a phone there is nothing to align to, so it
-                          only takes space when there is an award to show. */}
-                      <span
-                        className={`mt-1 block leading-[1.35] sm:mt-1.5 sm:min-h-[1.35em] ${MONO} text-accent`}
-                      >
-                        {p.award && (
-                          <>
-                            <span className="sr-only">Awarded: </span>
-                            {p.award}
-                          </>
-                        )}
-                      </span>
-                    </span>
-                  </ProjectLink>
-                </li>
-              ))}
-            </ul>
-          </section>
-        ))}
-      </div>
-
-      {/* Nothing in the footer's middle. The count used to sit there, but the
-          capsule it now takes is an object on the page rather than a line in a
-          band, and an object has to earn its place: /work and /cv put a file in
-          theirs, and this one was restating a number the cue at the top of the
-          page and the four belt headers below it both already give. */}
     </div>
   )
 }

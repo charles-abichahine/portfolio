@@ -4,6 +4,7 @@ import ProjectLink from '../components/ProjectLink.jsx'
 import ProjectGlyph from '../components/projectGlyphs.jsx'
 import { asset, imgSrcSet, projects } from '../data/projects.js'
 import { BELTS, BELT_BY_LABEL, beltFor } from '../data/belts.js'
+import { consumeHandoff, handoffMomentumActive } from '../handoff.js'
 
 // An animated cover rests on its static first-frame poster, so the index is a
 // wall of stills and nothing heavy loads. The animation is mounted only while
@@ -31,6 +32,19 @@ const CATEGORIES = BELTS.map((b) => b.label)
 // Each belt's hue carries on the filter pill and on the dot beside every title,
 // so the grouping reads without a legend.
 const CATEGORY_COLOR = Object.fromEntries(BELTS.map((b) => [b.label, b.color]))
+
+// The handoff arrival: cards rise into place, staggered left to right, while the
+// header row and index strip fade in just ahead of them. The stagger caps so the
+// tail of an eighteen-tile strip does not lag forever — cards past the cap share
+// the last delay. The rise's own duration lives in the card-rise utility (0.45s
+// in index.css); only the per-card delay is set here.
+const RISE_BASE_MS = 90 // cards start a beat behind the header/strip fade-in
+const RISE_STEP_MS = 45 // per-card stagger
+const RISE_STEP_CAP = 6 // cards past here share the last delay
+const RISE_DURATION_MS = 450
+// When the whole choreography is done, so the classes can be dropped: the last
+// staggered card's start plus its duration, with a little slack.
+const RISE_CLEAR_MS = RISE_BASE_MS + RISE_STEP_CAP * RISE_STEP_MS + RISE_DURATION_MS + 120
 
 // One radius for every surface on this page — tile, pill, scrubber. On the 4px
 // scrubber bar the browser clamps it to a pill, which is why it can stay a
@@ -196,6 +210,29 @@ export default function Work() {
   const filter = CATEGORIES.includes(asked) ? asked : 'All'
   const setFilter = (cat) =>
     setParams(cat === 'All' ? {} : { category: cat }, { replace: true })
+
+  // The arrival choreography. `rising` is read once, on mount, from the handoff:
+  // true only when /work is opening off the cover's leave, and consumed there so
+  // a later visit within the window falls back to the plain fade-in. Reduced
+  // motion opts out entirely — instant, as before. (The read is non-consuming
+  // across React's StrictMode double-invoke; see consumeHandoff in handoff.js.)
+  const [rising, setRising] = useState(
+    () =>
+      consumeHandoff() && !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  )
+  // The rise belongs to the filter the page arrived on. A pill press changes the
+  // filter and so ends the rise at once: the re-rendered strip keeps only its
+  // plain fade-in, never the rise, exactly as today. See the render below.
+  const arrivalFilterRef = useRef(filter)
+  const roseOnArrivalRef = useRef(rising)
+  const riseNow = rising && filter === arrivalFilterRef.current
+  // The strip that rose in is already at full opacity, so it must NOT also carry
+  // the fade-in: that would double the ramp, and worse, adding the class back to
+  // the live <ul> when the rise ends re-fires the fade as a flash. It stays plain
+  // for its whole life (a filter press remounts it via the key); every other
+  // strip — direct load, reduced motion, a later filter — fades in as before.
+  // Gated on the filter, not on `rising`, so it never flips mid-mount.
+  const stripFadeIn = !(roseOnArrivalRef.current && filter === arrivalFilterRef.current)
   // Which tile the cursor is over. Held in state rather than left to :hover
   // because a browser only re-evaluates :hover when the pointer moves — see the
   // effect below.
@@ -233,6 +270,23 @@ export default function Work() {
     mq.addEventListener('change', apply)
     return () => mq.removeEventListener('change', apply)
   }, [])
+
+  // Drop the rise once it has played out, so its classes and inline delays are
+  // gone before any later re-render (a filter press, a hover) could pick them up.
+  // A filter press ends it sooner through arrivalFilterRef; this is the timer for
+  // the case where nothing is touched.
+  useEffect(() => {
+    if (!rising) return
+    const t = window.setTimeout(() => setRising(false), RISE_CLEAR_MS)
+    return () => window.clearTimeout(t)
+  }, [rising])
+
+  // Once the visitor moves off the arrival filter, no strip is "the one that rose
+  // in" any more, so re-selecting it later fades in like every other view. Only a
+  // real change counts: on the mount run the filter still equals the arrival one.
+  useEffect(() => {
+    if (filter !== arrivalFilterRef.current) roseOnArrivalRef.current = false
+  }, [filter])
 
   // Same shape, same breakpoint the layout uses. Read here rather than assumed,
   // because the answer decides what the strip claims to be, not just how it looks.
@@ -412,6 +466,16 @@ export default function Work() {
     // stream that already carries its own inertia, and easing that only adds lag.
     const onWheel = (e) => {
       if (!isDesktop() || maxScroll() <= 0) return
+      // Residual trackpad momentum from the homepage's scroll-to-work handoff
+      // keeps firing wheel events for a beat after we arrive, and this handler
+      // turns vertical wheel into horizontal glide — so without this the strip
+      // lurches sideways under a visitor who only meant to scroll down. Swallow
+      // the tail of that gesture. See handoff.js for why the mark lives in a
+      // shared module rather than coupling the two pages.
+      if (handoffMomentumActive()) {
+        e.preventDefault()
+        return
+      }
       if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return
       if (e.deltaY === 0) return
       e.preventDefault()
@@ -593,7 +657,10 @@ export default function Work() {
           fixed at top centre — a right-aligned pill row would otherwise run
           straight into it around 1024px. */}
       <div className="flex min-h-0 flex-1 flex-col pt-[68px] lg:justify-center lg:pt-[76px]">
-        <div className="flex shrink-0 flex-col gap-3 px-6 pb-4 lg:flex-row lg:items-center lg:justify-between lg:gap-6 lg:px-10 lg:pb-10">
+        {/* On a handoff arrival the header and the index strip fade in without
+            the rise, a beat ahead of the cards; on any other load they are just
+            present, as before. */}
+        <div className={`flex shrink-0 flex-col gap-3 px-6 pb-4 lg:flex-row lg:items-center lg:justify-between lg:gap-6 lg:px-10 lg:pb-10${riseNow ? ' fade-in' : ''}`}>
           <div className="flex items-center gap-3.5">
             <span className={`${MONO} text-ink`}>Work</span>
             {/* Pressing a pill replaces the strip and changes nothing else that
@@ -667,12 +734,26 @@ export default function Work() {
             {/* items-start, not center: card heights differ with their text, and
                 tops on one line is what keeps uneven cards reading as a
                 filmstrip rather than a scatter. */}
+            {/* On arrival the cards carry their own rise-and-fade, so the strip
+                itself does not also fade (that would double the opacity ramp);
+                on every other load it keeps the plain fade-in it always had. The
+                key still remounts the list per filter, which is what re-runs that
+                fade-in on a pill press — with no rise, since riseNow is false by
+                then. */}
             <ul
               key={filter}
-              className="fade-in grid grid-cols-1 gap-x-8 gap-y-8 sm:grid-cols-2 lg:flex lg:h-full lg:w-max lg:items-start lg:gap-6 lg:px-10"
+              className={`grid grid-cols-1 gap-x-8 gap-y-8 sm:grid-cols-2 lg:flex lg:h-full lg:w-max lg:items-start lg:gap-6 lg:px-10${stripFadeIn ? ' fade-in' : ''}`}
             >
-              {filtered.map((p) => (
-                <li key={p.slug} className="lg:shrink-0">
+              {filtered.map((p, i) => (
+                <li
+                  key={p.slug}
+                  className={`lg:shrink-0${riseNow ? ' card-rise' : ''}`}
+                  style={
+                    riseNow
+                      ? { animationDelay: `${RISE_BASE_MS + Math.min(i, RISE_STEP_CAP) * RISE_STEP_MS}ms` }
+                      : undefined
+                  }
+                >
                   <ProjectTile
                     p={p}
                     hot={hotSlug === p.slug}
@@ -730,7 +811,7 @@ export default function Work() {
             stay out of the tab order because the strip region already has
             arrow keys, Home and End; eighteen extra stops would be noise, not
             access. */}
-        <div className="mt-10 hidden shrink-0 items-center gap-3.5 px-10 lg:flex">
+        <div className={`mt-10 hidden shrink-0 items-center gap-3.5 px-10 lg:flex${riseNow ? ' fade-in' : ''}`}>
           <div
             ref={indRef}
             className="flex flex-1 cursor-pointer touch-none transition-opacity duration-300"

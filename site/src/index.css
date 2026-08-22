@@ -300,3 +300,20 @@ html[data-theme-switching] *::after {
 @media (prefers-reduced-motion: reduce) {
   .fade-in { animation: none; }
 }
+
+/* The handoff arrival: when /work mounts off the cover's leave, each project
+   card rises the last 40px into place while it fades, the strip staggering the
+   delay left to right (set inline per card). The transform lives on the card's
+   <li>, never the cover image, so the hover scale and greyscale are untouched.
+   Applied only under the consumed-handoff state and stripped once it has run, so
+   a filter re-render or a direct load never inherits it. */
+@keyframes card-rise {
+  from { opacity: 0; transform: translateY(40px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@utility card-rise {
+  animation: card-rise 0.45s ease both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .card-rise { animation: none; }
+}

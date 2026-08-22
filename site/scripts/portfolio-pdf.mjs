@@ -58,6 +58,7 @@ import { createHash } from 'node:crypto'
 import { execFileSync } from 'node:child_process'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { dirname, resolve, join } from 'node:path'
+import { crossCap, makeProjector } from '../src/lib/crosscap.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const PUBLIC = resolve(here, '../public')
@@ -71,6 +72,9 @@ const SOURCES = [
   resolve(here, '../src/data/belts.js'),
   resolve(here, '../src/data/cv.js'),
   resolve(here, '../src/components/projectGlyphs.jsx'),
+  // The cover's surface is computed from this now-shared module, so a change to
+  // the mathematics is the same drift as a change to the writing.
+  resolve(here, '../src/lib/crosscap.js'),
 ]
 
 /* The eight sheets, in the order they print.
@@ -561,66 +565,26 @@ const strip = (litOf, size, sub = null) =>
 /*
  * The cover's field: a fragment of the cross-cap, surveyed.
  *
- * The surface is The Cross-Cap House's, and these are its own equations,
- * lifted off the submission board that project prints rather than reinvented:
- *
- *   u = (i / (U - 1)) * b * PI          v = (j / (V - 1)) * c * PI
- *   x = d * a * sin(u) * sin(e * v)
- *   y = a * sin(e * u) * sin(v) ** 2
- *   z = a * cos(e * u) * sin(v) ** 2
- *
- * with the board's defaults a=60 b=1 c=1 d=0.5 e=2. What is design rather than
- * data is everything below: which way the thing is turned, how far in the page
- * is zoomed, and where the frame sits on it. The page shows a fragment and
- * runs off every edge, because a cover that contained the whole object would
- * be a diagram of it; this is a detail of something larger, which is the
- * relationship the booklet has to the work.
- *
- * Every point carries its index in the grid, the way a survey drawing numbers
- * its stations. That is a real property of the drawing and not a decoration:
- * the numbers are what say this is a computed surface rather than a texture.
+ * The surface, its equations and the projection now live in a module the site's
+ * own cover shares, so the printed surface and the on-screen one can never drift
+ * apart: see src/lib/crosscap.js. What stays here is design rather than data —
+ * which way the thing is turned, how far the page is zoomed, and where the frame
+ * sits on it. The page shows a fragment and runs off every edge, because a cover
+ * that contained the whole object would be a diagram of it; this is a detail of
+ * something larger, which is the relationship the booklet has to the work.
  */
-const CC = { U: 112, V: 46, a: 60, b: 1, c: 1, d: 0.5, e: 2 }
 /* Turned so the pinch, where the surface crosses itself and every point piles
  * up, sits high and right. Centred it ran a dense smear straight down through
  * the name; off to a corner it becomes the thing the eye lands on and the rest
- * of the page stays open. */
+ * of the page stays open. Framed for A4 landscape; the site picks its own view
+ * for the viewport off the same maths. */
 const CC_VIEW = { yaw: 90, pitch: 34, zoom: 2.4, cx: 0.86, cy: 0.3 }
 
-function crossCap() {
-  const pts = []
-  for (let i = 0; i < CC.U; i++) {
-    const u = (i / (CC.U - 1)) * CC.b * Math.PI
-    for (let j = 0; j < CC.V; j++) {
-      const v = (j / (CC.V - 1)) * CC.c * Math.PI
-      const s2 = Math.sin(v) ** 2
-      pts.push({
-        id: i * CC.V + j,
-        x: CC.d * CC.a * Math.sin(u) * Math.sin(CC.e * v),
-        y: CC.a * Math.sin(CC.e * u) * s2,
-        z: CC.a * Math.cos(CC.e * u) * s2,
-      })
-    }
-  }
-  return pts
-}
-
-/* Orthographic, yaw about Z then pitch about X, then fitted to the page at
- * CC_VIEW.zoom times its natural size. Points outside the trim plus a small
- * bleed are dropped rather than drawn and clipped, because a page carrying a
- * thousand invisible circles is a page nobody's reader can open. */
+/* Fitted to the page at CC_VIEW.zoom times its natural size. Points outside the
+ * trim plus a small bleed are dropped rather than drawn and clipped, because a
+ * page carrying a thousand invisible circles is a page nobody's reader can open. */
 function coverField() {
-  const yaw = (CC_VIEW.yaw * Math.PI) / 180
-  const pitch = (CC_VIEW.pitch * Math.PI) / 180
-  const cy = Math.cos(yaw)
-  const sy = Math.sin(yaw)
-  const cp = Math.cos(pitch)
-  const sp = Math.sin(pitch)
-  const flat = crossCap().map((p) => {
-    const x1 = p.x * cy - p.y * sy
-    const y1 = p.x * sy + p.y * cy
-    return { id: p.id, px: x1, py: y1 * cp - p.z * sp, depth: y1 * sp + p.z * cp }
-  })
+  const flat = crossCap().map(makeProjector(CC_VIEW.yaw, CC_VIEW.pitch))
   const xs = flat.map((p) => p.px)
   const ys = flat.map((p) => p.py)
   const spanX = Math.max(...xs) - Math.min(...xs)
