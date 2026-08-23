@@ -77,19 +77,21 @@ function ProjectTile({ p, hot, motionOk, onFocus, onBlur }) {
 
   // The colour reveal, for a screen with no cursor. On the desktop strip a
   // hovered cover comes out of greyscale; below lg there is no hover, so the
-  // card that is in view takes its place: an observer lights it as it enters
-  // and lets it fall back to greyscale as it leaves, so scrolling the index
-  // walks the colour down it the way the cursor walks it across the strip.
+  // card takes its colour by crossing a line as it scrolls. The root is
+  // cropped to the top 60% of the viewport, so a card enters from the bottom
+  // in greyscale, is seen that way, and blooms to colour as it rises past the
+  // lower 40%. Cropping to a band rather than reading "mostly on screen" is the
+  // point: a big card is already well up the page by the time it is 55% shown,
+  // so that version never let the greyscale state be seen at all.
   const coverRef = useRef(null)
   const [inView, setInView] = useState(false)
   useEffect(() => {
     if (window.matchMedia('(min-width: 1024px)').matches) return
     const el = coverRef.current
     if (!el) return
-    const io = new IntersectionObserver(
-      ([e]) => setInView(e.isIntersecting && e.intersectionRatio >= 0.55),
-      { threshold: [0, 0.55, 1] },
-    )
+    const io = new IntersectionObserver(([e]) => setInView(e.isIntersecting), {
+      rootMargin: '0px 0px -40% 0px',
+    })
     io.observe(el)
     return () => io.disconnect()
   }, [])
