@@ -157,24 +157,25 @@ export default function ProjectCard({ project, onClose }) {
        * silently does nothing: at 1280x660 the card stayed 622px inside 580px of
        * room. 5rem is the padding the backdrop keeps on each side.
        *
-       * That fixed height is a desktop idea and it does not survive a phone. At
-       * 375x812 it made a 788px card holding a 179px media well and a 213px box
-       * with 354px of writing in it: everything squeezed, everything cut. Below
-       * lg the height is a ceiling instead, the card scrolls as one thing, and
-       * the media and the writing take the room they need. 1.5rem and 3rem are
-       * twice the padding the backdrop keeps at those sizes.
+       * Every layout now keeps that definite height, and every one of them puts
+       * the scrolling inside the rail rather than on the card. The phone used to
+       * be the exception: the card was a ceiling that scrolled as one thing, so
+       * the media scrolled away with the writing and you lost the drawing the
+       * moment you started reading about it. Pinning the height puts the gallery
+       * in a row of its own that stays where it is, and gives the writing a box
+       * to move in underneath. 1.5rem and 3rem are twice the padding the backdrop
+       * keeps at those sizes.
        *
-       * wide-short keeps the definite height. There the two halves sit side by
-       * side precisely because there is no vertical room to give, and the rail
-       * scrolls itself; a card that grew instead would have nowhere to grow.
+       * wide-short keeps it for the same reason it always did: there the two
+       * halves sit side by side precisely because there is no vertical room to
+       * give, and a card that grew instead would have nowhere to grow.
        *
-       * The third row is auto rather than 1fr for the same reason. A 1fr row in
-       * a grid whose height is capped gets the capped height, not the content's,
-       * so the rail was handed 786px for 2,251px of writing and the record drew
-       * straight through the prose. Auto rows size to what is in them and the
-       * card is what overflows.
+       * So the last row is 1fr everywhere — the rail takes what is left of a
+       * known height and scrolls inside it. It was auto while the card was the
+       * scroller, because a 1fr row in a capped grid gets the cap rather than
+       * the content and the record drew straight through the prose.
        */
-      className="grid max-h-[calc(100svh-1.5rem)] w-full max-w-[1180px] grid-cols-1 grid-rows-[auto_auto_auto] overflow-y-auto overscroll-contain rounded-[14px] border border-line bg-paper p-3.5 shadow-[0_24px_80px_-20px_rgba(0,0,0,0.45)] sm:max-h-[calc(100svh-3rem)] wide-short:h-[calc(100svh-3rem)] wide-short:grid-cols-[minmax(0,1.55fr)_24px_minmax(0,1fr)] wide-short:grid-rows-[minmax(0,1fr)] wide-short:overflow-hidden lg:h-[622px] lg:max-h-[calc(100vh-5rem)] lg:grid-cols-[760px_40px_minmax(0,1fr)] lg:grid-rows-[minmax(0,1fr)] lg:overflow-hidden lg:p-6"
+      className="grid h-[calc(100svh-1.5rem)] w-full max-w-[1180px] grid-cols-1 grid-rows-[auto_auto_minmax(0,1fr)] overflow-hidden rounded-[14px] border border-line bg-paper p-3.5 shadow-[0_24px_80px_-20px_rgba(0,0,0,0.45)] sm:h-[calc(100svh-3rem)] wide-short:grid-cols-[minmax(0,1.55fr)_24px_minmax(0,1fr)] wide-short:grid-rows-[minmax(0,1fr)] lg:h-[622px] lg:max-h-[calc(100vh-5rem)] lg:grid-cols-[760px_40px_minmax(0,1fr)] lg:grid-rows-[minmax(0,1fr)] lg:p-6"
       style={{ '--c': color }}
     >
       {/* ── the gallery ───────────────────────────────────────────────────── */}
@@ -187,20 +188,22 @@ export default function ProjectCard({ project, onClose }) {
           // height back the same way, which is what stopped the record being cut
           // off below the card edge.
           //
-          // Below lg the card scrolls, so the well has room to be the shape of
-          // what is in it: no aspect of its own, height set by the media, which
-          // caps itself at half the viewport. It used to be a 16/9 box capped at
-          // 30svh, which on a phone drew every drawing 317x179 whatever shape it
-          // actually was — a 0.55 portrait plan came out three inches wide.
-          className={`relative flex shrink-0 items-center justify-center overflow-hidden rounded-[10px] border border-line wide-short:min-h-0 wide-short:shrink wide-short:flex-1 lg:min-h-0 lg:shrink lg:flex-1 ${WELL}`}
+          // Below lg the card scrolls, so the well needs a height of its own. It
+          // takes a 4/3 frame — the same shape the index covers use — rather than
+          // the shape of whatever is in it. Letting the media set the height made
+          // the frame jump between projects as you stepped through them: a tall
+          // plan drew a tall box, a wide render a short one, and the card changed
+          // shape under the caption. A fixed frame with the media contained and
+          // centred on the well's ground is what the other two layouts already do.
+          className={`relative flex aspect-[4/3] shrink-0 items-center justify-center overflow-hidden rounded-[10px] border border-line wide-short:aspect-auto wide-short:min-h-0 wide-short:shrink wide-short:flex-1 lg:aspect-auto lg:min-h-0 lg:shrink lg:flex-1 ${WELL}`}
         >
           <MediaFrame
             item={item}
             title={project.title}
-            // max-h-full is what contains it wherever the well has a height of
-            // its own; the svh cap is what gives the well a height where it
-            // does not.
-            className="max-h-[50svh] max-w-full wide-short:max-h-full lg:max-h-full"
+            // max-h-full contains it: every layout now gives the well a height
+            // of its own, so the media letterboxes inside the frame rather than
+            // setting it.
+            className="max-h-full max-w-full"
             // The well is 760px at most and the card is nearly the full width
             // below that, so this asks for the 960 on a desktop and the 480 on
             // a phone. The viewer on top of it keeps the default and takes the
@@ -341,14 +344,24 @@ export default function ProjectCard({ project, onClose }) {
       <div aria-hidden="true" />
 
       {/* ── the rail ──────────────────────────────────────────────────────── */}
-      {/* min-h-0 only where the rail is inside a box of a fixed height and has to
-          shrink into it. Below lg it is the opposite: a grid item is allowed to
-          be smaller than its content once min-height is 0, and the row was then
-          sized at 496px for 1,961px of writing, so the record drew over the
-          prose. Letting min-height stay auto is what makes the row grow and the
-          card, rather than anything inside it, do the scrolling. */}
-      <div className="flex min-w-0 flex-col max-lg:mt-3.5 wide-short:mt-0 wide-short:min-h-0 wide-short:overflow-y-auto wide-short:overscroll-contain lg:min-h-0">
-        <div className="label-mono flex shrink-0 items-center gap-2.5 wide-short:sticky wide-short:top-0 wide-short:z-10 wide-short:bg-paper wide-short:pb-1.5">
+      {/* min-h-0 everywhere: the rail sits in a row of a known height and has to
+          shrink into it rather than push the card open, because the rail is what
+          scrolls now at every size.
+
+          The scrollbar is drawn rather than left to the platform, and that is
+          the fix for two things at once. An overlay scrollbar is invisible until
+          you are already scrolling, which is no use to someone deciding whether
+          there is anything below — and because it overlays rather than takes
+          room, the sticky header floated over the top of it, so the first thing
+          the bar did when it finally appeared was emerge from behind the close
+          button. A classic bar takes its own column: nothing can sit on it, and
+          it is there before the first scroll. Same 5px thumb as the prose box's
+          from lg up, so it reads as one device at every size. */}
+      <div className="flex min-h-0 min-w-0 flex-col overflow-y-auto overscroll-contain pr-1.5 [scrollbar-color:color-mix(in_srgb,var(--color-line)_60%,var(--color-ink))_transparent] [scrollbar-width:thin] max-lg:mt-3.5 [&::-webkit-scrollbar]:w-[5px] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[color-mix(in_srgb,var(--color-line)_60%,var(--color-ink))] [&::-webkit-scrollbar-track]:bg-transparent wide-short:mt-0 lg:overflow-visible lg:pr-0">
+        {/* Sticky wherever the rail is the scroller, so the belt and the way out
+            stay put while the writing moves under them. Static from lg up, where
+            the rail does not scroll and only the prose box inside it does. */}
+        <div className="label-mono sticky top-0 z-10 flex shrink-0 items-center gap-2.5 bg-paper pb-1.5 lg:static lg:pb-0">
           <span
             aria-hidden="true"
             className="h-[7px] w-[7px] shrink-0 rounded-[2px]"
@@ -384,9 +397,9 @@ export default function ProjectCard({ project, onClose }) {
          * The title above it and the record below it stay put, so nothing
          * scannable can be scrolled out of sight; the prose is what moves.
          *
-         * Below lg it does not scroll at all any more. Two nested scrollers on a
-         * phone is one too many — the outer card is the one that moves now — and
-         * the writing simply runs on and the card gets longer.
+         * Below lg it does not scroll at all. Two nested scrollers is one too
+         * many, and there the rail around it is the one that moves, so the
+         * writing simply runs on and the rail scrolls past it.
          *
          * The scrollbar is drawn rather than left to the platform. An overlay
          * scrollbar is invisible until you are already scrolling, which is no
