@@ -75,9 +75,21 @@ const P_COMPLETE_MS = 120
  * centre as a fraction of the canvas.
  */
 const CC_HOME_VIEW = { yaw: 90, pitch: 30, zoom: 1.5, ax: 0.9, ay: 0.14 }
+// The phone frames the same surface differently: a portrait viewport wants the
+// field through the whole page, not a fragment in a corner. Zoomed in past the
+// frame and centred a shade high, so the cross-cap's nested contour arcs — its
+// signature "eye" — fill the screen and the name sits in the field rather than
+// under a blob stuck above it. The name keeps its own faded-paper halo (the
+// scrim below) so it stays legible over the dense drawing.
+const CC_HOME_VIEW_MOBILE = { yaw: 90, pitch: 30, zoom: 3.2, ax: 0.44, ay: 0.3 }
+// The phone reads the field switch at the same 640px line the labels do.
+const MOBILE_MAX = 640
 // At rest this fraction of the u-rows is drawn: a partial survey, visibly still
-// computing. The sweep fills it from here to whole as p reaches 1.
+// computing. The sweep fills it from here to whole as p reaches 1. The phone is
+// dense at rest — the field is the page there, so it must read as full standing
+// still — with just enough headroom left that the sweep still has somewhere to go.
 const REST_ROWS = 0.12
+const REST_ROWS_MOBILE = 0.9
 const POINT_R = 0.7 // muted-ink station points, in CSS px
 const LABEL_PX = 8 // the station numbers, in the mono voice
 const LABEL_EVERY = 17 // only a sparse subset carry their number, survey-style
@@ -286,10 +298,16 @@ export default function Home() {
       }
     }
 
+    // The phone and the laptop frame the same maths differently; each picks its
+    // own view and its own rest density off the canvas width.
+    let restRows = REST_ROWS
     const compute = () => {
       const { w, h } = size
       if (!w || !h) return
-      const project = makeProjector(CC_HOME_VIEW.yaw, CC_HOME_VIEW.pitch)
+      const mobile = w < MOBILE_MAX
+      const view = mobile ? CC_HOME_VIEW_MOBILE : CC_HOME_VIEW
+      restRows = mobile ? REST_ROWS_MOBILE : REST_ROWS
+      const project = makeProjector(view.yaw, view.pitch)
       const flat = crossCap().map(project)
       const xs = flat.map((q) => q.px)
       const ys = flat.map((q) => q.py)
@@ -297,12 +315,12 @@ export default function Home() {
       const maxX = Math.max(...xs)
       const minY = Math.min(...ys)
       const maxY = Math.max(...ys)
-      const k = (CC_HOME_VIEW.zoom * w) / Math.max(maxX - minX, maxY - minY)
-      const ox = CC_HOME_VIEW.ax * w - ((minX + maxX) / 2) * k
-      const oy = CC_HOME_VIEW.ay * h + ((minY + maxY) / 2) * k
+      const k = (view.zoom * w) / Math.max(maxX - minX, maxY - minY)
+      const ox = view.ax * w - ((minX + maxX) / 2) * k
+      const oy = view.ay * h + ((minY + maxY) / 2) * k
       const bleed = 24
       // Numbers become noise at phone size; below sm the survey is points alone.
-      const showLabels = w >= 640
+      const showLabels = w >= MOBILE_MAX
       field = flat
         .map((q) => ({ row: q.row, id: q.id, X: ox + q.px * k, Y: oy - q.py * k }))
         .filter((q) => q.X > -bleed && q.X < w + bleed && q.Y > -bleed && q.Y < h + bleed)
@@ -314,7 +332,7 @@ export default function Home() {
       const { w, h } = size
       ctx.clearRect(0, 0, w, h)
       const rows = motionOkRef.current
-        ? Math.round((REST_ROWS + (1 - REST_ROWS) * sweep) * CC.U)
+        ? Math.round((restRows + (1 - restRows) * sweep) * CC.U)
         : CC.U
 
       // The name's box, in the canvas's own pixels, so the probe (and the eye)
@@ -464,6 +482,20 @@ export default function Home() {
       />
 
       <div ref={nameRef} className="relative z-10 w-[min(560px,88vw)]">
+        {/* The faded-paper halo. On the phone the field runs dense through the
+            whole page, so the name is given its own clearing: an ellipse of the
+            page's own paper colour, opaque across the type and fading out past
+            it, so the survey softly recedes around the name rather than leaving
+            a hard rectangular hole. Paper, not white, so it flips with the theme.
+            Mobile only — the laptop keeps its corner fragment and needs none. */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -inset-x-10 -inset-y-14 -z-10 sm:hidden"
+          style={{
+            background:
+              'radial-gradient(ellipse at center, var(--color-paper) 55%, transparent 82%)',
+          }}
+        />
         {/* font-light, not lighter: Space Grotesk stops at 300, and asking for a
             weight it does not have just gets 300 with the browser guessing. */}
         <h1 className="text-[clamp(2rem,4.4vw,3.25rem)] font-light leading-[1.03] tracking-[-0.024em]">
