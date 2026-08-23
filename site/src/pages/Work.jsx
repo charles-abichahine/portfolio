@@ -65,7 +65,7 @@ const ARROW =
 // text block below the cover is part of it, so the clamp sets the card's WIDTH
 // (the cover's 4:3 of the same height) and the cover follows from that. Same
 // density, and the card is the one bordered surface — no shadow, no plate.
-const CARD = `block overflow-hidden border border-line bg-paper lg:w-[calc(clamp(250px,38vh,400px)*4/3)] ${R}`
+const CARD = `flex h-full flex-col overflow-hidden border border-line bg-paper lg:h-auto lg:w-[calc(clamp(250px,38vh,400px)*4/3)] ${R}`
 const COVER = 'relative aspect-[4/3] w-full overflow-hidden bg-line'
 
 function ProjectTile({ p, hot, motionOk, onFocus, onBlur }) {
@@ -74,6 +74,28 @@ function ProjectTile({ p, hot, motionOk, onFocus, onBlur }) {
   // mounted: the element exists and is fetching. ready: it can paint a frame.
   const [mounted, setMounted] = useState(false)
   const [ready, setReady] = useState(false)
+
+  // The colour reveal, for a screen with no cursor. On the desktop strip a
+  // hovered cover comes out of greyscale; below lg there is no hover, so the
+  // card that is in view takes its place: an observer lights it as it enters
+  // and lets it fall back to greyscale as it leaves, so scrolling the index
+  // walks the colour down it the way the cursor walks it across the strip.
+  const coverRef = useRef(null)
+  const [inView, setInView] = useState(false)
+  useEffect(() => {
+    if (window.matchMedia('(min-width: 1024px)').matches) return
+    const el = coverRef.current
+    if (!el) return
+    const io = new IntersectionObserver(
+      ([e]) => setInView(e.isIntersecting && e.intersectionRatio >= 0.55),
+      { threshold: [0, 0.55, 1] },
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [])
+
+  // Lit by the cursor on the strip, or by being in view on a phone.
+  const lit = hot || inView
 
   // A cursor sweeping the strip crosses every tile on the way, so mounting waits
   // for it to settle — otherwise one pass pulls every cover on the row. Unlike
@@ -104,7 +126,7 @@ function ProjectTile({ p, hot, motionOk, onFocus, onBlur }) {
       onBlur={onBlur}
       className={CARD}
     >
-      <div className={COVER}>
+      <div ref={coverRef} className={COVER}>
         {/* The heading below is inside this link and names it, so an alt here
             would announce the project twice. */}
         {/* The tile is about 90vw on a phone and 405 to 533px on a desktop,
@@ -119,7 +141,7 @@ function ProjectTile({ p, hot, motionOk, onFocus, onBlur }) {
           loading="lazy"
           draggable="false"
           className={`h-full w-full object-cover transition duration-500 ease-out ${
-            hot ? 'scale-[1.03] grayscale-0' : 'grayscale'
+            lit ? 'scale-[1.03] grayscale-0' : 'grayscale'
           }`}
         />
         {/* The animated cover fades in over its own poster once it can paint a
@@ -159,21 +181,21 @@ function ProjectTile({ p, hot, motionOk, onFocus, onBlur }) {
           <span
             aria-hidden="true"
             className="mt-[3px] shrink-0 transition-colors duration-300"
-            style={{ color: hot ? color : 'var(--color-ink)' }}
+            style={{ color: lit ? color : 'var(--color-ink)' }}
           >
             <ProjectGlyph slug={p.slug} className="h-5 w-5" />
           </span>
           <h2
             className="min-h-[2.6em] min-w-0 flex-1 text-[1.1rem] font-semibold leading-[1.3] transition-colors duration-300 sm:max-lg:min-h-[3.9em]"
-            style={{ color: hot ? color : 'var(--color-ink)' }}
+            style={{ color: lit ? color : 'var(--color-ink)' }}
           >
             {p.title}
           </h2>
-          <span className={`shrink-0 pt-[7px] tabular-nums ${MONO} text-muted`}>{p.year}</span>
+          <span className={`ml-auto shrink-0 pt-[7px] tabular-nums ${MONO} text-muted`}>{p.year}</span>
         </div>
         {/* No clamp and no truncation: the tagline's length is governed in
             projects.js, where it can be read and shortened. */}
-        <p className="mt-1 min-h-[1.4em] font-serif text-[0.88rem] leading-snug text-soft sm:max-lg:min-h-[2.75em]">{p.tagline}</p>
+        <p className="mt-1.5 min-h-[1.4em] font-serif text-[0.88rem] leading-snug text-soft sm:max-lg:min-h-[2.75em]">{p.tagline}</p>
         {/* The award, named. Always the accent, never the category colour — a
             distinction should read as itself, not as its group. The line is
             reserved either way; see the block comment above. */}
@@ -742,7 +764,7 @@ export default function Work() {
                 then. */}
             <ul
               key={filter}
-              className={`grid grid-cols-1 gap-x-8 gap-y-8 sm:grid-cols-2 lg:flex lg:h-full lg:w-max lg:items-start lg:gap-6 lg:px-10${stripFadeIn ? ' fade-in' : ''}`}
+              className={`grid grid-cols-1 gap-x-8 gap-y-9 sm:grid-cols-2 lg:flex lg:h-full lg:w-max lg:items-start lg:gap-6 lg:px-10${stripFadeIn ? ' fade-in' : ''}`}
             >
               {filtered.map((p, i) => (
                 <li
