@@ -75,9 +75,9 @@ const MARKS = [
 /* A 24px box around a 14px mark: the drawing stays as quiet as the type it sits
    beside, while the target stays big enough to hit with a thumb. The box only
    has to stay square while the mark is alone in it, so the width is a minimum
-   rather than a fixed 24px, and the name that appears at lg widens it. */
+   rather than a fixed 24px, and the name that appears from sm widens it. */
 const LINK =
-  `${MONO} flex h-6 min-w-6 items-center justify-center gap-1.5 rounded-[7px] text-muted transition-colors hover:text-accent focus-visible:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent lg:px-1`
+  `${MONO} flex h-6 min-w-6 items-center justify-center gap-1.5 rounded-[7px] text-muted transition-colors hover:text-accent focus-visible:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:px-1`
 
 /*
  * The three contacts, as a row of marks. Exported because /about takes them out
@@ -202,16 +202,16 @@ export default function Footer({ slotRef }) {
             the same baseline as the type opposite them. */}
         {/* Named, because a landmark with no name is announced as "navigation"
             and there is a second one on the page. */}
-        {/* The names come back at lg, not at sm. The note above records that the
-            three words cost 170px and broke the phone row, and that is still
-            true anywhere the row is tight: at sm the identity, a page's chip and
-            three named marks want more than the 592px the row has. lg is the
-            first width where all three fit on one line with room to spare, and
-            it is already where the role joins the identity, so the footer fills
-            out in one step rather than two. */}
+        {/* The names come back at sm — one row up from the single phone column,
+            which is the landscape phone and everything wider. The note above
+            records that the three words cost 170px and once broke the row, but
+            that was when a page hung a chip in the middle cell too; with the
+            slot empty the row is only the identity and the marks, and the two
+            clear the 592px an sm row has with room to spare. Portrait phones
+            (below sm) stay marks, where the column is narrow and the row tight. */}
         <nav
           aria-label="Contact"
-          className="-my-1 -mr-1.5 flex justify-self-end gap-0.5 sm:col-start-3 sm:row-start-1 lg:gap-2.5"
+          className="-my-1 -mr-1.5 flex justify-self-end gap-0.5 sm:col-start-3 sm:row-start-1 sm:gap-2.5"
         >
           {MARKS.map((m) => (
             <a
@@ -222,12 +222,12 @@ export default function Footer({ slotRef }) {
               {...(m.away ? { target: '_blank', rel: 'noreferrer' } : {})}
             >
               <Mark d={m.d} />
-              {/* Hidden below lg rather than absent, and the aria-label stays on
+              {/* Hidden below sm rather than absent, and the aria-label stays on
                   the anchor either way: display:none takes the span out of the
                   accessible name, so without the label the phone version would
                   be three unnamed links again. Where both are present they say
                   the same word, so nothing is announced twice. */}
-              <span className="hidden lg:inline">{m.label}</span>
+              <span className="hidden sm:inline">{m.label}</span>
             </a>
           ))}
         </nav>
