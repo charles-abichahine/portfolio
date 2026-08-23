@@ -75,25 +75,46 @@ const P_COMPLETE_MS = 120
  * centre as a fraction of the canvas.
  */
 const CC_HOME_VIEW = { yaw: 90, pitch: 30, zoom: 1.5, ax: 0.9, ay: 0.14 }
-// The phone frames the same surface differently: a portrait viewport wants the
-// field through the whole page, not a fragment in a corner. Zoomed in past the
-// frame and centred a shade high, so the cross-cap's nested contour arcs — its
-// signature "eye" — fill the screen and the name sits in the field rather than
-// under a blob stuck above it. The name keeps its own faded-paper halo (the
-// scrim below) so it stays legible over the dense drawing.
-const CC_HOME_VIEW_MOBILE = { yaw: 90, pitch: 30, zoom: 3.2, ax: 0.44, ay: 0.3 }
-// The phone reads the field switch at the same 640px line the labels do.
-const MOBILE_MAX = 640
-// At rest this fraction of the u-rows is drawn: a partial survey, visibly still
-// computing. The sweep fills it from here to whole as p reaches 1. The phone is
-// dense at rest — the field is the page there, so it must read as full standing
-// still — with just enough headroom left that the sweep still has somewhere to go.
+// The full-bleed view, for a portrait phone or tablet: the field runs through
+// the whole page rather than a fragment in a corner, framed so the cross-cap's
+// nested contour arcs — its signature "eye" — sit centred behind the name, and
+// the radial reveal below grows out from there in every direction. The name
+// keeps its faded-paper halo (the scrim) so it reads over the field. Portrait
+// only: a phone on its side is short and wide, the same shape the laptop is, and
+// a field centred on the name has nowhere to grow without landing on the type —
+// there the corner fragment (CC_HOME_VIEW), off to one side, is the right frame.
+const CC_HOME_VIEW_MOBILE = { yaw: 90, pitch: 30, zoom: 3.0, ax: 0.5, ay: 0.42 }
+// The laptop starts here; below it in landscape still reads as the wide frame.
+const DESKTOP_MIN = 1024
+// What is drawn at rest, and what the gesture opens toward whole. On the laptop
+// it is a fraction of the u-rows, drawn in order — the fan grows out of the
+// corner as the wheel turns. On a phone it is a fraction of the field's RADIUS:
+// at rest a bloom sits behind the name, and the gesture pushes the frontier
+// outward to the edges, so the field visibly grows the way the laptop's does,
+// only from the centre rather than a corner — and symmetric, so it never sits
+// lopsided. Area goes as the square of the radius, so 0.55 → 1 more than triples
+// what is drawn: the reason the phone transition now reads as strongly as it does.
 const REST_ROWS = 0.12
-const REST_ROWS_MOBILE = 0.9
+const REST_RADIUS_MOBILE = 0.55
+// The radial reveal, taken bare, grows as a perfect circle — a compass arc that
+// reads as mechanical against a hand-plotted survey. So the frontier each point
+// is measured against is bent: a smooth low-frequency wobble in the angle turns
+// the circle into an organic blob, and a little per-point jitter feathers the
+// edge so it dissolves into the field rather than ending on a clean line. Both
+// are fixed per point, so the shape is stable and still grows outward as one.
+const CC_EDGE_WOBBLE = 0.22
+const CC_EDGE_JITTER = 0.06
 const POINT_R = 0.7 // muted-ink station points, in CSS px
 const LABEL_PX = 8 // the station numbers, in the mono voice
 const LABEL_EVERY = 17 // only a sparse subset carry their number, survey-style
+const LABEL_EVERY_FULL = 43 // sparser again on the dense full-bleed phone field
 const TAU = Math.PI * 2
+// A stable pseudo-random in [0,1) from an integer — the classic sine hash, used
+// to feather the reveal edge without a per-render Math.random that would flicker.
+const hash01 = (n) => {
+  const s = Math.sin(n * 12.9898) * 43758.5453
+  return s - Math.floor(s)
+}
 
 export default function Home() {
   const navigate = useNavigate()
@@ -298,15 +319,20 @@ export default function Home() {
       }
     }
 
-    // The phone and the laptop frame the same maths differently; each picks its
-    // own view and its own rest density off the canvas width.
-    let restRows = REST_ROWS
+    // The phone and the laptop frame the same maths differently, and read the
+    // gesture differently: the laptop sweeps rows in order, the phone grows the
+    // field out by radius. Each is chosen here off the viewport's size and shape.
+    let restFrac = REST_ROWS
+    let fullField = false
     const compute = () => {
       const { w, h } = size
       if (!w || !h) return
-      const mobile = w < MOBILE_MAX
-      const view = mobile ? CC_HOME_VIEW_MOBILE : CC_HOME_VIEW
-      restRows = mobile ? REST_ROWS_MOBILE : REST_ROWS
+      // The centred full-bleed field is for the portrait column only. A phone on
+      // its side is short and wide like the laptop, so it takes the laptop's
+      // corner fragment; only an upright phone or tablet gets the centred field.
+      fullField = w < DESKTOP_MIN && h >= w
+      const view = fullField ? CC_HOME_VIEW_MOBILE : CC_HOME_VIEW
+      restFrac = fullField ? REST_RADIUS_MOBILE : REST_ROWS
       const project = makeProjector(view.yaw, view.pitch)
       const flat = crossCap().map(project)
       const xs = flat.map((q) => q.px)
@@ -319,21 +345,54 @@ export default function Home() {
       const ox = view.ax * w - ((minX + maxX) / 2) * k
       const oy = view.ay * h + ((minY + maxY) / 2) * k
       const bleed = 24
-      // Numbers become noise at phone size; below sm the survey is points alone.
-      const showLabels = w >= MOBILE_MAX
-      field = flat
+      // The station numbers, everywhere now — they are what says this is a
+      // computed survey rather than a texture, and the phone wants that as much
+      // as the laptop. A sparser subset carries one on the dense full-bleed field
+      // (LABEL_EVERY_FULL) than on the laptop's small fragment, so it reads as
+      // annotated rather than crowded.
+      const showLabels = true
+      const every = fullField ? LABEL_EVERY_FULL : LABEL_EVERY
+      const placed = flat
         .map((q) => ({ row: q.row, id: q.id, X: ox + q.px * k, Y: oy - q.py * k }))
         .filter((q) => q.X > -bleed && q.X < w + bleed && q.Y > -bleed && q.Y < h + bleed)
-        .map((q) => ({ ...q, label: showLabels && q.id % LABEL_EVERY === 0 }))
+        .map((q) => ({ ...q, label: showLabels && q.id % every === 0 }))
+      // Each point's distance from the eye's centre, normalised, so the radial
+      // reveal can grow the field outward from behind the name. The centre is
+      // the anchor the cloud was placed on; the far corner sets the unit.
+      const cx = view.ax * w
+      const cy = view.ay * h
+      let maxR = 1
+      for (const q of placed) {
+        q.rad = Math.hypot(q.X - cx, q.Y - cy)
+        if (q.rad > maxR) maxR = q.rad
+      }
+      // q.rev is the fraction the sweep must reach to draw this point. It is the
+      // normalised radius bent off a circle: divided by an angular wobble so the
+      // frontier bulges and pinches like a natural outline, then nudged per point
+      // so the edge feathers instead of ending on a line. Both are deterministic.
+      for (const q of placed) {
+        q.rad /= maxR
+        const theta = Math.atan2(q.Y - cy, q.X - cx)
+        const wobble =
+          (CC_EDGE_WOBBLE *
+            (Math.sin(3 * theta + 0.7) +
+              0.6 * Math.sin(5 * theta + 2.1) +
+              0.4 * Math.sin(7 * theta - 1.3))) /
+          2
+        q.rev = q.rad / (1 + wobble) + (hash01(q.id) - 0.5) * CC_EDGE_JITTER
+      }
+      field = placed
     }
 
     const draw = () => {
       if (!field || !pal) return
       const { w, h } = size
       ctx.clearRect(0, 0, w, h)
-      const rows = motionOkRef.current
-        ? Math.round((restRows + (1 - restRows) * sweep) * CC.U)
-        : CC.U
+      // How far the reveal has opened now: the rest fraction, carried toward
+      // whole by the sweep. The laptop reads it as a row count, the full-bleed
+      // field as a radius (see the per-point test below).
+      const frac = motionOkRef.current ? restFrac + (1 - restFrac) * sweep : 1
+      const revealed = Math.round(frac * CC.U)
 
       // The name's box, in the canvas's own pixels, so the probe (and the eye)
       // can confirm the survey stays off the type. Both rects carry the same
@@ -351,7 +410,10 @@ export default function Home() {
       let drawn = 0
       const labels = []
       for (const q of field) {
-        if (q.row >= rows) continue
+        // The full-bleed field grows by radius from the centre; the laptop's
+        // fragment fills row by row from its corner.
+        const shown = fullField ? q.rev <= frac : q.row < revealed
+        if (!shown) continue
         // The name is the one thing the survey may not cross. The framing keeps
         // the field in the corner; this is the guarantee the sparse tail never
         // lands on the type, at any size.
@@ -374,7 +436,7 @@ export default function Home() {
       ctx.globalAlpha = 1
 
       if (import.meta.env.DEV) {
-        cv.dataset.ccRows = String(rows)
+        cv.dataset.ccRows = String(revealed)
         cv.dataset.ccTotal = String(CC.U)
         cv.dataset.ccDrawn = String(drawn)
         cv.dataset.ccNamehits = String(hits)
@@ -463,7 +525,7 @@ export default function Home() {
 
   return (
     <div
-      className="relative flex flex-1 flex-col items-center justify-center overflow-hidden px-4 text-center [touch-action:pinch-zoom]"
+      className="relative flex flex-1 flex-col items-center justify-center overflow-hidden px-4 text-center [touch-action:pinch-zoom] max-lg:landscape:pt-[76px]"
       style={{
         transition: leaving
           ? `opacity ${LEAVE_MS}ms ease, transform ${LEAVE_MS}ms ease`
@@ -482,15 +544,17 @@ export default function Home() {
       />
 
       <div ref={nameRef} className="relative z-10 w-[min(560px,88vw)]">
-        {/* The faded-paper halo. On the phone the field runs dense through the
-            whole page, so the name is given its own clearing: an ellipse of the
-            page's own paper colour, opaque across the type and fading out past
-            it, so the survey softly recedes around the name rather than leaving
-            a hard rectangular hole. Paper, not white, so it flips with the theme.
-            Mobile only — the laptop keeps its corner fragment and needs none. */}
+        {/* The faded-paper halo. In the portrait full-bleed field the drawing
+            runs through the whole page, so the name is given its own clearing: an
+            ellipse of the page's own paper colour, opaque across the type and
+            fading out past it, so the survey softly recedes around the name
+            rather than leaving a hard rectangular hole. Paper, not white, so it
+            flips with the theme. Portrait below the laptop only — landscape and
+            the desktop both use the corner fragment, which never reaches the
+            name, so it needs no clearing. */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -inset-x-10 -inset-y-14 -z-10 sm:hidden"
+          className="pointer-events-none absolute -inset-x-10 -inset-y-14 -z-10 lg:hidden landscape:hidden"
           style={{
             background:
               'radial-gradient(ellipse at center, var(--color-paper) 55%, transparent 82%)',
