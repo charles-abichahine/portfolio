@@ -40,8 +40,11 @@ const MONO = 'font-mono text-[0.6875rem] uppercase tracking-[0.16em]'
 const WHEEL_THRESHOLD = 320
 const WHEEL_WINDOW_MS = 500
 
-// An upward swipe past this many pixels reads as a deliberate "go", not a graze.
-const SWIPE_MIN = 60
+// The upward drag that a full commit takes. The finger meters the same
+// progress the wheel does over this distance, so the give and the survey build
+// under the thumb and then depart, rather than the swipe jumping straight to
+// the leave with none of the transition the laptop shows.
+const SWIPE_THRESHOLD = 140
 
 // The leave: the name lifts and fades, same ease and travel as before but given
 // a touch more room — 0.5s, so the departure is a shade more deliberate than the
@@ -143,9 +146,11 @@ export default function Home() {
   }, [navigate])
 
   // Wheel, touch and keyboard on the window. Only downward wheel and upward
-  // swipes count: up is not a direction this page can go. The wheel path meters
-  // the progress the give and the survey read; the keyboard and cue paths go
-  // straight to the leave, with no sweep, because there is no gesture to meter.
+  // swipes count: up is not a direction this page can go. The wheel and the
+  // touch drag both meter the progress the give and the survey read, so the
+  // phone gets the same building transition the laptop does; the keyboard and
+  // cue paths go straight to the leave, with no sweep, because there is no
+  // gesture to meter.
   useEffect(() => {
     let acc = 0
     let lapse = 0
@@ -187,7 +192,31 @@ export default function Home() {
     }
     const onTouchMove = (e) => {
       if (startY == null) return
-      if (startY - (e.touches[0]?.clientY ?? startY) > SWIPE_MIN) fire()
+      const up = startY - (e.touches[0]?.clientY ?? startY)
+      // Only an upward drag builds; a downward one holds the block at rest.
+      if (up <= 0) {
+        setPMs(P_LIVE_MS)
+        setP(0)
+        return
+      }
+      if (up >= SWIPE_THRESHOLD) {
+        setPMs(P_COMPLETE_MS)
+        setP(1)
+        fire()
+        startY = null
+        return
+      }
+      setPMs(P_LIVE_MS)
+      setP(up / SWIPE_THRESHOLD)
+    }
+    const onTouchEnd = () => {
+      // A lifted finger short of the threshold is an abandoned gesture: ease the
+      // give and the survey back the way an abandoned wheel does. startY is
+      // already null once a drag has fired, so a committed one is left alone.
+      if (startY == null) return
+      startY = null
+      setPMs(P_LAPSE_MS)
+      setP(0)
     }
 
     const onKeyDown = (e) => {
@@ -213,12 +242,14 @@ export default function Home() {
     window.addEventListener('wheel', onWheel, { passive: true })
     window.addEventListener('touchstart', onTouchStart, { passive: true })
     window.addEventListener('touchmove', onTouchMove, { passive: true })
+    window.addEventListener('touchend', onTouchEnd, { passive: true })
     window.addEventListener('keydown', onKeyDown)
     return () => {
       clearLapse()
       window.removeEventListener('wheel', onWheel)
       window.removeEventListener('touchstart', onTouchStart)
       window.removeEventListener('touchmove', onTouchMove)
+      window.removeEventListener('touchend', onTouchEnd)
       window.removeEventListener('keydown', onKeyDown)
     }
   }, [fire])
@@ -414,7 +445,7 @@ export default function Home() {
 
   return (
     <div
-      className="relative flex flex-1 flex-col items-center justify-center overflow-hidden px-4 text-center"
+      className="relative flex flex-1 flex-col items-center justify-center overflow-hidden px-4 text-center [touch-action:pinch-zoom]"
       style={{
         transition: leaving
           ? `opacity ${LEAVE_MS}ms ease, transform ${LEAVE_MS}ms ease`
