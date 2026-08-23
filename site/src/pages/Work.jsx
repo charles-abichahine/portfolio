@@ -77,14 +77,17 @@ function ProjectTile({ p, hot, motionOk, onFocus, onBlur }) {
 
   // The colour reveal, for a screen with no cursor. On the desktop strip a
   // hovered cover comes out of greyscale; below lg there is no hover, so the
-  // card takes its colour by crossing a line as it scrolls. The root is
-  // cropped to the top 42% of the viewport, so a card enters from the bottom
-  // in greyscale, stays that way through most of its rise, and blooms only once
-  // it reaches the upper-middle of the screen. Cropping to a band rather than
-  // reading "mostly on screen" is the point: a big card is already well up the
-  // page by the time it is 55% shown, so that version never let the greyscale
-  // state be seen at all. The line sits high on purpose — a lower one lit the
-  // cover while it was still near the bottom, which read as colouring too early.
+  // card takes its colour while it passes a reading band as it scrolls. The
+  // root is cropped to a thin band across the upper-middle of the viewport
+  // (28%–45%): a cover enters from the bottom in greyscale, blooms as its top
+  // reaches the band, holds colour while it crosses, and falls back to greyscale
+  // once it rises out the top. The band is the point twice over. It sits high,
+  // so the cover is not lit while still near the bottom (which read as colouring
+  // too early); and it is thinner than the gap between two covers (measured: a
+  // 255px cover, 157px apart), so only one cover ever overlaps it — when the
+  // next one lights, the one above has already left the band and greys out, so
+  // no two covers are ever in colour at the same time, the way the cursor lights
+  // exactly one on the strip.
   const coverRef = useRef(null)
   const [inView, setInView] = useState(false)
   useEffect(() => {
@@ -92,7 +95,7 @@ function ProjectTile({ p, hot, motionOk, onFocus, onBlur }) {
     const el = coverRef.current
     if (!el) return
     const io = new IntersectionObserver(([e]) => setInView(e.isIntersecting), {
-      rootMargin: '0px 0px -58% 0px',
+      rootMargin: '-28% 0px -55% 0px',
     })
     io.observe(el)
     return () => io.disconnect()
@@ -190,7 +193,7 @@ function ProjectTile({ p, hot, motionOk, onFocus, onBlur }) {
             <ProjectGlyph slug={p.slug} className="h-5 w-5" />
           </span>
           <h2
-            className="min-h-[2.6em] min-w-0 flex-1 text-[1.1rem] font-semibold leading-[1.3] transition-colors duration-300 sm:max-lg:min-h-[3.9em]"
+            className="min-h-[2.6em] min-w-0 flex-1 text-[1.1rem] font-semibold leading-[1.3] transition-colors duration-300"
             style={{ color: lit ? color : 'var(--color-ink)' }}
           >
             {p.title}
@@ -199,7 +202,7 @@ function ProjectTile({ p, hot, motionOk, onFocus, onBlur }) {
         </div>
         {/* No clamp and no truncation: the tagline's length is governed in
             projects.js, where it can be read and shortened. */}
-        <p className="mt-1.5 min-h-[1.4em] font-serif text-[0.88rem] leading-snug text-soft sm:max-lg:min-h-[2.75em]">{p.tagline}</p>
+        <p className="mt-1.5 min-h-[1.4em] font-serif text-[0.88rem] leading-snug text-soft">{p.tagline}</p>
         {/* The award, named. Always the accent, never the category colour — a
             distinction should read as itself, not as its group. The line is
             reserved either way; see the block comment above. */}
@@ -682,11 +685,11 @@ export default function Work() {
           of the viewport. The top padding clears the Dynamic Island, which is
           fixed at top centre — a right-aligned pill row would otherwise run
           straight into it around 1024px. */}
-      <div className="flex min-h-0 flex-1 flex-col pt-[68px] lg:justify-center lg:pt-[76px]">
+      <div className="flex min-h-0 flex-1 flex-col pt-[68px] max-lg:portrait:pt-[92px] lg:justify-center lg:pt-[76px]">
         {/* On a handoff arrival the header and the index strip fade in without
             the rise, a beat ahead of the cards; on any other load they are just
             present, as before. */}
-        <div className={`flex shrink-0 flex-col gap-3 px-6 pb-4 lg:flex-row lg:items-center lg:justify-between lg:gap-6 lg:px-10 lg:pb-10${riseNow ? ' fade-in' : ''}`}>
+        <div className={`flex shrink-0 flex-col gap-3 px-6 pb-4 max-lg:portrait:gap-5 max-lg:portrait:pb-7 lg:flex-row lg:items-center lg:justify-between lg:gap-6 lg:px-10 lg:pb-10${riseNow ? ' fade-in' : ''}`}>
           <div className="flex items-center gap-3.5">
             <span className={`${MONO} text-ink`}>Work</span>
             {/* Pressing a pill replaces the strip and changes nothing else that
@@ -768,7 +771,7 @@ export default function Work() {
                 then. */}
             <ul
               key={filter}
-              className={`grid grid-cols-1 gap-x-8 gap-y-9 sm:grid-cols-2 lg:flex lg:h-full lg:w-max lg:items-start lg:gap-6 lg:px-10${stripFadeIn ? ' fade-in' : ''}`}
+              className={`grid grid-cols-1 gap-x-8 gap-y-9 sm:grid-cols-2 sm:items-start lg:flex lg:h-full lg:w-max lg:items-start lg:gap-6 lg:px-10${stripFadeIn ? ' fade-in' : ''}`}
             >
               {filtered.map((p, i) => (
                 <li
