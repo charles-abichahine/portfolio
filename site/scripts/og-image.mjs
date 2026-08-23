@@ -28,6 +28,7 @@ import { existsSync, readFileSync, writeFileSync, unlinkSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { tmpdir } from 'node:os'
+import { CC, crossCap, makeProjector } from '../src/lib/crosscap.js'
 
 const SITE = join(dirname(fileURLToPath(import.meta.url)), '..')
 const PUBLIC = join(SITE, 'public')
@@ -55,8 +56,70 @@ const font = (file) => readFileSync(join(PUBLIC, 'fonts', file)).toString('base6
 const PAPER = '#f4f5f6'
 const INK = '#16181d'
 const SOFT = '#4e535c'
+const MUTED = '#6a707b'
 const LINE = '#e0e3e7'
 const ACCENT = '#c9261b'
+
+/*
+ * The cross-cap survey, the same drawing the homepage carries, rendered into the
+ * card so the preview looks like the site it opens. The mathematics is shared
+ * (src/lib/crosscap.js); the framing here is the card's own — turned and zoomed
+ * like the desktop hero so a fragment sits high on the right and runs off the top
+ * and right edges, clear of the name block on the left. Points are muted, a
+ * sparse subset carry their station number, and the whole thing is one SVG laid
+ * over the card. w/h are the card's pixels; ax/ay place the cloud's centre.
+ */
+// ax past 1: the cross-cap's pinch spine — the clean vertical line where every
+// arc ends — sits right of the frame, off the card, the way the desktop hero
+// hangs it off the screen edge. What the card shows is the arcs sweeping in.
+const CARD_VIEW = { yaw: 90, pitch: 30, zoom: 2.1, ax: 1.02, ay: 0.3 }
+const CARD_LABEL_EVERY = 67
+// A partial survey, like the homepage at rest: only this fraction of the u-rows
+// is drawn, so the card carries a drawing still computing rather than the whole
+// solid — the whole shape at full ink overpowered the name it shares the card with.
+// The cutoff is feathered over the trailing rows rather than ending on a hard
+// line: points thin out toward the frontier, the way the homepage's edge does.
+const CARD_ROWS = 0.7
+const CARD_FEATHER_ROWS = 40
+// The homepage's stable sine hash, so the feather is deterministic per point.
+const hash01 = (n) => {
+  const s = Math.sin(n * 12.9898) * 43758.5453
+  return s - Math.floor(s)
+}
+
+function crossCapField(w, h) {
+  const project = makeProjector(CARD_VIEW.yaw, CARD_VIEW.pitch)
+  const flat = crossCap().map(project)
+  const xs = flat.map((q) => q.px)
+  const ys = flat.map((q) => q.py)
+  const minX = Math.min(...xs)
+  const maxX = Math.max(...xs)
+  const minY = Math.min(...ys)
+  const maxY = Math.max(...ys)
+  const k = (CARD_VIEW.zoom * w) / Math.max(maxX - minX, maxY - minY)
+  const ox = CARD_VIEW.ax * w - ((minX + maxX) / 2) * k
+  const oy = CARD_VIEW.ay * h + ((minY + maxY) / 2) * k
+  const bleed = 16
+  let dots = ''
+  let nums = ''
+  const maxRow = Math.round(CARD_ROWS * CC.U)
+  for (const q of flat) {
+    // Feather: fully kept below the band, fully dropped past it, thinning in
+    // between — each point's own hash decides, so the frontier dissolves.
+    const over = q.row - (maxRow - CARD_FEATHER_ROWS)
+    if (over > 0 && hash01(q.id) < over / CARD_FEATHER_ROWS) continue
+    const X = ox + q.px * k
+    const Y = oy - q.py * k
+    if (X < -bleed || X > w + bleed || Y < -bleed || Y > h + bleed) continue
+    dots += `<circle cx="${X.toFixed(1)}" cy="${Y.toFixed(1)}" r="1.6"/>`
+    if (q.id % CARD_LABEL_EVERY === 0)
+      nums += `<text x="${(X + 5).toFixed(1)}" y="${(Y + 4).toFixed(1)}">${String(q.id).padStart(4, '0')}</text>`
+  }
+  return `<svg class="field" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
+    <g fill="${MUTED}" opacity="0.45">${dots}</g>
+    <g fill="${MUTED}" opacity="0.38" font-family="IBM Plex Mono" font-size="15">${nums}</g>
+  </svg>`
+}
 
 /*
  * 1200x630 is the size every unfurler crops to. The card is built at 2x and
@@ -85,19 +148,17 @@ const html = `<!doctype html>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { width: 1200px; height: 630px; }
   body {
-    /* Bare paper. The card carried a 60px grid, inherited from the dark version
-       and meant to stand in for the landing's line drawing. On a near-black
-       ground it was texture; on paper the same lines are a spreadsheet behind
-       the name, and the block is quiet enough that it does not need a backdrop
-       to sit on. */
+    /* Paper, with the cross-cap survey laid over it — the same drawing the
+       homepage carries, so the preview reads as the site rather than a card
+       about it. The field sits high on the right (see CARD_VIEW) and the name
+       block sits over it on the left, clear of the points. */
+    position: relative;
     background: ${PAPER};
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 88px;
     font-kerning: normal;
     -webkit-font-smoothing: antialiased;
   }
+  .field { position: absolute; inset: 0; width: 1200px; height: 630px; }
+  .block { position: absolute; left: 88px; top: 50%; transform: translateY(-50%); }
   h1 {
     font-family: "Space Grotesk", sans-serif;
     /* 300, and 300 exactly. The variable file starts there, and the old card's
@@ -139,25 +200,24 @@ const html = `<!doctype html>
     line-height: 1.6;
     color: ${SOFT};
   }
-  svg { width: 224px; height: 204px; display: block; }
+  /* A paper wash behind the name, so the field's points and numbers recede
+     around the block rather than crowding the type — the card's echo of the
+     homepage's faded-paper halo. */
+  .block::before {
+    content: "";
+    position: absolute;
+    inset: -40px -120px -40px -60px;
+    background: radial-gradient(ellipse at center, ${PAPER} 55%, transparent 88%);
+    z-index: -1;
+  }
 </style>
-<div>
+${crossCapField(1200, 630)}
+<div class="block">
   <h1>Charles Abi<br>Chahine<span class="dot">.</span></h1>
   <p class="role">architect · computational designer</p>
   <hr>
   <p class="summary">design, computation, and the work of getting it built.</p>
 </div>
-<!-- public/logo.svg, inlined with the light theme's ink and accent in place of
-     the file's own hard-coded pair. -->
-<svg viewBox="0 0 110 100" xmlns="http://www.w3.org/2000/svg">
-  <g fill="none" stroke="${INK}" stroke-linecap="round">
-    <circle cx="48" cy="50" r="40" stroke-width="6" pathLength="100"
-      stroke-dasharray="86 14" transform="rotate(18 48 50)" />
-    <circle cx="48" cy="50" r="31" stroke-width="5.5" pathLength="100"
-      stroke-dasharray="38 10 40 12" transform="rotate(-30 48 50)" />
-  </g>
-  <rect x="93" y="57" width="5" height="25" rx="1" fill="${ACCENT}" />
-</svg>
 `
 
 const tmp = join(tmpdir(), 'og-image.html')
