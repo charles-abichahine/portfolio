@@ -689,10 +689,10 @@ const _projects = [
   {
     slug: 'narkomfin',
     date: '2026-06-25',
-    title: 'Analyzing Narkomfin Through Its Graph',
+    title: 'Narkomfin as a Graph',
     subtitle:
       'The Narkomfin Building rebuilt as a spatial graph: centrality and community detection recover Ginzburg’s vertical living cells from topology alone, and a GraphSAGE classifier reads room types the plan cannot show.',
-    tagline: 'The Narkomfin building as a spatial graph.',
+    tagline: 'Centrality reveals the corridor as its spine.',
     year: '2026',
     module: 'Graph Machine Learning · MaCAD, IAAC',
     team: ['Charles Abi Chahine', 'Emilie El Chidiac', 'Lakzhmy Mari Zaro', 'María Sánchez Domínguez'],
