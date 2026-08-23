@@ -18,6 +18,36 @@ function App() {
     window.scrollTo(0, 0)
   }, [pathname])
 
+  // iOS Safari does not refresh the svh unit when the phone is rotated, so the
+  // full-bleed one-screen pages kept their portrait height in landscape and sat
+  // shifted under the island until a reload — or until a scroll, which is what
+  // finally settled iOS's viewport. So the height is measured off visualViewport,
+  // whose resize event is what actually fires when iOS changes the viewport, both
+  // on rotation and when the toolbar shows or hides; a timer guessing when that
+  // happened read a value iOS had not updated yet. The measured height is
+  // published as --app-h, which the wrapper resolves its height against, so the
+  // layout tracks the visible viewport with no reload and no scroll to nudge it.
+  useEffect(() => {
+    const vv = window.visualViewport
+    const apply = () => {
+      const h = Math.round(vv?.height ?? window.innerHeight)
+      document.documentElement.style.setProperty('--app-h', `${h}px`)
+    }
+    apply()
+    vv?.addEventListener('resize', apply)
+    // Fallback for the rare engine with no visualViewport, and desktop resizes.
+    window.addEventListener('resize', apply)
+    // A rotation into a shorter frame can leave the page nudged down; on the
+    // orientation change specifically — never on a toolbar scroll — snap it back.
+    const onOrient = () => window.scrollTo(0, 0)
+    window.addEventListener('orientationchange', onOrient)
+    return () => {
+      vv?.removeEventListener('resize', apply)
+      window.removeEventListener('resize', apply)
+      window.removeEventListener('orientationchange', onOrient)
+    }
+  }, [])
+
   /*
    * Routes that fill the viewport rather than flowing down it. They used to be
    * the routes with no shared footer, each carrying its own; now every route
@@ -39,12 +69,14 @@ function App() {
 
   return (
     /*
-     * min-h-[100svh], not min-h-screen. A 100vh wrapper around a 100svh child is
-     * taller than the visual viewport on mobile, which hands the page a phantom
-     * scrollbar; that is why the full-bleed routes used to sit outside the
-     * wrapper entirely. Matching the units lets them come inside it.
+     * --app-h, which is 100svh by default (see index.css), not min-h-screen. A
+     * 100vh wrapper around a 100svh child is taller than the visual viewport on
+     * mobile, which hands the page a phantom scrollbar; that is why the full-bleed
+     * routes used to sit outside the wrapper entirely. Matching the units lets
+     * them come inside it. The token, rather than the bare svh, is so a rotation
+     * can override it with a measured height iOS otherwise leaves stale (above).
      */
-    <div className="flex min-h-[100svh] flex-col">
+    <div className="flex min-h-[var(--app-h)] flex-col">
       {/*
        * First thing in the tree, so it is the first thing Tab reaches. The
        * island's logo, three links and theme toggle are five tab stops before
