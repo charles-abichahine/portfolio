@@ -139,6 +139,14 @@
  * darker one. Green 4.65:1 and amber 4.91:1 already cleared AA and are untouched.
  */
 :root {
+  /* The app wrapper's height. 100svh is the right value everywhere except one
+     place: iOS Safari does not refresh svh when the phone is rotated, so a
+     portrait-height layout persists into landscape until a reload. App.jsx
+     overrides this with a freshly measured pixel height on rotation, so the
+     layout re-sizes without one; until then, and on every other platform, the
+     svh default stands. */
+  --app-h: 100svh;
+
   /* Set from the footer's measured height by Footer.jsx. The landing subtracts
      it so its second screen still ends where the document does. */
   --footer-h: 0px;
