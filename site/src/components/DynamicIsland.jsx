@@ -127,7 +127,7 @@ export default function DynamicIsland() {
   }, [open, activeTo])
 
   return (
-    <div className="fixed left-1/2 top-4 z-50 -translate-x-1/2">
+    <div className="fixed left-1/2 top-4 z-50 flex -translate-x-1/2 items-stretch gap-2">
       {/* Gaps and link padding tighten below sm: the toggle costs ~31px, more
           slack than the pill had at 360px-wide phones. Unchanged at sm and up. */}
       <nav
@@ -193,53 +193,55 @@ export default function DynamicIsland() {
           ))}
         </div>
 
-        {/*
-          Sits outside the links container on purpose: the sliding indicator is
-          positioned from offsetLeft within that container, so keeping the
-          toggle out of it leaves the existing measurement untouched. It also
-          stays visible when the island goes compact — the links collapse, the
-          brand mark and the toggle remain reachable.
-        */}
-        <button
-          type="button"
-          onClick={toggleTheme}
-          aria-label={dark ? 'Switch to light theme' : 'Switch to dark theme'}
-          className="flex h-[27px] w-[27px] shrink-0 items-center justify-center rounded-[7px] text-soft transition-colors hover:bg-[var(--chrome-wash)] hover:text-ink focus-visible:bg-[var(--chrome-wash)] focus-visible:text-ink focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent"
-        >
-          <span className="relative block h-[15px] w-[15px]">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.9"
-              strokeLinecap="round"
-              aria-hidden="true"
-              data-theme-icon=""
-              className={`absolute inset-0 h-full w-full transition-all duration-300 ease-out motion-reduce:transition-none ${
-                dark ? 'rotate-90 scale-50 opacity-0' : 'rotate-0 scale-100 opacity-100'
-              }`}
-            >
-              <circle cx="12" cy="12" r="4.2" />
-              <path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6L17 7M7 17l-1.4 1.4" />
-            </svg>
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.9"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-              data-theme-icon=""
-              className={`absolute inset-0 h-full w-full transition-all duration-300 ease-out motion-reduce:transition-none ${
-                dark ? 'rotate-0 scale-100 opacity-100' : '-rotate-90 scale-50 opacity-0'
-              }`}
-            >
-              <path d="M20.5 14.6A8.6 8.6 0 1 1 9.4 3.5a6.9 6.9 0 0 0 11.1 11.1Z" />
-            </svg>
-          </span>
-        </button>
       </nav>
+      {/*
+      Its own shell, beside the nav rather than inside it. The switch is not
+      navigation, so it does not belong inside the nav landmark, and as a
+      separate square it stays put while the nav collapses and expands
+      instead of riding the pill's width. aspect-square against the
+      stretched row keeps the heights equal; the width is stated because a
+        stretched height is not a specified size, so aspect-ratio cannot
+        derive from it and the square collapsed to its icon.
+      */}
+      <button
+        type="button"
+        onClick={toggleTheme}
+        aria-label={dark ? 'Switch to light theme' : 'Switch to dark theme'}
+        className="flex w-[43px] shrink-0 items-center justify-center self-stretch rounded-[10px] border border-[var(--chrome-edge)] bg-[var(--chrome-glass)] text-soft shadow-[var(--chrome-lift)] backdrop-blur-md transition-colors hover:bg-[var(--chrome-wash)] hover:text-ink focus-visible:bg-[var(--chrome-wash)] focus-visible:text-ink focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent"
+      >
+        <span className="relative block h-[15px] w-[15px]">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.9"
+            strokeLinecap="round"
+            aria-hidden="true"
+            data-theme-icon=""
+            className={`absolute inset-0 h-full w-full transition-all duration-300 ease-out motion-reduce:transition-none ${
+              dark ? 'rotate-90 scale-50 opacity-0' : 'rotate-0 scale-100 opacity-100'
+            }`}
+          >
+            <circle cx="12" cy="12" r="4.2" />
+            <path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6L17 7M7 17l-1.4 1.4" />
+          </svg>
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.9"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+            data-theme-icon=""
+            className={`absolute inset-0 h-full w-full transition-all duration-300 ease-out motion-reduce:transition-none ${
+              dark ? 'rotate-0 scale-100 opacity-100' : '-rotate-90 scale-50 opacity-0'
+            }`}
+          >
+            <path d="M20.5 14.6A8.6 8.6 0 1 1 9.4 3.5a6.9 6.9 0 0 0 11.1 11.1Z" />
+          </svg>
+        </span>
+      </button>
     </div>
   )
 }
