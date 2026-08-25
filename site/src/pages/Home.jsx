@@ -23,6 +23,11 @@ import { CC, crossCap, makeProjector } from '../lib/crosscap.js'
  * carries, off the same equations (src/lib/crosscap.js). Both are wheel only; the
  * keyboard and the cue have no gesture to meter, so they go straight to the leave.
  *
+ * p is held rather than timed: it sits where the last scroll left it, and only
+ * another scroll moves it, up or down. So the half-open state is somewhere you
+ * can stop and stay — which is what the survey's caption needs, since reading a
+ * line of equations takes longer than any timeout worth setting.
+ *
  * This replaced a two-screen landing whose second screen was a canvas strand
  * field fanning down into four columns of project cards. Those cards live in
  * full on /work; the drawing (DataField) is gone, recoverable from git.
@@ -31,14 +36,19 @@ import { CC, crossCap, makeProjector } from '../lib/crosscap.js'
 // The site's floor for anything set in this voice: the role line and the cue.
 const MONO = 'font-mono text-[0.6875rem] uppercase tracking-[0.16em]'
 
-// The wheel intent the handoff needs, and the window it must arrive in. Tuned
-// for a deliberate scroll rather than a graze: roughly three notches of a wheel,
-// or a sustained trackpad push, has to land inside one window — a single flick
-// no longer departs. The window is a shade wider so a slower, considered scroll
-// still accumulates before it resets; stray single ticks decay between windows
-// rather than adding up into an accidental departure.
+// The wheel distance a full commit takes: roughly three notches, or a sustained
+// trackpad push, so a single flick still does not depart.
+//
+// There is deliberately no window on it any more. Position is held, not timed:
+// the gesture accumulates where you leave it and stays there until you scroll
+// again, in either direction. A timed window meant a scroll stopped halfway
+// unwound itself a beat later, which made the half-open state impossible to sit
+// in and read — you were racing a clock you could not see. Holding the position
+// makes the landing behave like a scroll: partway is a place, not a lapse. What
+// used to guard against stray ticks adding up is now the reverse direction —
+// scrolling up walks the same value back down, so an accidental nudge is undone
+// by the gesture that caused it rather than by waiting.
 const WHEEL_THRESHOLD = 320
-const WHEEL_WINDOW_MS = 500
 
 // The upward drag that a full commit takes. The finger meters the same
 // progress the wheel does over this distance, so the give and the survey build
@@ -58,11 +68,11 @@ const LEAVE_MS = 500
 // survey sweep, and at the threshold it hands off to the full lift-and-fade.
 const GIVE_TRAVEL = 12
 
-// The timing p moves on: quick while the gesture is live, the give's own ease
-// back when it lapses, a short snap to shut the survey as the leave begins. The
-// give reads these through a CSS transition, the survey through a matched tween.
+// The timing p moves on: quick while the gesture is live, a short snap to shut
+// the survey as the leave begins. The give reads these through a CSS transition,
+// the survey through a matched tween. Reversing is live too — walking the
+// gesture back is still a gesture, so it moves at the same rate as building it.
 const P_LIVE_MS = 90
-const P_LAPSE_MS = 250
 const P_COMPLETE_MS = 120
 
 /*
@@ -133,6 +143,13 @@ export default function Home() {
   const nameRef = useRef(null)
   // Set by the survey effect; the progress effect calls it to retarget the sweep.
   const sweepToRef = useRef(null)
+  // The authority on where the gesture currently sits, 0..1. p is the rendered
+  // copy of it; this is the one the handlers add to and subtract from, because a
+  // wheel event needs the value as of the last event, not as of the last render.
+  // It has to live out here rather than inside the gesture effect: the mount and
+  // bfcache resets below zero p, and a held position that did not zero with it
+  // would leave the page looking untouched while one more notch departed.
+  const progRef = useRef(0)
   const motionOkRef = useRef(motionOk)
   motionOkRef.current = motionOk
 
@@ -149,12 +166,14 @@ export default function Home() {
   useEffect(() => {
     firedRef.current = false
     setLeaving(false)
+    progRef.current = 0
     setP(0)
     setPMs(P_LIVE_MS)
     const onShow = (e) => {
       if (!e.persisted) return
       firedRef.current = false
       setLeaving(false)
+      progRef.current = 0
       setP(0)
       setPMs(P_LIVE_MS)
     }
@@ -178,78 +197,60 @@ export default function Home() {
     window.setTimeout(() => navigate('/work'), LEAVE_MS)
   }, [navigate])
 
-  // Wheel, touch and keyboard on the window. Only downward wheel and upward
-  // swipes count: up is not a direction this page can go. The wheel and the
-  // touch drag both meter the progress the give and the survey read, so the
-  // phone gets the same building transition the laptop does; the keyboard and
-  // cue paths go straight to the leave, with no sweep, because there is no
-  // gesture to meter.
+  // Wheel, touch and keyboard on the window. The wheel and the touch drag both
+  // meter the progress the give and the survey read, so the phone gets the same
+  // building transition the laptop does, and both run in both directions: /work
+  // is still the only place this page goes, but how far along the way you are is
+  // yours to set, and to undo. The keyboard and cue paths go straight to the
+  // leave, with no sweep, because there is no gesture to meter.
   useEffect(() => {
-    let acc = 0
-    let lapse = 0
-    const clearLapse = () => {
-      if (lapse) {
-        window.clearTimeout(lapse)
-        lapse = 0
-      }
-    }
-    // A whole window with no wheel means the gesture was abandoned: ease the
-    // survey back to its rest fraction and start the accumulation fresh.
-    const armLapse = () => {
-      clearLapse()
-      lapse = window.setTimeout(() => {
-        acc = 0
-        setPMs(P_LAPSE_MS)
-        setP(0)
-      }, WHEEL_WINDOW_MS)
-    }
-
-    const onWheel = (e) => {
-      if (e.deltaY <= 0) return
-      acc += e.deltaY
-      if (acc >= WHEEL_THRESHOLD) {
-        clearLapse()
+    // Move the held position by some fraction of the whole gesture and render
+    // it. Commit is the top of the range rather than a separate test, so every
+    // path into a departure — wheel, drag — goes through the same door.
+    const settle = (next) => {
+      const to = next < 0 ? 0 : next > 1 ? 1 : next
+      if (to === progRef.current) return
+      progRef.current = to
+      if (to >= 1) {
         setPMs(P_COMPLETE_MS)
         setP(1)
         fire()
         return
       }
       setPMs(P_LIVE_MS)
-      setP(acc / WHEEL_THRESHOLD)
-      armLapse()
+      setP(to)
     }
 
+    // Both directions count. Down builds toward the handoff, up walks it back,
+    // and nothing moves on its own in between: that is the whole of the control
+    // the gesture offers. Stopping halfway holds the survey half-open and the
+    // caption up for as long as it takes to read.
+    const onWheel = (e) => {
+      if (e.deltaY === 0) return
+      settle(progRef.current + e.deltaY / WHEEL_THRESHOLD)
+    }
+
+    // The finger meters the same held position the wheel does, so a drag starts
+    // from wherever the last one stopped rather than from rest. Without that
+    // base a touch would snap the page back to zero the moment it landed, which
+    // is the same lost-your-place problem the wheel had.
     let startY = null
+    let startProg = 0
     const onTouchStart = (e) => {
       startY = e.touches[0]?.clientY ?? null
+      startProg = progRef.current
     }
     const onTouchMove = (e) => {
       if (startY == null) return
       const up = startY - (e.touches[0]?.clientY ?? startY)
-      // Only an upward drag builds; a downward one holds the block at rest.
-      if (up <= 0) {
-        setPMs(P_LIVE_MS)
-        setP(0)
-        return
-      }
-      if (up >= SWIPE_THRESHOLD) {
-        setPMs(P_COMPLETE_MS)
-        setP(1)
-        fire()
-        startY = null
-        return
-      }
-      setPMs(P_LIVE_MS)
-      setP(up / SWIPE_THRESHOLD)
+      settle(startProg + up / SWIPE_THRESHOLD)
+      // A committed drag is done; anything further belongs to the leave.
+      if (progRef.current >= 1) startY = null
     }
     const onTouchEnd = () => {
-      // A lifted finger short of the threshold is an abandoned gesture: ease the
-      // give and the survey back the way an abandoned wheel does. startY is
-      // already null once a drag has fired, so a committed one is left alone.
-      if (startY == null) return
+      // A lifted finger leaves the position exactly where the drag put it, the
+      // same way a stopped wheel does. There is nothing to ease back to.
       startY = null
-      setPMs(P_LAPSE_MS)
-      setP(0)
     }
 
     const onKeyDown = (e) => {
@@ -278,7 +279,6 @@ export default function Home() {
     window.addEventListener('touchend', onTouchEnd, { passive: true })
     window.addEventListener('keydown', onKeyDown)
     return () => {
-      clearLapse()
       window.removeEventListener('wheel', onWheel)
       window.removeEventListener('touchstart', onTouchStart)
       window.removeEventListener('touchmove', onTouchMove)
@@ -294,8 +294,8 @@ export default function Home() {
    * canvas-space points — this is a static drawing redrawn on demand, not a
    * per-frame loop. The gesture sweeps it: `sweep` runs 0..1, drawing u-rows from
    * the rest fraction to whole, and a short tween carries it between targets so a
-   * lapse eases back and completion snaps shut. The palette and the mono face are
-   * read from the tokens, so the drawing flips with the theme.
+   * reversed scroll draws back down and completion snaps shut. The palette and
+   * the mono face are read from the tokens, so the drawing flips with the theme.
    */
   useEffect(() => {
     const cv = canvasRef.current
@@ -586,6 +586,58 @@ export default function Home() {
           Scroll · {projects.length} projects ↓
         </Link>
       </div>
+
+      {/* The survey's caption: the surface's own equations, the ones
+          crosscap.js plots and the printed cover carries, with the board's
+          defaults substituted (d = 1/2, e = 2). It rides the same p the give
+          and the sweep read, so starting to scroll surfaces it above the
+          footer and scrolling back up takes it down again, as one response.
+          Since p is held rather than timed, a scroll stopped partway leaves it
+          standing: this is the one thing on the page that wants to be read
+          rather than glanced at, and it now gets as long as that takes.
+          Reduced motion shows the survey whole and still, so the caption is
+          simply there. Hidden from readers: the canvas it annotates is too,
+          and spoken symbol soup serves nobody.
+
+          Set in the mono's italic rather than its upright, and in accent rather
+          than muted: the same voice the site labels things in, leaning, which is
+          the difference between a caption printed on the drawing and a note
+          worked out beside it.
+
+          The domain is written 0 ≤ u, v ≤ π rather than u, v ∈ [0, π], and that
+          is a typesetting constraint rather than a preference. Text faces carry
+          about a dozen math operators and no set theory: there is no ∈ in Plex,
+          in Spectral, in Space Grotesk, or in STIX Two Text. The upright mono
+          was therefore quietly borrowing the system's ∈ and π every time this
+          line drew, one or two glyphs in a face nobody chose, sitting in the
+          middle of a formula. The two forms say the same thing, and this one
+          the site can actually set: ≤ and π both come from the italic's subset,
+          which is built for exactly this line (see index.css).
+
+          Tracking is gone — it belongs on the labels this borrows its face
+          from, not on a formula, where it pushes the operators away from their
+          operands — and the size is back near the mono's floor now that a
+          handwriting face is not setting it.
+
+          Each clause is its own nowrap span, because on a phone this wrapped
+          wherever the width ran out and put the back half of y = a·sin 2u·sin²v
+          on the next line, which is not a formula any more. The only breaks left
+          are at the separators, and a separator stays with the clause it follows
+          rather than leading the next line. */}
+      <p
+        aria-hidden="true"
+        className="pointer-events-none absolute bottom-3 left-0 right-0 px-4 font-mono text-[0.6875rem] italic text-accent"
+        style={{
+          opacity: motionOk ? Math.min(1, p / 0.7) : 1,
+          transition: motionOk ? `opacity ${pMs}ms ease` : 'none',
+        }}
+      >
+        <span className="whitespace-nowrap">0 ≤ u, v ≤ π ·</span>{' '}
+        <span className="whitespace-nowrap">x = ½a·sin u·sin 2v ·</span>{' '}
+        <span className="whitespace-nowrap">y = a·sin 2u·sin²v ·</span>{' '}
+        <span className="whitespace-nowrap">z = a·cos 2u·sin²v ·</span>{' '}
+        <span className="whitespace-nowrap">a = 60</span>
+      </p>
     </div>
   )
 }
