@@ -54,6 +54,38 @@
   font-display: swap;
   src: url("/fonts/ibm-plex-mono-500.woff2") format("woff2");
 }
+/*
+ * The mono's italic, which the landing's survey caption is set in and which is
+ * the only italic the site loads at all. Declared on the same family as the two
+ * uprights above, so `font-mono italic` reaches a drawn italic rather than the
+ * slanted-upright the browser would otherwise synthesise. It is a true italic,
+ * -9 degrees with its own cursive a and f, not an oblique.
+ *
+ * This one is not a stock Google subset. Their latin subset stops at 230 glyphs
+ * and carries no Greek, so a caption with a pi in it had nowhere to get one and
+ * silently borrowed the system's — which is what the upright mono was doing
+ * here for as long as this caption has existed. Built instead from the full
+ * IBMPlexMono-Italic with the same latin range plus U+03C0 and U+2264/U+2265,
+ * the three the formula needs. Rebuild, if the caption ever wants another
+ * symbol, with:
+ *
+ *   fonttools subset IBMPlexMono-Italic.ttf --flavor=woff2 \
+ *     --unicodes="<google latin range>,U+03C0,U+2264,U+2265" --layout-features='*'
+ *
+ * Worth knowing before reaching for a symbol: text faces carry about a dozen
+ * math operators and no set theory at all. There is no U+2208 in Plex, Spectral,
+ * Space Grotesk or even STIX Two Text, which is why the caption's domain is
+ * written 0 <= u, v <= pi rather than with an element-of. Not preloaded: it
+ * paints below the fold on one route, and the two faces that are preloaded are
+ * already competing for the first bytes.
+ */
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/ibm-plex-mono-italic-400.woff2") format("woff2");
+}
 
 @theme {
   /* A cool grey ground rather than pure white. White is not a colour a printed
@@ -105,7 +137,10 @@
    *       the prose from the interface around it.
    * mono  IBM Plex Mono. Labels, counts, years, metadata. Not a code font
    *       borrowed for the look — a text mono with real italics and a proper
-   *       text colour, which is what a drafting annotation actually wants.
+   *       text colour, which is what a drafting annotation actually wants — and
+   *       whose italic, now loaded, gives the landing's survey caption a voice
+   *       of its own without a fourth family: the upright is what the site
+   *       prints on the drawing, the italic what it works out in the margin.
    */
   --font-sans: "Space Grotesk", ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-serif: "Spectral", Georgia, "Times New Roman", serif;
