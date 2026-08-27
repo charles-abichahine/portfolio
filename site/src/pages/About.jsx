@@ -50,7 +50,9 @@ const CLOSE_DELAY = 160
  * it, it resumes its own slow turn when left alone, and the far side is dim
  * until you bring it round. The rail is the clock, and it is the clock for the
  * surface too — the survey only exists up to the year you have wound to, so
- * winding back is watching the thing be un-built.
+ * winding back is watching the thing be un-built. And the first two beats can
+ * be asked for again: a small control on the stage's shoulder runs the
+ * arrival over from the map, and hands the room back at the present.
  *
  * And for anyone who has asked not to be moved, none of the first two: no map,
  * no fold, the cap already drawn, already at the present, and not turning on its
@@ -259,9 +261,6 @@ const pinSize = (p) => (p.kind === 'now' ? 9 : p.kind === 'lived' ? 7 : 5)
 const HOLD = 500
 const FOLD = 1700
 const ARRIVAL = HOLD + FOLD
-// The grain's own pitch, in CSS pixels. It is the page's paper and nothing more
-// now: the map is the figure drawn on it, not a replacement for it.
-const GRAIN = 15
 
 /*
  * The map's plane, in the surface's own units: x runs east, z runs north, y is
@@ -488,15 +487,22 @@ export default function About() {
     return () => mq.removeEventListener('change', apply)
   }, [])
   const [settled, setSettled] = useState(reduceMotion)
+  // Counted rather than merely un-set, because a replay pressed in the middle
+  // of a replay has to restart this timer too: settled is already false then,
+  // and a dependency that did not change would leave the first press's stale
+  // timeout to fire under the second press's map.
+  const [foldRun, setFoldRun] = useState(0)
   useEffect(() => {
     if (settled) return
     const t = setTimeout(() => setSettled(true), ARRIVAL)
     return () => clearTimeout(t)
-  }, [settled])
+  }, [settled, foldRun])
 
   // When the visitor got here, kept out of the drawing effect on purpose. That
   // effect re-runs on every resize — a phone rotating, the island settling — and
   // if the clock lived inside it the map would unfold itself again each time.
+  // It is also the replay's one handle: writing a fresh now into it is what
+  // asks the fold to run again, which is why the loop reads it every frame.
   const arrivedAt = useRef(0)
 
   // The eye, the pointing and the open card, all read by the loop sixty times a
@@ -774,6 +780,10 @@ export default function About() {
     if (!cv) return
     const d = dragRef.current
     const onDown = (e) => {
+      // While the fold is running — the first time or a replay — the stage
+      // belongs to the crossing: a drag would be steering an eye that is
+      // still on rails, so the press is simply not taken.
+      if (!reduceMotion && performance.now() - arrivedAt.current < ARRIVAL) return
       // A hand on the object outranks the tour: whatever it was winding to,
       // the year stays where the press found it.
       stopTour()
@@ -842,7 +852,7 @@ export default function About() {
       cv.removeEventListener('pointerup', onUp)
       cv.removeEventListener('pointercancel', onUp)
     }
-  }, [stopTour])
+  }, [reduceMotion, stopTour])
 
   /* ---- the drawing ---- */
   useEffect(() => {
@@ -898,19 +908,6 @@ export default function About() {
     const sMap = Math.min((0.94 * availW) / MAP_W, (0.94 * availH) / MAP_H)
     const cxMap = w / 2
 
-    /*
-     * The paper. A plain grid at the page's own pitch, laid down once per size
-     * and painted under everything: it is the material the drawing sits on and
-     * it takes no part in the fold. Held as a flat pair list rather than as
-     * objects, because this is the one loop that runs its whole length in every
-     * single frame.
-     */
-    const gpts = []
-    for (let gy = GRAIN * 0.6; gy < h; gy += GRAIN) {
-      for (let gx = GRAIN * 0.6; gx < w; gx += GRAIN) gpts.push(gx, gy)
-    }
-    const grain = Float32Array.from(gpts)
-
     // The fold's own fill styles, rewritten in place on the frames it runs and
     // never rebuilt, and the one scratch point every travelling dot borrows to
     // be projected from. Between them they are why the crossing allocates
@@ -931,7 +928,6 @@ export default function About() {
       const accent = g('--color-accent') || '#c9261b'
       return {
         ink,
-        muted: g('--color-muted') || '#6a707b',
         // The map's own colour, and it is the map's alone: the moment the plane
         // starts to close, the land is on its way to being ink.
         land: g('--color-land') || '#a1a7b0',
@@ -992,7 +988,6 @@ export default function About() {
 
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (!arrivedAt.current) arrivedAt.current = performance.now()
-    const t0 = arrivedAt.current
     let raf = 0
     // What the rail was last told. Writing an unchanged opacity every frame is
     // a style invalidation the page has no use for.
@@ -1009,9 +1004,11 @@ export default function About() {
        * How far the fold has come, on the ease every dot crosses on. The beat
        * before it is the map being read, which is why the clock starts negative
        * and is clamped. Reduced motion never starts it at all: the cap is
-       * simply already here, and there was never a map.
+       * simply already here, and there was never a map. The start is read from
+       * the ref every frame rather than closed over, because the replay winds
+       * this clock back by writing a fresh now into it.
        */
-      const ea = reduce ? 1 : smooth(clamp01((now - t0 - HOLD) / FOLD))
+      const ea = reduce ? 1 : smooth(clamp01((now - arrivedAt.current - HOLD) / FOLD))
       const arriving = ea < 1
       // A plane has no depth to shade and no far side to dim, so both arrive
       // over the first half of the crossing rather than at the end of it.
@@ -1156,13 +1153,6 @@ export default function About() {
       const cxa = lerp(cxMap, cx, ea)
       const fr = rowFor(yearRef.current)
       ctx.clearRect(0, 0, w, h)
-
-      // The paper. One fillStyle, one pass, and it is the reason everything
-      // above it still sits on something.
-      ctx.fillStyle = hexA(pal.muted, 0.22)
-      for (let n = 0; n < grain.length; n += 2) {
-        ctx.fillRect(grain[n] - 0.6, grain[n + 1] - 0.6, 1.2, 1.2)
-      }
 
       /*
        * The stations no land dot claimed. They come in over the last third of
@@ -1353,7 +1343,7 @@ export default function About() {
     }
 
     // One frame now, then the loop.
-    draw(t0)
+    draw(performance.now())
     const loop = (now) => {
       raf = requestAnimationFrame(loop)
       if (!visible) return
@@ -1389,6 +1379,42 @@ export default function About() {
     }, CLOSE_DELAY)
   }, [])
   useEffect(() => clearClose, [])
+
+  /* ---- the replay ---- */
+  /*
+   * The arrival, offered again. The fold is the one thing on the page no
+   * gesture can bring back — the surface turns and the years wind, but the
+   * map is only ever there once — so this is a real control and not an
+   * accident of reloading. Pressing it puts the room back the way the fold
+   * expects to find it: the tour stopped, the card away, the coefficients
+   * home at once (the fold delivers the board's surface, not a held one),
+   * the clock at the present, any leftover throw taken off the object. Then
+   * the fold's own clock is wound back by writing a fresh now into
+   * arrivedAt, and the drawing does the rest. Pressed mid-fold it simply
+   * starts over, which is what a control that never leaves the stage should
+   * mean. It exists only after the first settle — a replay of something not
+   * yet seen is noise over the map — and under reduced motion there is no
+   * arrival to replay and no control at all.
+   */
+  const [replayable, setReplayable] = useState(false)
+  useEffect(() => { if (settled) setReplayable(true) }, [settled])
+  const replay = useCallback(() => {
+    stopTour()
+    close()
+    const c = coefRef.current
+    c.drag = null
+    c.ret = null
+    c.d = COEFS.d.home
+    c.e = COEFS.e.home
+    paintCoef('d')
+    paintCoef('e')
+    dragRef.current.vy = 0
+    dragRef.current.vp = 0
+    setClock(NOW)
+    arrivedAt.current = performance.now()
+    setFoldRun((n) => n + 1)
+    setSettled(false)
+  }, [close, paintCoef, setClock, stopTour])
 
   const isNarrow = () => window.matchMedia('(max-width: 767px)').matches
 
@@ -1572,6 +1598,28 @@ export default function About() {
             )
           })}
         </div>
+
+        {/* The way back to the fold. Top left of the stage, the corner every
+            mode leaves empty: the writing holds the bottom left, the hint line
+            and the play control the bottom right, the island the top centre.
+            The top inset repeats the drawing frame's own clearance — the
+            island reserve while the page is a screen, CC_STAGE.pad once it
+            flows — so the control hangs at the frame's shoulder rather than
+            floating in the margin; flowing is asked in JSX because two
+            breakpoint rules fighting over one inset would be settled by
+            stylesheet order, not intent. It appears with the first settle and
+            then stays, pressable even mid-fold: a press while the fold runs
+            starts the fold over. */}
+        {!reduceMotion && (
+          <button
+            type="button"
+            onClick={replay}
+            className={`${MONO} absolute left-4 z-[3] cursor-pointer whitespace-nowrap rounded-[3px] px-1 text-muted outline-none transition-[color,opacity] duration-300 hover:text-accent focus-visible:ring-1 focus-visible:ring-accent motion-reduce:transition-none sm:left-7 lg:left-11 ${flowing ? 'top-2.5' : 'top-[104px] md:top-[92px]'}`}
+            style={{ opacity: replayable ? 1 : 0, visibility: replayable ? 'visible' : 'hidden' }}
+          >
+            <span aria-hidden="true" className="pr-1">↻</span>replay the fold
+          </button>
+        )}
       </div>
 
       {/* Bottom left, over the drawing and above the rail. The offset clears the
