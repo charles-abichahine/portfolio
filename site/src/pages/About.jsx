@@ -318,6 +318,29 @@ const FOLD_FROM = new Array(CLOUD.length).fill(null)
 // `places`, so a mark's start and its station share one index the whole way.
 const PLACE_FROM = places.map((p) => flat3(lonToX(p.lon), latToY(p.lat)))
 
+/*
+ * The frame a phone on its side is read in, and the one case that needs its own.
+ *
+ * Below lg and wider than it is tall there is no room under the writing for
+ * anything, so the writing moves beside the cap instead of above it: it takes
+ * the left half from under the island down, and the cap takes the right. Fitted
+ * to what was left over after the writing's band the cap came out a 140px
+ * thumbnail squeezed high against the middle of the stage; framed like this it
+ * stands the whole way from under the island down to the rail's own lanes.
+ *
+ * top is the island's clearance. foot is the whole reserve at the bottom rather
+ * than an addition to the rail's block, because here the caption is beside the
+ * cap and not under it: what the cap has to clear is the rail's own lanes and
+ * ticks, and it may stand the full height above them. ax places the cap's
+ * centre across the stage, in the half the writing does not use.
+ */
+const CC_LAND_VIEW = { top: 62, foot: 56, ax: 0.76 }
+// The same query the landscape classes below are written against, asked once
+// per size rather than inferred from the box: the stage is the viewport less
+// the footer, so its own shape can disagree with the page's by a few pixels
+// and the framing and the layout have to change on exactly the same beat.
+const LAND_Q = '(max-width: 1023.98px) and (orientation: landscape)'
+
 // The eye. Roughly the cover's three-quarter view, far enough round that the
 // cap's self-intersection reads as a fold rather than as a silhouette.
 const YAW0 = -34
@@ -794,20 +817,26 @@ export default function About() {
      * leave the writing in the corner room to sit against. On a wide screen the
      * writing takes the left half, so the cap moves off centre to the right
      * rather than being painted over three paragraphs.
+     *
+     * A phone on its side is the third case and it is CC_LAND_VIEW's: there the
+     * writing and the caption are beside the cap rather than under it, so the
+     * foot is the rail's lanes alone and the cap is anchored in the half the
+     * writing leaves it.
      */
-    const top = w < 768 ? 104 : 92
+    const land = window.matchMedia(LAND_Q).matches
+    const top = land ? CC_LAND_VIEW.top : w < 768 ? 104 : 92
     // The foot: the rail's own block, then the room the writing needs. The phone
     // number carries the caption as well, since there the writing runs the full
     // width and the caption has to sit under it rather than beside it; on a wide
     // screen the writing keeps to the left half and the caption tucks into the
     // space it already leaves above the rail.
-    const bottom = 70 + LANE_H + 26 + (w < 768 ? 208 : 74)
+    const bottom = land ? CC_LAND_VIEW.foot : 70 + LANE_H + 26 + (w < 768 ? 208 : 74)
     const availH = Math.max(120, h - top - bottom)
     const availW = Math.max(120, w - 48)
     // 135 is the surface's own extent in its units, so this reads as "fill the
     // short side of the box".
     const s = (0.94 * Math.min(availW, availH)) / 135
-    const cx = w < 1024 ? w / 2 : w * 0.62
+    const cx = land ? w * CC_LAND_VIEW.ax : w < 1024 ? w / 2 : w * 0.62
     const cy = top + availH * 0.5
 
     /*
@@ -1184,7 +1213,10 @@ export default function About() {
        */
       const hov = hoverRef.current
       const act = activeRef.current
-      const wide = w >= 768
+      // Room for names, which is not the same question as width. A phone on its
+      // side is 812 across and still has a cap the size of a portrait phone's in
+      // it, so it is read under the phone's rule and not the desk's.
+      const wide = w >= 768 && !land
       for (let n = 0; n < N; n++) {
         const p = places[n]
         const el = pinRefs.current[p.id]
@@ -1217,9 +1249,10 @@ export default function About() {
         const half = (pinSize(p) + 14) / 2
         lx[n] = X + half
         ly[n] = Y - half - 4
-        // The name only where there is room for it: on a phone fifteen tracked
-        // uppercase names over a 270px cap is a wall of type, so there it is the
-        // one you are pointing at and nothing else.
+        // The name only where there is room for it: on a phone, upright or on
+        // its side, fifteen tracked uppercase names over a cap this size is a
+        // wall of type, so there it is the one you are pointing at and nothing
+        // else.
         lstate[n] = on ? 2 : front && wide ? 1 : 0
       }
 
@@ -1416,8 +1449,15 @@ export default function About() {
           canvas: it is inset-0 like the canvas is, it hit-tests whether or not
           it paints anything, and it was swallowing every press meant for the
           drawing — which is why the surface would not turn at all. */}
+      {/* Lifted over the rail on a phone lying down, and only there. The cap
+          fills the height between the island and the lanes in that frame, so
+          its tail reaches into the rail's own lead — and the rail, being later
+          in the source and z-[3], would otherwise take every press meant for a
+          station down there and wind the year with it. The wrapper is still
+          pointer-events-none, so what is lifted is fifteen thumb-sized marks
+          and not a sheet of glass over the rail. */}
       <div
-        className="pointer-events-none absolute inset-0"
+        className="pointer-events-none absolute inset-0 max-lg:landscape:z-[4]"
         aria-label="Places, pinned to survey stations"
       >
         {places.map((p) => {
@@ -1453,14 +1493,25 @@ export default function About() {
       {/* Bottom left, over the drawing and above the rail. The offset clears the
           rail's own block — its 32px of lead, the 3px line, the tick row and its
           24px foot — and now the caption's band under that as well, which is why
-          it stands off further than the rail alone would ask for. */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-[136px] z-[3] px-5 sm:px-8 lg:px-12">
-        <div className="max-w-[58ch] md:max-w-[48%]">
-          <p className={`${MONO} mb-4 text-muted`}>About</p>
+          it stands off further than the rail alone would ask for.
+
+          Except on a phone lying down, where a block that grows upward off the
+          rail grows straight through the island and loses its first line off the
+          top of the stage. There it is hung from the top instead, on the same
+          76px of clearance the landing gives itself in landscape, and it keeps
+          to the left half at every width rather than only from md, because the
+          cap now stands in the other one. */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-[136px] z-[3] px-5 sm:px-8 max-lg:landscape:bottom-auto max-lg:landscape:top-[76px] lg:px-12">
+        <div className="max-w-[58ch] max-lg:landscape:max-w-[48%] md:max-w-[48%]">
+          {/* The label goes when the page lies down. Between the island and the
+              caption there is room for the headline and the summary and nothing
+              else, and of the two lines that could go this is the one the island
+              is already saying: its About is lit. */}
+          <p className={`${MONO} mb-4 text-muted max-lg:landscape:hidden`}>About</p>
           <h1 className="max-w-[28ch] text-balance text-[clamp(1.2rem,1.85vw,1.6rem)] font-light leading-[1.32] text-ink">
             Trained to draw buildings, went back for the machinery<span className="text-accent">.</span>
           </h1>
-          <p className="mt-4 max-w-[56ch] font-serif text-[0.92rem] leading-[1.75] text-soft">
+          <p className="mt-4 max-w-[56ch] font-serif text-[0.92rem] leading-[1.75] text-soft max-lg:landscape:mt-3">
             Practice across Beirut, Dubai and Kuwait, then the MaCAD master at IAAC. Now I build the
             tools I used to ask for.
           </p>
@@ -1468,8 +1519,21 @@ export default function About() {
               page about the person, so it is where a way to reach him belongs;
               the band below keeps the identity alone and centred. The block
               above is pointer-events-none so the drawing stays reachable
-              through it, which the marks have to opt back out of. */}
-          <ContactMarks named className="pointer-events-auto mt-7 -ml-1.5 text-muted" />
+              through it, which the marks have to opt back out of.
+
+              Lying down there is no room for them under the writing, and this
+              page's footer is bare precisely because it carries them, so they
+              are not something that can simply be dropped. They go to the one
+              piece of the stage a landscape phone leaves empty instead: the
+              island's own line, in the corner beside it, as three marks without
+              their names — the same trim the footer makes when its row is
+              narrow. -50px off the block's top lands them on the island's
+              centre line, and 26px in is where the -ml-1.5 has them sitting in
+              the flow, so the corner is the same margin as the writing. */}
+          <ContactMarks
+            named
+            className="pointer-events-auto mt-7 -ml-1.5 text-muted max-lg:landscape:absolute max-lg:landscape:-top-[50px] max-lg:landscape:left-[26px] max-lg:landscape:ml-0 max-lg:landscape:mt-0 max-lg:landscape:[&_span]:hidden"
+          />
         </div>
       </div>
 
@@ -1501,8 +1565,14 @@ export default function About() {
           drag. The two `2`s in the y and z clauses are written the same way,
           from the same value: there is one e, and a formula that disagreed with
           itself while being held would be a worse lie than a static one. */}
+      {/* Lying down it keeps the same job and folds. The full-width line ran
+          straight through the half the cap now stands in, so there it is held
+          to the writing's own side of the stage and breaks at its separators
+          into two, and it comes down to sit on the rail's lead — as low as it
+          can go before it would share a line with the rail's hint, which is
+          right-aligned and reaches a long way in at these widths. */}
       <p
-        className="pointer-events-none absolute inset-x-0 bottom-[92px] z-[4] px-5 font-mono text-[0.6875rem] italic leading-[1.5] text-accent sm:px-8 lg:px-12"
+        className="pointer-events-none absolute inset-x-0 bottom-[92px] z-[4] px-5 font-mono text-[0.6875rem] italic leading-[1.5] text-accent max-lg:landscape:bottom-[76px] max-lg:landscape:max-w-[62%] sm:px-8 lg:px-12"
         style={{
           opacity: settled ? 1 : 0,
           // And out of reach until it is here. The handles keep their 44px of
