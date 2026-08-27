@@ -16,12 +16,13 @@ import { CC, crossCap, makeProjector } from '../lib/crosscap.js'
  * URL, where the filmstrip's own fade-in serves as the arrival.
  *
  * A scroll builds toward that departure rather than tripping it, so the gesture
- * is answered while it accumulates. One progress value p, the wheel's fraction of
- * the threshold, drives two things: the whole block gives a little in the
+ * is answered while it accumulates. One progress value p, the gesture's fraction
+ * of its threshold, drives two things: the whole block gives a little in the
  * direction it is about to leave, and the cross-cap survey in the corner sweeps
  * itself in u-row by u-row, the same drawing the printed portfolio's cover
- * carries, off the same equations (src/lib/crosscap.js). Both are wheel only; the
- * keyboard and the cue have no gesture to meter, so they go straight to the leave.
+ * carries, off the same equations (src/lib/crosscap.js). A wheel meters p, and so
+ * does a finger; the keyboard and the cue have no gesture to meter, so they go
+ * straight to the leave.
  *
  * p is held rather than timed: it sits where the last scroll left it, and only
  * another scroll moves it, up or down. So the half-open state is somewhere you
@@ -33,11 +34,16 @@ import { CC, crossCap, makeProjector } from '../lib/crosscap.js'
  * taken theirs, which is not a screen this cover can be set on at any spacing
  * worth having. So below lg and lying down the page stops being a screen and
  * becomes a page — it flows, it scrolls, the footer sits at the end of the
- * document — and the departure gesture is simply switched off, because a scroll
- * cannot be both the way down a page and the way off it. The cue and the
- * keyboard still go to /work; they never needed the gesture. With nothing left
- * to meter, the survey is drawn whole and the caption stands at full opacity,
- * which is the state the reduced-motion path already asks for.
+ * document. The transition comes with it rather than being switched off. The
+ * cover is made sticky at the viewport's height and a runway of empty page is
+ * laid under it, so a scroll moves the document without moving the cover, and
+ * how far down that runway you are is p. The scroll is the gesture: same give,
+ * same sweep, same caption, the same fire() at the end, only read off a real
+ * scroll position instead of a virtual accumulator. Held position comes free
+ * here, because it is the scroll position. The wheel and swipe handlers are
+ * the one thing that stays unbound, since the browser is already delivering
+ * the same value more faithfully than they could. The cue and the keyboard go
+ * straight to /work as they do everywhere else.
  *
  * This replaced a two-screen landing whose second screen was a canvas strand
  * field fanning down into four columns of project cards. Those cards live in
@@ -66,6 +72,20 @@ const WHEEL_THRESHOLD = 320
 // under the thumb and then depart, rather than the swipe jumping straight to
 // the leave with none of the transition the laptop shows.
 const SWIPE_THRESHOLD = 140
+
+// The scroll counterpart of the two above, for the flowing page: how much empty
+// document is laid under the sticky cover, as a fraction of the viewport's own
+// height, and therefore how far you scroll to commit. A fraction rather than a
+// pixel count because the runway is cut from the same cloth as the screen it
+// runs beneath — a roomier landscape phone should ask for proportionally more
+// scroll, not the same absolute distance. At the ~375px this mode exists for it
+// comes out near 225px: past SWIPE_THRESHOLD, which a real scroll would trip on
+// momentum alone, and short of WHEEL_THRESHOLD, which on a screen this short
+// would be the better part of a page. Three deliberate notches, or one unhurried
+// push of the thumb. The same number sizes the empty box that *is* the runway,
+// so the distance you can scroll and the distance p is measured over are one
+// thing rather than two that have to be kept in agreement.
+const SCROLL_RUNWAY = 0.6
 
 // The leave: the name lifts and fades, same ease and travel as before but given
 // a touch more room — 0.5s, so the departure is a shade more deliberate than the
@@ -109,9 +129,10 @@ const CC_HOME_VIEW_MOBILE = { yaw: 90, pitch: 30, zoom: 3.0, ax: 0.5, ay: 0.42 }
 const DESKTOP_MIN = 1024
 // A phone on its side, and the one shape this page does not try to be a screen
 // in. The same query the landscape classes below are written against, asked
-// here as well because three things that are not layout follow from it: the
-// wheel and the swipe are unbound, the survey is drawn whole, and the caption
-// stops reading a progress it can no longer be given.
+// here as well because what the gesture is read off follows from it: flowing,
+// the wheel and the swipe are unbound and a passive scroll listener meters p in
+// their place. Everything downstream of p — the give, the sweep, the caption —
+// is the same on both sides of this line.
 const SHORT_LAND = '(max-width: 1023.98px) and (orientation: landscape)'
 // What is drawn at rest, and what the gesture opens toward whole. On the laptop
 // it is a fraction of the u-rows, drawn in order — the fan grows out of the
@@ -155,8 +176,8 @@ export default function Home() {
     () => !window.matchMedia('(prefers-reduced-motion: reduce)').matches
   )
   // Whether the page is flowing rather than filling the screen. Held in state
-  // because what it changes is behaviour and not only paint: the listeners the
-  // gesture registers, and what the survey and the caption are shown at.
+  // because what it changes is behaviour and not only paint: which listener
+  // meters p, and the runway margin that gives that listener something to read.
   const [flowing, setFlowing] = useState(() => window.matchMedia(SHORT_LAND).matches)
   // Fire-once, so rapid wheel or a double tap cannot queue two navigations.
   const firedRef = useRef(false)
@@ -182,31 +203,39 @@ export default function Home() {
     return () => mq.removeEventListener('change', apply)
   }, [])
 
-  // Turning the phone on its side mid-gesture would otherwise leave the block
-  // lifted and the survey half-open on a page that no longer has a gesture to
-  // walk either of them back, so the held position is dropped on the way in.
+  // A rotation crosses this line in either direction, and the two sides keep the
+  // held position in different places — an accumulator one way, the scrollbar
+  // the other. Neither can read the other's, so a turn mid-gesture would leave
+  // the block lifted and the survey half-open with nothing able to walk them
+  // back. Both are dropped on the way through, the scroll along with p, since a
+  // page that arrives already scrolled would arrive already committed.
   useEffect(() => {
     const mq = window.matchMedia(SHORT_LAND)
-    const apply = () => {
-      setFlowing(mq.matches)
-      if (mq.matches) {
-        progRef.current = 0
-        setP(0)
-      }
-    }
+    const apply = () => setFlowing(mq.matches)
     apply()
-    mq.addEventListener('change', apply)
-    return () => mq.removeEventListener('change', apply)
+    const onChange = () => {
+      apply()
+      progRef.current = 0
+      setP(0)
+      window.scrollTo(0, 0)
+    }
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
   }, [])
 
   // Reset on every mount, and on a bfcache restore, so returning here with the
-  // back button never shows the faded-out hero the handoff left behind.
+  // back button never shows the faded-out hero the handoff left behind. The
+  // scroll goes back to the top with it: flowing, the scroll position *is* the
+  // held position, and a browser that helpfully restores it would hand the page
+  // back mid-departure, one notch from firing again. On every other shape the
+  // page is exactly the viewport and this costs nothing.
   useEffect(() => {
     firedRef.current = false
     setLeaving(false)
     progRef.current = 0
     setP(0)
     setPMs(P_LIVE_MS)
+    window.scrollTo(0, 0)
     const onShow = (e) => {
       if (!e.persisted) return
       firedRef.current = false
@@ -214,6 +243,7 @@ export default function Home() {
       progRef.current = 0
       setP(0)
       setPMs(P_LIVE_MS)
+      window.scrollTo(0, 0)
     }
     window.addEventListener('pageshow', onShow)
     return () => window.removeEventListener('pageshow', onShow)
@@ -235,23 +265,13 @@ export default function Home() {
     window.setTimeout(() => navigate('/work'), LEAVE_MS)
   }, [navigate])
 
-  // Wheel, touch and keyboard on the window. The wheel and the touch drag both
-  // meter the progress the give and the survey read, so the phone gets the same
-  // building transition the laptop does, and both run in both directions: /work
-  // is still the only place this page goes, but how far along the way you are is
-  // yours to set, and to undo. The keyboard and cue paths go straight to the
-  // leave, with no sweep, because there is no gesture to meter.
-  //
-  // Except while the page is flowing, where the two metered paths are not
-  // registered at all: there a wheel and an upward drag are how the visitor
-  // reads the rest of the page, and a scroll that both moved the document and
-  // built toward leaving it would be neither gesture done properly. The
-  // keyboard keys stay, because they are a jump and not a scroll.
-  useEffect(() => {
-    // Move the held position by some fraction of the whole gesture and render
-    // it. Commit is the top of the range rather than a separate test, so every
-    // path into a departure — wheel, drag — goes through the same door.
-    const settle = (next) => {
+  // Move the held position to some fraction of the whole gesture and render it.
+  // Commit is the top of the range rather than a separate test, so every path
+  // into a departure — wheel, drag, scroll — goes through the same door. It sits
+  // out here, above the effects, because there are now two effects that need it:
+  // the accumulator's and the flowing page's scroll listener.
+  const settle = useCallback(
+    (next) => {
       const to = next < 0 ? 0 : next > 1 ? 1 : next
       if (to === progRef.current) return
       progRef.current = to
@@ -263,8 +283,72 @@ export default function Home() {
       }
       setPMs(P_LIVE_MS)
       setP(to)
-    }
+    },
+    [fire]
+  )
 
+  /*
+   * The flowing page's gesture: the scroll itself.
+   *
+   * The cover is sticky at the viewport's height with SCROLL_RUNWAY of empty
+   * document under it (see the markup below), so scrolling moves the page
+   * without moving the cover, and the scroll position is a metered gesture
+   * already — 0 at the top, committed at the far end of the runway. It goes
+   * through the same settle() the wheel does, so the give, the sweep and the
+   * caption cannot tell which mode fed them, and at the end of the runway the
+   * same fire() runs, once, on the same firedRef.
+   *
+   * Passive, and reading nothing but a cached number: the runway is measured on
+   * resize rather than per event, so the frame that follows a scroll has one
+   * division and a setState in it and nothing to allocate.
+   */
+  useEffect(() => {
+    if (!flowing) return
+    // The browser keeps a scroll position per history entry and replays it on a
+    // traversal back into this page — and does it after React has mounted and
+    // run its reset, which is why the reset alone cannot cover it. Everywhere
+    // else that replay is a courtesy; here the scroll position is not state but
+    // a gesture, and the one it saved is the finished one, so Back handed the
+    // page back already committed and it departed again before it had finished
+    // arriving. Switched off, then: set rather than put back on cleanup, since
+    // the traversal it has to survive happens long after this effect is gone,
+    // and there is nothing to give back, because the shell already sends every
+    // route change to the top by hand.
+    history.scrollRestoration = 'manual'
+    // Off --app-h rather than innerHeight, because that is the height the
+    // runway below is cut from; on iOS the two disagree by a toolbar, and p
+    // would run past 1 or stop short of it.
+    let runway = 1
+    const remeasure = () => {
+      const px = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--app-h'))
+      runway = Math.max(1, (px || window.innerHeight) * SCROLL_RUNWAY)
+    }
+    const onScroll = () => settle(window.scrollY / runway)
+    remeasure()
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', remeasure)
+    window.visualViewport?.addEventListener('resize', remeasure)
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', remeasure)
+      window.visualViewport?.removeEventListener('resize', remeasure)
+    }
+  }, [flowing, settle])
+
+  // Wheel, touch and keyboard on the window. The wheel and the touch drag both
+  // meter the progress the give and the survey read, so the phone gets the same
+  // building transition the laptop does, and both run in both directions: /work
+  // is still the only place this page goes, but how far along the way you are is
+  // yours to set, and to undo. The keyboard and cue paths go straight to the
+  // leave, with no sweep, because there is no gesture to meter.
+  //
+  // Except while the page is flowing, where these two are not registered at
+  // all: there the same wheel and the same upward drag are already moving a
+  // real document, and the effect above reads the resulting scroll position
+  // instead. Counting the deltas as well would meter the gesture twice. The
+  // keyboard keys stay, because they are a jump and not a scroll.
+  useEffect(() => {
     // Both directions count. Down builds toward the handoff, up walks it back,
     // and nothing moves on its own in between: that is the whole of the control
     // the gesture offers. Stopping halfway holds the survey half-open and the
@@ -331,7 +415,7 @@ export default function Home() {
       window.removeEventListener('touchend', onTouchEnd)
       window.removeEventListener('keydown', onKeyDown)
     }
-  }, [fire, flowing])
+  }, [fire, flowing, settle])
 
   /*
    * The survey on the cover.
@@ -553,12 +637,11 @@ export default function Home() {
   }, [])
 
   // Feed p into the survey sweep, matched to the same timing the give moves on.
-  // Flowing, there is no p worth reading: the survey is opened whole and held
-  // there, the same still state reduced motion is given, so the drawing is
-  // finished rather than waiting on a gesture the page no longer offers.
+  // One line for both modes: by the time p arrives here it has forgotten whether
+  // an accumulator or a scrollbar set it, which is the point of settle().
   useEffect(() => {
-    sweepToRef.current?.(flowing ? 1 : p, flowing ? 0 : pMs)
-  }, [p, pMs, motionOk, flowing])
+    sweepToRef.current?.(p, pMs)
+  }, [p, pMs, motionOk])
 
   // Enter on the focused cue dispatches a click too, so this one handler
   // animates both the pointer and the keyboard; the Link keeps its href, so the
@@ -569,146 +652,176 @@ export default function Home() {
   }
 
   // The give lifts the block toward the leave as p grows; reduced motion takes
-  // none of it, and neither does the flowing page, which has no p. At the leave
-  // the full lift-and-fade takes the transform over.
-  const give = motionOk && !flowing ? GIVE_TRAVEL * p : 0
+  // none of it. At the leave the full lift-and-fade takes the transform over.
+  // On the flowing page this rides on top of the sticky offset, which is what
+  // makes the cover lift off its own pin rather than off the document.
+  const give = motionOk ? GIVE_TRAVEL * p : 0
 
+  /*
+   * Lying down, three of these are the lock and all three come off. The
+   * overflow clipped a page that is now taller than its box; the touch-action
+   * gave the browser nothing to pan, which is what made a finger on this page
+   * do nothing at all; and min-h-0, released in the shell, is what lets the
+   * column grow instead of shrinking under its own content. What is left —
+   * the centring, the padding, the island's clearance — is the same
+   * composition, only with somewhere to go. The bottom padding is the
+   * caption's room now that it stands in the flow rather than on the floor.
+   *
+   * And four more go on, which together pin the cover. flex-none gives the box
+   * its height back: as a flex-1 item its main size came from the flex
+   * algorithm, which sizes it to its content, and the cover wants to be exactly
+   * the screen. h-[--app-h] is that screen, measured. sticky and top-0 pin it
+   * there while the document goes past underneath. The runway it goes past is
+   * the empty sibling after it, and it has to be a sibling: a sticky element is
+   * held inside its containing block by its *margin* box, so a margin under this
+   * one would add exactly as much document as it took away from the slack, and
+   * the box would sit there refusing to stick with no error to explain itself.
+   */
   return (
-    /*
-     * Lying down, three of these are the lock and all three come off. The
-     * overflow clipped a page that is now taller than its box; the touch-action
-     * gave the browser nothing to pan, which is what made a finger on this page
-     * do nothing at all; and min-h-0, released in the shell, is what lets the
-     * column grow instead of shrinking under its own content. What is left —
-     * the centring, the padding, the island's clearance — is the same
-     * composition, only with somewhere to go. The bottom padding is the
-     * caption's room now that it stands in the flow rather than on the floor.
-     */
-    <div
-      className="relative flex flex-1 flex-col items-center justify-center overflow-hidden px-4 text-center [touch-action:pinch-zoom] max-lg:landscape:overflow-visible max-lg:landscape:pb-10 max-lg:landscape:pt-[76px] max-lg:landscape:[touch-action:auto]"
-      style={{
-        transition: leaving
-          ? `opacity ${LEAVE_MS}ms ease, transform ${LEAVE_MS}ms ease`
-          : `transform ${motionOk ? `${pMs}ms ease` : '0ms'}`,
-        opacity: leaving ? 0 : 1,
-        transform: leaving ? 'translateY(-24px)' : `translateY(${-give}px)`,
-      }}
-    >
-      {/* The survey, computed on the cross-cap and swept in by the gesture. A
-          background field behind the type, running off the top and right edges;
-          see the survey effect above and CC_HOME_VIEW for the framing.
-
-          Inset to the box everywhere but on the flowing page, where the box is
-          the whole document and a field stretched down it would be a texture
-          rather than a drawing. There it is cut to one viewport height and
-          stays behind the first screen, which is the screen it was framed for:
-          the corner fragment belongs to the name, and the name is up there. */}
-      <canvas
-        ref={canvasRef}
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-0 h-full w-full max-lg:landscape:bottom-auto max-lg:landscape:h-[var(--app-h)]"
-      />
-
-      <div ref={nameRef} className="relative z-10 w-[min(560px,88vw)]">
-        {/* The faded-paper halo. In the portrait full-bleed field the drawing
-            runs through the whole page, so the name is given its own clearing: an
-            ellipse of the page's own paper colour, opaque across the type and
-            fading out past it, so the survey softly recedes around the name
-            rather than leaving a hard rectangular hole. Paper, not white, so it
-            flips with the theme. Portrait below the laptop only — landscape and
-            the desktop both use the corner fragment, which never reaches the
-            name, so it needs no clearing. */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -inset-x-10 -inset-y-14 -z-10 lg:hidden landscape:hidden"
-          style={{
-            background:
-              'radial-gradient(ellipse at center, var(--color-paper) 55%, transparent 82%)',
-          }}
-        />
-        {/* font-light, not lighter: Space Grotesk stops at 300, and asking for a
-            weight it does not have just gets 300 with the browser guessing. */}
-        <h1 className="text-[clamp(2rem,4.4vw,3.25rem)] font-light leading-[1.03] tracking-[-0.024em]">
-          Charles Abi Chahine<span className="text-accent">.</span>
-        </h1>
-        <p className="mt-3.5 font-mono text-[0.72rem] lowercase tracking-[0.08em] text-soft">
-          architect · computational designer
-        </p>
-        {/* The one sentence on the cover, so it is set as one: the serif here is
-            what tells you the rest of the site has writing in it. */}
-        <p className="mt-5 font-serif text-[clamp(0.95rem,1.2vw,1.05rem)] leading-[1.6] text-soft">
-          {summary}
-        </p>
-        {/* The cue is the handoff made visible and the handoff made a link: a
-            real anchor to /work, so it reads as a link and works with JS off,
-            with the animated leave grafted onto its activation. The count is
-            read from the data, never typed. The rule under it is the same mark
-            the belts used to hang from. */}
-        <Link
-          to="/work"
-          onClick={onCue}
-          className={`mx-auto mt-9 block w-fit border-t border-line pt-3 text-muted transition-colors hover:text-ink focus-visible:text-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent ${MONO}`}
-        >
-          Scroll · {projects.length} projects ↓
-        </Link>
-      </div>
-
-      {/* The survey's caption: the surface's own equations, the ones
-          crosscap.js plots and the printed cover carries, with the board's
-          defaults substituted (d = 1/2, e = 2). It rides the same p the give
-          and the sweep read, so starting to scroll surfaces it above the
-          footer and scrolling back up takes it down again, as one response.
-          Since p is held rather than timed, a scroll stopped partway leaves it
-          standing: this is the one thing on the page that wants to be read
-          rather than glanced at, and it now gets as long as that takes.
-          Reduced motion shows the survey whole and still, so the caption is
-          simply there. Hidden from readers: the canvas it annotates is too,
-          and spoken symbol soup serves nobody.
-
-          On the flowing page it is neither held to the floor nor metered: it
-          drops into the flow under the name, where a caption on a page that
-          scrolls belongs, and it is simply present, because the drawing it
-          annotates is already whole.
-
-          Set in the mono's italic rather than its upright, and in accent rather
-          than muted: the same voice the site labels things in, leaning, which is
-          the difference between a caption printed on the drawing and a note
-          worked out beside it.
-
-          The domain is written 0 ≤ u, v ≤ π rather than u, v ∈ [0, π], and that
-          is a typesetting constraint rather than a preference. Text faces carry
-          about a dozen math operators and no set theory: there is no ∈ in Plex,
-          in Spectral, in Space Grotesk, or in STIX Two Text. The upright mono
-          was therefore quietly borrowing the system's ∈ and π every time this
-          line drew, one or two glyphs in a face nobody chose, sitting in the
-          middle of a formula. The two forms say the same thing, and this one
-          the site can actually set: ≤ and π both come from the italic's subset,
-          which is built for exactly this line (see index.css).
-
-          Tracking is gone — it belongs on the labels this borrows its face
-          from, not on a formula, where it pushes the operators away from their
-          operands — and the size is back near the mono's floor now that a
-          handwriting face is not setting it.
-
-          Each clause is its own nowrap span, because on a phone this wrapped
-          wherever the width ran out and put the back half of y = a·sin 2u·sin²v
-          on the next line, which is not a formula any more. The only breaks left
-          are at the separators, and a separator stays with the clause it follows
-          rather than leading the next line. */}
-      <p
-        aria-hidden="true"
-        className="pointer-events-none absolute bottom-3 left-0 right-0 px-4 font-mono text-[0.6875rem] italic text-accent max-lg:landscape:static max-lg:landscape:mt-11"
+    <>
+      <div
+        className="relative flex flex-1 flex-col items-center justify-center overflow-hidden px-4 text-center [touch-action:pinch-zoom] max-lg:landscape:sticky max-lg:landscape:top-0 max-lg:landscape:h-[var(--app-h)] max-lg:landscape:flex-none max-lg:landscape:overflow-visible max-lg:landscape:pb-10 max-lg:landscape:pt-[76px] max-lg:landscape:[touch-action:auto]"
         style={{
-          opacity: motionOk && !flowing ? Math.min(1, p / 0.7) : 1,
-          transition: motionOk && !flowing ? `opacity ${pMs}ms ease` : 'none',
+          transition: leaving
+            ? `opacity ${LEAVE_MS}ms ease, transform ${LEAVE_MS}ms ease`
+            : `transform ${motionOk ? `${pMs}ms ease` : '0ms'}`,
+          opacity: leaving ? 0 : 1,
+          transform: leaving ? 'translateY(-24px)' : `translateY(${-give}px)`,
         }}
       >
-        <span className="whitespace-nowrap">0 ≤ u, v ≤ π ·</span>{' '}
-        <span className="whitespace-nowrap">x = ½a·sin u·sin 2v ·</span>{' '}
-        <span className="whitespace-nowrap">y = a·sin 2u·sin²v ·</span>{' '}
-        <span className="whitespace-nowrap">z = a·cos 2u·sin²v ·</span>{' '}
-        <span className="whitespace-nowrap">a = 60</span>
-      </p>
-    </div>
+        {/* The survey, computed on the cross-cap and swept in by the gesture. A
+            background field behind the type, running off the top and right edges;
+            see the survey effect above and CC_HOME_VIEW for the framing.
+
+            Inset to the box, which on the flowing page is now the pinned cover
+            rather than the document: the explicit --app-h is what it used to take
+            to keep the field off a page taller than its frame, and it stays
+            because it says the thing the h-full beside it only implies — this
+            drawing is framed for one screen, and it is the screen the name is
+            on. */}
+        <canvas
+          ref={canvasRef}
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 z-0 h-full w-full max-lg:landscape:bottom-auto max-lg:landscape:h-[var(--app-h)]"
+        />
+
+        <div ref={nameRef} className="relative z-10 w-[min(560px,88vw)]">
+          {/* The faded-paper halo. In the portrait full-bleed field the drawing
+              runs through the whole page, so the name is given its own clearing: an
+              ellipse of the page's own paper colour, opaque across the type and
+              fading out past it, so the survey softly recedes around the name
+              rather than leaving a hard rectangular hole. Paper, not white, so it
+              flips with the theme. Portrait below the laptop only — landscape and
+              the desktop both use the corner fragment, which never reaches the
+              name, so it needs no clearing. */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -inset-x-10 -inset-y-14 -z-10 lg:hidden landscape:hidden"
+            style={{
+              background:
+                'radial-gradient(ellipse at center, var(--color-paper) 55%, transparent 82%)',
+            }}
+          />
+          {/* font-light, not lighter: Space Grotesk stops at 300, and asking for a
+              weight it does not have just gets 300 with the browser guessing. */}
+          <h1 className="text-[clamp(2rem,4.4vw,3.25rem)] font-light leading-[1.03] tracking-[-0.024em]">
+            Charles Abi Chahine<span className="text-accent">.</span>
+          </h1>
+          <p className="mt-3.5 font-mono text-[0.72rem] lowercase tracking-[0.08em] text-soft">
+            architect · computational designer
+          </p>
+          {/* The one sentence on the cover, so it is set as one: the serif here is
+              what tells you the rest of the site has writing in it. */}
+          <p className="mt-5 font-serif text-[clamp(0.95rem,1.2vw,1.05rem)] leading-[1.6] text-soft">
+            {summary}
+          </p>
+          {/* The cue is the handoff made visible and the handoff made a link: a
+              real anchor to /work, so it reads as a link and works with JS off,
+              with the animated leave grafted onto its activation. The count is
+              read from the data, never typed. The rule under it is the same mark
+              the belts used to hang from. */}
+          <Link
+            to="/work"
+            onClick={onCue}
+            className={`mx-auto mt-9 block w-fit border-t border-line pt-3 text-muted transition-colors hover:text-ink focus-visible:text-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent ${MONO}`}
+          >
+            Scroll · {projects.length} projects ↓
+          </Link>
+        </div>
+
+        {/* The survey's caption: the surface's own equations, the ones
+            crosscap.js plots and the printed cover carries, with the board's
+            defaults substituted (d = 1/2, e = 2). It rides the same p the give
+            and the sweep read, so starting to scroll surfaces it above the
+            footer and scrolling back up takes it down again, as one response.
+            Since p is held rather than timed, a scroll stopped partway leaves it
+            standing: this is the one thing on the page that wants to be read
+            rather than glanced at, and it now gets as long as that takes.
+            Reduced motion shows the survey whole and still, so the caption is
+            simply there. Hidden from readers: the canvas it annotates is too,
+            and spoken symbol soup serves nobody.
+
+            On the flowing page it is metered the same way, off the same p, and
+            only its position changes: it drops out of the floor and into the flow
+            under the name, where a caption on a page that scrolls belongs. It
+            rides down with the pinned cover, so the scroll that raises it is also
+            the scroll that keeps it in front of you while it is raised.
+
+            Set in the mono's italic rather than its upright, and in accent rather
+            than muted: the same voice the site labels things in, leaning, which is
+            the difference between a caption printed on the drawing and a note
+            worked out beside it.
+
+            The domain is written 0 ≤ u, v ≤ π rather than u, v ∈ [0, π], and that
+            is a typesetting constraint rather than a preference. Text faces carry
+            about a dozen math operators and no set theory: there is no ∈ in Plex,
+            in Spectral, in Space Grotesk, or in STIX Two Text. The upright mono
+            was therefore quietly borrowing the system's ∈ and π every time this
+            line drew, one or two glyphs in a face nobody chose, sitting in the
+            middle of a formula. The two forms say the same thing, and this one
+            the site can actually set: ≤ and π both come from the italic's subset,
+            which is built for exactly this line (see index.css).
+
+            Tracking is gone — it belongs on the labels this borrows its face
+            from, not on a formula, where it pushes the operators away from their
+            operands — and the size is back near the mono's floor now that a
+            handwriting face is not setting it.
+
+            Each clause is its own nowrap span, because on a phone this wrapped
+            wherever the width ran out and put the back half of y = a·sin 2u·sin²v
+            on the next line, which is not a formula any more. The only breaks left
+            are at the separators, and a separator stays with the clause it follows
+            rather than leading the next line. */}
+        <p
+          aria-hidden="true"
+          className="pointer-events-none absolute bottom-3 left-0 right-0 px-4 font-mono text-[0.6875rem] italic text-accent max-lg:landscape:static max-lg:landscape:mt-11"
+          style={{
+            opacity: motionOk ? Math.min(1, p / 0.7) : 1,
+            transition: motionOk ? `opacity ${pMs}ms ease` : 'none',
+          }}
+        >
+          <span className="whitespace-nowrap">0 ≤ u, v ≤ π ·</span>{' '}
+          <span className="whitespace-nowrap">x = ½a·sin u·sin 2v ·</span>{' '}
+          <span className="whitespace-nowrap">y = a·sin 2u·sin²v ·</span>{' '}
+          <span className="whitespace-nowrap">z = a·cos 2u·sin²v ·</span>{' '}
+          <span className="whitespace-nowrap">a = 60</span>
+        </p>
+      </div>
+
+      {/* The runway. Empty page under the pinned cover, and the only thing on
+          this route that exists to be scrolled rather than read: its height is
+          the distance to a departure, so p is nothing more than how much of it
+          has gone by. Rendered only in the one mode that has it, which is also
+          why the wheel and the desktop see no change here at all — there is no
+          node, not a hidden one. The footer follows it, at the end of the
+          document, where the departure usually fires before anyone arrives. */}
+      {flowing && (
+        <div
+          aria-hidden="true"
+          className="shrink-0"
+          style={{ height: `calc(var(--app-h) * ${SCROLL_RUNWAY})` }}
+        />
+      )}
+    </>
   )
 }
