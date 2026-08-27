@@ -629,7 +629,9 @@ const _projects = [
     category: 'Computation & AI',
     award: null,
     links: {
-      github: 'https://github.com/iaac-macad/bimsc26-datamgmt-final-project/tree/FinalAssignment/CharlesAbiChahine',
+      /* No github: the class repo (iaac-macad/bimsc26-datamgmt-final-project)
+         was taken down after the course, and the link 404s. Restore it only if
+         the work is republished somewhere that will stay up. */
       blog: 'https://blog.iaac.net/facadeiq-facade-feasibility-estimator/',
     },
     intro: [
