@@ -55,6 +55,11 @@ const CLOSE_DELAY = 160
  * And for anyone who has asked not to be moved, none of the first two: no map,
  * no fold, the cap already drawn, already at the present, and not turning on its
  * own.
+ *
+ * All three beats are the same on a phone lying down. What changes there is
+ * that the page is a page: the stage, the writing, the caption and the rail
+ * come one after another down a document that scrolls, rather than being laid
+ * over one screen. See CC_STAGE.
  */
 
 // Where the chronology lives on the surface. A year picks a u row and a fixed
@@ -319,27 +324,34 @@ const FOLD_FROM = new Array(CLOUD.length).fill(null)
 const PLACE_FROM = places.map((p) => flat3(lonToX(p.lon), latToY(p.lat)))
 
 /*
- * The frame a phone on its side is read in, and the one case that needs its own.
+ * A phone on its side, and the one case where this page is not one screen.
  *
- * Below lg and wider than it is tall there is no room under the writing for
- * anything, so the writing moves beside the cap instead of above it: it takes
- * the left half from under the island down, and the cap takes the right. Fitted
- * to what was left over after the writing's band the cap came out a 140px
- * thumbnail squeezed high against the middle of the stage; framed like this it
- * stands the whole way from under the island down to the rail's own lanes.
+ * Below lg and wider than it is tall there is about 330px of usable height,
+ * which is not enough for the drawing and the writing at once however they are
+ * arranged: side by side, which is what this used to do, the cap became a
+ * column-wide sliver and the writing lost its label, its contact names and its
+ * caption's line to make room. So the page flows instead. It is the portrait
+ * composition with the room it wants — the stage, then the writing, then the
+ * caption, then the rail, then the footer — and the document scrolls.
  *
- * top is the island's clearance. foot is the whole reserve at the bottom rather
- * than an addition to the rail's block, because here the caption is beside the
- * cap and not under it: what the cap has to clear is the rail's own lanes and
- * ticks, and it may stand the full height above them. ax places the cap's
- * centre across the stage, in the half the writing does not use.
+ * The stage is the one part given a height rather than taking one: a viewport
+ * less the island's clearance, so the cap opens at very nearly the full height
+ * of the screen and everything else is read by scrolling to it. Inside that
+ * stage the cap needs no reserve at either end — nothing shares it — so the
+ * frame is the box less a little air, and the cap is centred in it.
+ *
+ * top is the clearance, and it is written here to be read rather than to be
+ * used: the page's padding and the stage's height are both classes, and a
+ * Tailwind class cannot take a number from a module. The two literals below are
+ * the ones to change with it. pad is the air, and the drawing does read that.
  */
-const CC_LAND_VIEW = { top: 62, foot: 56, ax: 0.76 }
-// The same query the landscape classes below are written against, asked once
-// per size rather than inferred from the box: the stage is the viewport less
-// the footer, so its own shape can disagree with the page's by a few pixels
-// and the framing and the layout have to change on exactly the same beat.
-const LAND_Q = '(max-width: 1023.98px) and (orientation: landscape)'
+const CC_STAGE = { top: 76, pad: 10 }
+// The same query the layout classes below are written against, asked here too
+// because three things that are not layout follow from it: the wheel is left to
+// the document, the cap is framed against the stage rather than the page, and
+// the place names keep the phone's rule. Asked once per size rather than
+// inferred from the box, so the framing and the layout change on one beat.
+const SHORT_LAND = '(max-width: 1023.98px) and (orientation: landscape)'
 
 // The eye. Roughly the cover's three-quarter view, far enough round that the
 // cap's self-intersection reads as a fold rather than as a silhouette.
@@ -407,6 +419,12 @@ function mixHex(a, b, t) {
 }
 
 export default function About() {
+  // The page and the stage are two boxes now. Locked they are the same box, the
+  // stage laid over the page at inset-0; flowing, the page is the whole document
+  // and the stage is the screen-tall block the cap is drawn in at the top of it.
+  // Everything that frames the drawing measures the stage; the wheel, which is
+  // about the page, is taken on the page.
+  const pageRef = useRef(null)
   const stageRef = useRef(null)
   const canvasRef = useRef(null)
   const cardRef = useRef(null)
@@ -419,10 +437,13 @@ export default function About() {
   const active = activeId ? byId[activeId] : null
 
   /*
-   * The timeline is the clock, and it is the only thing on this page that
-   * scrolls. The page itself does not: it was 300svh with the drawing sticky
-   * inside it, which pushed the footer three screens down and made reading the
-   * page and winding the clock the same gesture whether you wanted it or not.
+   * The timeline is the clock, and on a screen-tall page it is the only thing
+   * that scrolls. The page itself does not: it was 300svh with the drawing
+   * sticky inside it, which pushed the footer three screens down and made
+   * reading the page and winding the clock the same gesture whether you wanted
+   * it or not. That is also exactly why the flowing page hands the wheel back
+   * to the document and leaves the clock to a drag on the rail: with a real
+   * document under it, one gesture doing both jobs would be the same mistake.
    *
    * It opens at the present, complete, and you wind back. Opening at 2018 meant
    * arriving at an almost empty screen, which is a poor first impression of a
@@ -448,6 +469,24 @@ export default function About() {
   const [reduceMotion] = useState(
     () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
   )
+
+  /*
+   * Whether the page is flowing rather than filling the screen. The layout is
+   * CSS and needs none of this; what needs it is the behaviour that follows —
+   * the wheel listener that must not be registered, the frame the drawing is
+   * fitted to, and the box a card is placed inside. The ref is for the card,
+   * which is placed from a layout effect that cannot wait for a render.
+   */
+  const [flowing, setFlowing] = useState(() => window.matchMedia(SHORT_LAND).matches)
+  const flowingRef = useRef(flowing)
+  flowingRef.current = flowing
+  useEffect(() => {
+    const mq = window.matchMedia(SHORT_LAND)
+    const apply = () => setFlowing(mq.matches)
+    apply()
+    mq.addEventListener('change', apply)
+    return () => mq.removeEventListener('change', apply)
+  }, [])
   const [settled, setSettled] = useState(reduceMotion)
   useEffect(() => {
     if (settled) return
@@ -646,8 +685,8 @@ export default function About() {
    */
   useEffect(() => {
     const el = railRef.current
-    const stage = stageRef.current
-    if (!el || !stage) return
+    const page = pageRef.current
+    if (!el || !page) return
     const span = NOW - START
 
     /*
@@ -657,6 +696,12 @@ export default function About() {
      * winds the clock, which is the one thing on the page that has a length.
      * The other gesture, drag, belongs to the surface and turns it; the two
      * never meet because the rail sits above the canvas and takes its own.
+     *
+     * All of which stops being true the moment the page flows. There a wheel is
+     * how the visitor reaches the writing, and taking it to wind the years would
+     * be the page refusing to be read. So the listener is simply not registered
+     * in that mode, and the rail is wound by dragging the rail, which is what a
+     * finger has always had to do and what the hint has always said.
      */
     const onWheel = (e) => {
       e.preventDefault()
@@ -683,19 +728,19 @@ export default function About() {
     const onMove = (e) => { if (dragging) fromX(e.clientX) }
     const onUp = () => { dragging = false }
 
-    stage.addEventListener('wheel', onWheel, { passive: false })
+    if (!flowing) page.addEventListener('wheel', onWheel, { passive: false })
     el.addEventListener('pointerdown', onDown)
     el.addEventListener('pointermove', onMove)
     el.addEventListener('pointerup', onUp)
     el.addEventListener('pointercancel', onUp)
     return () => {
-      stage.removeEventListener('wheel', onWheel)
+      page.removeEventListener('wheel', onWheel)
       el.removeEventListener('pointerdown', onDown)
       el.removeEventListener('pointermove', onMove)
       el.removeEventListener('pointerup', onUp)
       el.removeEventListener('pointercancel', onUp)
     }
-  }, [setClock, stopTour])
+  }, [flowing, setClock, stopTour])
 
   useEffect(() => {
     const el = stageRef.current
@@ -818,25 +863,28 @@ export default function About() {
      * writing takes the left half, so the cap moves off centre to the right
      * rather than being painted over three paragraphs.
      *
-     * A phone on its side is the third case and it is CC_LAND_VIEW's: there the
-     * writing and the caption are beside the cap rather than under it, so the
-     * foot is the rail's lanes alone and the cap is anchored in the half the
-     * writing leaves it.
+     * A phone on its side is the third case and it is CC_STAGE's, and there
+     * this box is not the page: it is the stage block at the top of a document
+     * that scrolls, and the writing, the caption and the rail are all below it.
+     * Nothing shares the box, so both reserves come down to a little air.
      */
-    const land = window.matchMedia(LAND_Q).matches
-    const top = land ? CC_LAND_VIEW.top : w < 768 ? 104 : 92
+    const flow = window.matchMedia(SHORT_LAND).matches
+    const top = flow ? CC_STAGE.pad : w < 768 ? 104 : 92
     // The foot: the rail's own block, then the room the writing needs. The phone
     // number carries the caption as well, since there the writing runs the full
     // width and the caption has to sit under it rather than beside it; on a wide
     // screen the writing keeps to the left half and the caption tucks into the
     // space it already leaves above the rail.
-    const bottom = land ? CC_LAND_VIEW.foot : 70 + LANE_H + 26 + (w < 768 ? 208 : 74)
+    const bottom = flow ? CC_STAGE.pad : 70 + LANE_H + 26 + (w < 768 ? 208 : 74)
     const availH = Math.max(120, h - top - bottom)
     const availW = Math.max(120, w - 48)
     // 135 is the surface's own extent in its units, so this reads as "fill the
     // short side of the box".
     const s = (0.94 * Math.min(availW, availH)) / 135
-    const cx = land ? w * CC_LAND_VIEW.ax : w < 1024 ? w / 2 : w * 0.62
+    // Centred everywhere but on the desk, where the writing holds the left half.
+    // The flowing page is below lg by definition, so it takes the centre with
+    // the rest of the narrow frames rather than asking for a case of its own.
+    const cx = w < 1024 ? w / 2 : w * 0.62
     const cy = top + availH * 0.5
 
     /*
@@ -1214,9 +1262,10 @@ export default function About() {
       const hov = hoverRef.current
       const act = activeRef.current
       // Room for names, which is not the same question as width. A phone on its
-      // side is 812 across and still has a cap the size of a portrait phone's in
-      // it, so it is read under the phone's rule and not the desk's.
-      const wide = w >= 768 && !land
+      // side is 812 across and still has a cap a thumb reaches across, so it is
+      // read under the phone's rule and not the desk's: the name you are
+      // pointing at, and no others.
+      const wide = w >= 768 && !flow
       for (let n = 0; n < N; n++) {
         const p = places[n]
         const el = pinRefs.current[p.id]
@@ -1318,7 +1367,10 @@ export default function About() {
       io.disconnect()
       scheme.removeEventListener('change', onScheme)
     }
-  }, [box, paintCoef, setClock, stopTour])
+    // flowing is a dependency rather than a thing read once: the stage's box can
+    // come out the same on either side of the flip, and the framing must not be
+    // left behind on a size that never changed.
+  }, [box, flowing, paintCoef, setClock, stopTour])
 
   /* ---- the place cards, unchanged in job ---- */
   const clearClose = () => {
@@ -1350,7 +1402,13 @@ export default function About() {
       return
     }
     const r = pin.getBoundingClientRect()
-    const s = stageRef.current.getBoundingClientRect()
+    // The box the card is fitted into. Locked, that is the stage, and the card
+    // is placed inside it. Flowing, the card is fixed to the viewport so that a
+    // page scrolling under it cannot carry it off the screen, and the frame it
+    // has to stay inside is therefore the viewport itself.
+    const s = flowingRef.current
+      ? { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight }
+      : stageRef.current.getBoundingClientRect()
     const w = card.offsetWidth
     const h = card.offsetHeight
     const gap = 18
@@ -1429,65 +1487,91 @@ export default function About() {
   }
 
   return (
-    <div ref={stageRef} className="relative min-h-0 w-full flex-1 overflow-hidden bg-paper">
-      {/* touch-none because the gesture on this canvas is a turn, and a phone
-          would otherwise spend it trying to scroll a page that has nowhere to
-          go. The survey itself is decoration: the marks over it are the content
-          and carry the names. */}
-      <canvas
-        ref={canvasRef}
-        aria-hidden="true"
-        className="absolute inset-0 block h-full w-full cursor-grab touch-none active:cursor-grabbing"
-      />
-
-      {/* The marks start hidden by class rather than by inline style, because
-          the loop writes inline and an inline rule beats a class: a render
-          caused by the rail scrubbing can never put a mark back at the origin.
-
-          The wrapper is pointer-events-none and the marks opt back in one at a
-          time. Without that this box is a full-stage sheet of glass over the
-          canvas: it is inset-0 like the canvas is, it hit-tests whether or not
-          it paints anything, and it was swallowing every press meant for the
-          drawing — which is why the surface would not turn at all. */}
-      {/* Lifted over the rail on a phone lying down, and only there. The cap
-          fills the height between the island and the lanes in that frame, so
-          its tail reaches into the rail's own lead — and the rail, being later
-          in the source and z-[3], would otherwise take every press meant for a
-          station down there and wind the year with it. The wrapper is still
-          pointer-events-none, so what is lifted is fifteen thumb-sized marks
-          and not a sheet of glass over the rail. */}
+    /*
+     * The page. Locked it is one screen and everything on it is laid out from
+     * an edge of that screen; flowing it is a document, and the four blocks
+     * below come one after another down it. min-h-0 is what let the screen
+     * version shrink to its box and is released in the shell for this one; the
+     * overflow clipped a page that is now taller than its box; and the top
+     * padding is the island's clearance, CC_STAGE.top, so nothing starts under
+     * the island.
+     */
+    <div
+      ref={pageRef}
+      className="relative min-h-0 w-full flex-1 overflow-hidden bg-paper max-lg:landscape:min-h-[auto] max-lg:landscape:overflow-visible max-lg:landscape:pt-[76px]"
+    >
+      {/* The stage. Laid over the page at inset-0 while the page is a screen,
+          and a block of its own at the top of the document once it flows: a
+          viewport less the island's clearance, which is as much height as the
+          cap can be given without pushing the writing off the first screen
+          entirely. It clips there, because the marks are placed from the
+          drawing's own arithmetic and a station on the tail of the surface
+          would otherwise land in the middle of the writing below. */}
       <div
-        className="pointer-events-none absolute inset-0 max-lg:landscape:z-[4]"
-        aria-label="Places, pinned to survey stations"
+        ref={stageRef}
+        className="absolute inset-0 max-lg:landscape:relative max-lg:landscape:h-[calc(var(--app-h)_-_76px)] max-lg:landscape:overflow-hidden"
       >
-        {places.map((p) => {
-          const tone = p.kind === 'now' ? 'bg-accent' : p.kind === 'lived' ? 'bg-ink' : 'bg-soft'
-          // The same number the loop uses to work out where a name would hang.
-          const size = pinSize(p)
-          return (
-            <button
-              key={p.id}
-              type="button"
-              data-place
-              ref={(el) => { pinRefs.current[p.id] = el }}
-              aria-label={`${p.name}, ${p.cities}`}
-              className="pointer-events-none absolute left-0 top-0 cursor-pointer rounded-full p-[7px] opacity-0 outline-none"
-              onPointerEnter={() => { hoverRef.current = p.id }}
-              onPointerLeave={() => { if (hoverRef.current === p.id) hoverRef.current = null }}
-              onFocus={() => openPlace(p.id)}
-              onBlur={scheduleClose}
-              onClick={() => pinPlace(p.id)}
-            >
-              <span className={`block rounded-full ${tone}`} style={{ width: size, height: size }} />
-              <span
-                className={`${MONO} pointer-events-none absolute left-full top-0 -mt-1 whitespace-nowrap pl-1 text-ink opacity-0 transition-opacity duration-150 motion-reduce:transition-none`}
-                style={{ color: p.kind === 'now' ? 'var(--color-accent)' : undefined }}
+        {/* touch-none because the gesture on this canvas is a turn, and a phone
+            would otherwise spend it trying to scroll a page that has nowhere to
+            go. Once the page does have somewhere to go, that reverses into
+            pan-y: an across-the-stage drag is still the turn, which is the
+            gesture this object is for, and an up-and-down one is given back to
+            the document, so the stage is not a 300px wall a finger cannot get
+            past. The survey itself is decoration: the marks over it are the
+            content and carry the names. */}
+        <canvas
+          ref={canvasRef}
+          aria-hidden="true"
+          className="absolute inset-0 block h-full w-full cursor-grab touch-none active:cursor-grabbing max-lg:landscape:touch-pan-y"
+        />
+
+        {/* The marks start hidden by class rather than by inline style, because
+            the loop writes inline and an inline rule beats a class: a render
+            caused by the rail scrubbing can never put a mark back at the origin.
+
+            The wrapper is pointer-events-none and the marks opt back in one at
+            a time. Without that this box is a full-stage sheet of glass over
+            the canvas: it is inset-0 like the canvas is, it hit-tests whether
+            or not it paints anything, and it was swallowing every press meant
+            for the drawing — which is why the surface would not turn at all.
+
+            It used to be lifted over the rail on a phone lying down, because
+            the cap stood down into the rail's own lead there and the rail took
+            the presses. Nothing overlaps now: the rail is further down the
+            document than the stage is, and the marks are inside the stage. */}
+        <div
+          className="pointer-events-none absolute inset-0"
+          aria-label="Places, pinned to survey stations"
+        >
+          {places.map((p) => {
+            const tone = p.kind === 'now' ? 'bg-accent' : p.kind === 'lived' ? 'bg-ink' : 'bg-soft'
+            // The same number the loop uses to work out where a name would hang.
+            const size = pinSize(p)
+            return (
+              <button
+                key={p.id}
+                type="button"
+                data-place
+                ref={(el) => { pinRefs.current[p.id] = el }}
+                aria-label={`${p.name}, ${p.cities}`}
+                className="pointer-events-none absolute left-0 top-0 cursor-pointer rounded-full p-[7px] opacity-0 outline-none"
+                onPointerEnter={() => { hoverRef.current = p.id }}
+                onPointerLeave={() => { if (hoverRef.current === p.id) hoverRef.current = null }}
+                onFocus={() => openPlace(p.id)}
+                onBlur={scheduleClose}
+                onClick={() => pinPlace(p.id)}
               >
-                {p.name}
-              </span>
-            </button>
-          )
-        })}
+                <span className={`block rounded-full ${tone}`} style={{ width: size, height: size }} />
+                <span
+                  className={`${MONO} pointer-events-none absolute left-full top-0 -mt-1 whitespace-nowrap pl-1 text-ink opacity-0 transition-opacity duration-150 motion-reduce:transition-none`}
+                  style={{ color: p.kind === 'now' ? 'var(--color-accent)' : undefined }}
+                >
+                  {p.name}
+                </span>
+              </button>
+            )
+          })}
+        </div>
       </div>
 
       {/* Bottom left, over the drawing and above the rail. The offset clears the
@@ -1495,23 +1579,23 @@ export default function About() {
           24px foot — and now the caption's band under that as well, which is why
           it stands off further than the rail alone would ask for.
 
-          Except on a phone lying down, where a block that grows upward off the
-          rail grows straight through the island and loses its first line off the
-          top of the stage. There it is hung from the top instead, on the same
-          76px of clearance the landing gives itself in landscape, and it keeps
-          to the left half at every width rather than only from md, because the
-          cap now stands in the other one. */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-[136px] z-[3] px-5 sm:px-8 max-lg:landscape:bottom-auto max-lg:landscape:top-[76px] lg:px-12">
-        <div className="max-w-[58ch] max-lg:landscape:max-w-[48%] md:max-w-[48%]">
-          {/* The label goes when the page lies down. Between the island and the
-              caption there is room for the headline and the summary and nothing
-              else, and of the two lines that could go this is the one the island
-              is already saying: its About is lit. */}
-          <p className={`${MONO} mb-4 text-muted max-lg:landscape:hidden`}>About</p>
+          On a phone lying down it is not over the drawing at all: it drops out
+          of the corner and into the flow, directly under the stage, which is
+          where a column of writing on a page that scrolls belongs. Nothing is
+          hung off an edge there, so nothing needs to be trimmed to clear one —
+          the label, the contact names and the full measure are all back.
+
+          The measure is written as two rules rather than one because the flowing
+          page is exactly md-and-up in landscape below lg: the half-width column
+          belongs to a portrait tablet and to the desk, and this asks for those
+          two by name rather than asking for md and then arguing with it. */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-[136px] z-[3] px-5 sm:px-8 max-lg:landscape:static max-lg:landscape:mt-8 lg:px-12">
+        <div className="max-w-[58ch] md:portrait:max-w-[48%] lg:max-w-[48%]">
+          <p className={`${MONO} mb-4 text-muted`}>About</p>
           <h1 className="max-w-[28ch] text-balance text-[clamp(1.2rem,1.85vw,1.6rem)] font-light leading-[1.32] text-ink">
             Trained to draw buildings, went back for the machinery<span className="text-accent">.</span>
           </h1>
-          <p className="mt-4 max-w-[56ch] font-serif text-[0.92rem] leading-[1.75] text-soft max-lg:landscape:mt-3">
+          <p className="mt-4 max-w-[56ch] font-serif text-[0.92rem] leading-[1.75] text-soft">
             Practice across Beirut, Dubai and Kuwait, then the MaCAD master at IAAC. Now I build the
             tools I used to ask for.
           </p>
@@ -1521,19 +1605,12 @@ export default function About() {
               above is pointer-events-none so the drawing stays reachable
               through it, which the marks have to opt back out of.
 
-              Lying down there is no room for them under the writing, and this
-              page's footer is bare precisely because it carries them, so they
-              are not something that can simply be dropped. They go to the one
-              piece of the stage a landscape phone leaves empty instead: the
-              island's own line, in the corner beside it, as three marks without
-              their names — the same trim the footer makes when its row is
-              narrow. -50px off the block's top lands them on the island's
-              centre line, and 26px in is where the -ml-1.5 has them sitting in
-              the flow, so the corner is the same margin as the writing. */}
-          <ContactMarks
-            named
-            className="pointer-events-auto mt-7 -ml-1.5 text-muted max-lg:landscape:absolute max-lg:landscape:-top-[50px] max-lg:landscape:left-[26px] max-lg:landscape:ml-0 max-lg:landscape:mt-0 max-lg:landscape:[&_span]:hidden"
-          />
+              They used to be exiled to the island's own line, as three bare
+              marks without their names, on a phone lying down: there was no
+              room for them under the writing there and this page's footer is
+              bare precisely because it carries them. The flowing page has the
+              room, so they are back where they belong at every size, named. */}
+          <ContactMarks named className="pointer-events-auto mt-7 -ml-1.5 text-muted" />
         </div>
       </div>
 
@@ -1565,14 +1642,13 @@ export default function About() {
           drag. The two `2`s in the y and z clauses are written the same way,
           from the same value: there is one e, and a formula that disagreed with
           itself while being held would be a worse lie than a static one. */}
-      {/* Lying down it keeps the same job and folds. The full-width line ran
-          straight through the half the cap now stands in, so there it is held
-          to the writing's own side of the stage and breaks at its separators
-          into two, and it comes down to sit on the rail's lead — as low as it
-          can go before it would share a line with the rail's hint, which is
-          right-aligned and reaches a long way in at these widths. */}
+      {/* Lying down it does the same job from the flow: the writing, then the
+          caption, then the rail, in that order down the document. It used to be
+          folded into a 62% column there to keep clear of the cap standing in
+          the other half of the stage, which is a compromise the flowing page
+          does not have to make — there is nothing beside it any more. */}
       <p
-        className="pointer-events-none absolute inset-x-0 bottom-[92px] z-[4] px-5 font-mono text-[0.6875rem] italic leading-[1.5] text-accent max-lg:landscape:bottom-[76px] max-lg:landscape:max-w-[62%] sm:px-8 lg:px-12"
+        className="pointer-events-none absolute inset-x-0 bottom-[92px] z-[4] px-5 font-mono text-[0.6875rem] italic leading-[1.5] text-accent max-lg:landscape:static max-lg:landscape:mt-7 sm:px-8 lg:px-12"
         style={{
           opacity: settled ? 1 : 0,
           // And out of reach until it is here. The handles keep their 44px of
@@ -1629,7 +1705,12 @@ export default function About() {
           if (e.key === 'Home') { e.preventDefault(); setClock(START) }
           if (e.key === 'End') { e.preventDefault(); setClock(NOW) }
         }}
-        className="absolute inset-x-0 bottom-0 z-[3] cursor-ew-resize touch-none px-5 pb-6 pt-8 outline-none focus-visible:ring-1 focus-visible:ring-accent sm:px-8 lg:px-12"
+        /* Held to the floor of the screen, and on the flowing page simply the
+           last block before the footer. relative rather than static there, so
+           the hint line above the lanes still has this box to hang from — and
+           so the year winds by an across-the-rail drag while an up-and-down one
+           is left to the document, which is what pan-y buys. */
+        className="absolute inset-x-0 bottom-0 z-[3] cursor-ew-resize touch-none px-5 pb-6 pt-8 outline-none focus-visible:ring-1 focus-visible:ring-accent max-lg:landscape:relative max-lg:landscape:mt-7 max-lg:landscape:touch-pan-y sm:px-8 lg:px-12"
       >
         {/* Two gestures and no chrome to announce either: the surface turns and
             the years wind, and both are invisible until tried. This says it
@@ -1642,12 +1723,16 @@ export default function About() {
             {/* The wheel is a desk gesture: a finger on a phone reaches the
                 clock by dragging the rail, and the second clause has no
                 meaning there. Dropping it is also what leaves room for the
-                play control on the same line at 375px. */}
+                play control on the same line at 375px. It goes on the flowing
+                page too, at any width: there a scroll is how you read the page
+                and the wheel is not offered to the clock at all, so the hint
+                would be describing a gesture that does nothing. */}
             <span
               className={`${MONO} whitespace-nowrap text-muted transition-opacity duration-300 motion-reduce:transition-none`}
               style={{ opacity: year < NOW ? 0 : 1 }}
             >
-              Drag to turn<span className="max-sm:hidden"> · scroll to wind back</span>
+              Drag to turn
+              <span className="max-lg:landscape:hidden max-sm:hidden"> · scroll to wind back</span>
             </span>
             {/* On a phone the names are not painted beside the marks, so the
                 tour would light fifteen dots and say nothing. This is that
@@ -1745,7 +1830,12 @@ export default function About() {
         ref={cardRef}
         data-card
         aria-hidden={!active}
-        className={`absolute z-[7] max-h-[min(440px,68vh)] w-[296px] overflow-auto rounded-[10px] border border-line bg-paper shadow-[var(--chrome-lift)] transition-[opacity,transform] duration-200 ease-out motion-reduce:transition-none max-md:inset-x-3.5 max-md:bottom-3.5 max-md:top-auto max-md:max-h-[52%] max-md:w-auto ${
+        /* Fixed rather than absolute on the flowing page. Absolute, its box is
+           the whole document there, so the narrow frame's bottom-3.5 would put
+           the card at the foot of the page instead of the foot of the screen;
+           fixed puts it back on the screen and keeps it there while the page
+           scrolls under it. placeCard fits it to the viewport to match. */
+        className={`absolute z-[7] max-h-[min(440px,68vh)] w-[296px] overflow-auto rounded-[10px] border border-line bg-paper shadow-[var(--chrome-lift)] transition-[opacity,transform] duration-200 ease-out motion-reduce:transition-none max-md:inset-x-3.5 max-md:bottom-3.5 max-md:top-auto max-md:max-h-[52%] max-md:w-auto max-lg:landscape:fixed ${
           active ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-1 opacity-0'
         }`}
         onPointerEnter={clearClose}

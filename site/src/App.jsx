@@ -62,6 +62,23 @@ function App() {
   // load, and the page inside it lost the height its centring resolves against.
   const route = normalize(pathname)
   const fullBleed = route === '/' || route === '/about' || route === '/work'
+  /*
+   * And the two of those three that give the lock up on a phone held sideways.
+   *
+   * A landscape phone leaves about 330px of usable height once the island and
+   * the footer have taken theirs, and neither the cover nor the biography fits
+   * in that without being squeezed into something neither of them is. So below
+   * lg and lying down these two flow instead: the page grows past the viewport,
+   * the document scrolls, and the footer lands at the end of it rather than
+   * being held on screen. /work is not in this set — a filmstrip is one screen
+   * at any orientation, and it keeps its lock.
+   *
+   * The switch is a class and not a measurement. min-h-0 is what lets a flex
+   * item shrink below its content; releasing it in exactly the media query the
+   * two pages are already written against is the whole of the mechanism, so the
+   * shell has nothing to observe and no state to keep in step.
+   */
+  const flowsShort = route === '/' || route === '/about'
 
   // Held in state rather than a ref so that setting it re-renders and the
   // portal in FooterSlot finds its target on the pass after the footer mounts.
@@ -110,7 +127,11 @@ function App() {
         <main
           id="main"
           tabIndex={-1}
-          className={`outline-none ${fullBleed ? 'flex min-h-0 flex-1 flex-col' : 'flex-1'}`}
+          className={`outline-none ${
+            fullBleed
+              ? `flex min-h-0 flex-1 flex-col${flowsShort ? ' max-lg:landscape:min-h-[auto]' : ''}`
+              : 'flex-1'
+          }`}
         >
           <Outlet />
         </main>

@@ -28,6 +28,17 @@ import { CC, crossCap, makeProjector } from '../lib/crosscap.js'
  * can stop and stay — which is what the survey's caption needs, since reading a
  * line of equations takes longer than any timeout worth setting.
  *
+ * One exception, and it is the whole of the exception: a phone held sideways.
+ * There the viewport is about 330px tall once the island and the band have
+ * taken theirs, which is not a screen this cover can be set on at any spacing
+ * worth having. So below lg and lying down the page stops being a screen and
+ * becomes a page — it flows, it scrolls, the footer sits at the end of the
+ * document — and the departure gesture is simply switched off, because a scroll
+ * cannot be both the way down a page and the way off it. The cue and the
+ * keyboard still go to /work; they never needed the gesture. With nothing left
+ * to meter, the survey is drawn whole and the caption stands at full opacity,
+ * which is the state the reduced-motion path already asks for.
+ *
  * This replaced a two-screen landing whose second screen was a canvas strand
  * field fanning down into four columns of project cards. Those cards live in
  * full on /work; the drawing (DataField) is gone, recoverable from git.
@@ -96,6 +107,12 @@ const CC_HOME_VIEW = { yaw: 90, pitch: 30, zoom: 1.5, ax: 0.9, ay: 0.14 }
 const CC_HOME_VIEW_MOBILE = { yaw: 90, pitch: 30, zoom: 3.0, ax: 0.5, ay: 0.42 }
 // The laptop starts here; below it in landscape still reads as the wide frame.
 const DESKTOP_MIN = 1024
+// A phone on its side, and the one shape this page does not try to be a screen
+// in. The same query the landscape classes below are written against, asked
+// here as well because three things that are not layout follow from it: the
+// wheel and the swipe are unbound, the survey is drawn whole, and the caption
+// stops reading a progress it can no longer be given.
+const SHORT_LAND = '(max-width: 1023.98px) and (orientation: landscape)'
 // What is drawn at rest, and what the gesture opens toward whole. On the laptop
 // it is a fraction of the u-rows, drawn in order — the fan grows out of the
 // corner as the wheel turns. On a phone it is a fraction of the field's RADIUS:
@@ -137,6 +154,10 @@ export default function Home() {
   const [motionOk, setMotionOk] = useState(
     () => !window.matchMedia('(prefers-reduced-motion: reduce)').matches
   )
+  // Whether the page is flowing rather than filling the screen. Held in state
+  // because what it changes is behaviour and not only paint: the listeners the
+  // gesture registers, and what the survey and the caption are shown at.
+  const [flowing, setFlowing] = useState(() => window.matchMedia(SHORT_LAND).matches)
   // Fire-once, so rapid wheel or a double tap cannot queue two navigations.
   const firedRef = useRef(false)
   const canvasRef = useRef(null)
@@ -156,6 +177,23 @@ export default function Home() {
   useEffect(() => {
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
     const apply = () => setMotionOk(!mq.matches)
+    apply()
+    mq.addEventListener('change', apply)
+    return () => mq.removeEventListener('change', apply)
+  }, [])
+
+  // Turning the phone on its side mid-gesture would otherwise leave the block
+  // lifted and the survey half-open on a page that no longer has a gesture to
+  // walk either of them back, so the held position is dropped on the way in.
+  useEffect(() => {
+    const mq = window.matchMedia(SHORT_LAND)
+    const apply = () => {
+      setFlowing(mq.matches)
+      if (mq.matches) {
+        progRef.current = 0
+        setP(0)
+      }
+    }
     apply()
     mq.addEventListener('change', apply)
     return () => mq.removeEventListener('change', apply)
@@ -203,6 +241,12 @@ export default function Home() {
   // is still the only place this page goes, but how far along the way you are is
   // yours to set, and to undo. The keyboard and cue paths go straight to the
   // leave, with no sweep, because there is no gesture to meter.
+  //
+  // Except while the page is flowing, where the two metered paths are not
+  // registered at all: there a wheel and an upward drag are how the visitor
+  // reads the rest of the page, and a scroll that both moved the document and
+  // built toward leaving it would be neither gesture done properly. The
+  // keyboard keys stay, because they are a jump and not a scroll.
   useEffect(() => {
     // Move the held position by some fraction of the whole gesture and render
     // it. Commit is the top of the range rather than a separate test, so every
@@ -273,10 +317,12 @@ export default function Home() {
       fire()
     }
 
-    window.addEventListener('wheel', onWheel, { passive: true })
-    window.addEventListener('touchstart', onTouchStart, { passive: true })
-    window.addEventListener('touchmove', onTouchMove, { passive: true })
-    window.addEventListener('touchend', onTouchEnd, { passive: true })
+    if (!flowing) {
+      window.addEventListener('wheel', onWheel, { passive: true })
+      window.addEventListener('touchstart', onTouchStart, { passive: true })
+      window.addEventListener('touchmove', onTouchMove, { passive: true })
+      window.addEventListener('touchend', onTouchEnd, { passive: true })
+    }
     window.addEventListener('keydown', onKeyDown)
     return () => {
       window.removeEventListener('wheel', onWheel)
@@ -285,7 +331,7 @@ export default function Home() {
       window.removeEventListener('touchend', onTouchEnd)
       window.removeEventListener('keydown', onKeyDown)
     }
-  }, [fire])
+  }, [fire, flowing])
 
   /*
    * The survey on the cover.
@@ -507,9 +553,12 @@ export default function Home() {
   }, [])
 
   // Feed p into the survey sweep, matched to the same timing the give moves on.
+  // Flowing, there is no p worth reading: the survey is opened whole and held
+  // there, the same still state reduced motion is given, so the drawing is
+  // finished rather than waiting on a gesture the page no longer offers.
   useEffect(() => {
-    sweepToRef.current?.(p, pMs)
-  }, [p, pMs, motionOk])
+    sweepToRef.current?.(flowing ? 1 : p, flowing ? 0 : pMs)
+  }, [p, pMs, motionOk, flowing])
 
   // Enter on the focused cue dispatches a click too, so this one handler
   // animates both the pointer and the keyboard; the Link keeps its href, so the
@@ -520,12 +569,23 @@ export default function Home() {
   }
 
   // The give lifts the block toward the leave as p grows; reduced motion takes
-  // none of it. At the leave the full lift-and-fade takes the transform over.
-  const give = motionOk ? GIVE_TRAVEL * p : 0
+  // none of it, and neither does the flowing page, which has no p. At the leave
+  // the full lift-and-fade takes the transform over.
+  const give = motionOk && !flowing ? GIVE_TRAVEL * p : 0
 
   return (
+    /*
+     * Lying down, three of these are the lock and all three come off. The
+     * overflow clipped a page that is now taller than its box; the touch-action
+     * gave the browser nothing to pan, which is what made a finger on this page
+     * do nothing at all; and min-h-0, released in the shell, is what lets the
+     * column grow instead of shrinking under its own content. What is left —
+     * the centring, the padding, the island's clearance — is the same
+     * composition, only with somewhere to go. The bottom padding is the
+     * caption's room now that it stands in the flow rather than on the floor.
+     */
     <div
-      className="relative flex flex-1 flex-col items-center justify-center overflow-hidden px-4 text-center [touch-action:pinch-zoom] max-lg:landscape:pt-[76px]"
+      className="relative flex flex-1 flex-col items-center justify-center overflow-hidden px-4 text-center [touch-action:pinch-zoom] max-lg:landscape:overflow-visible max-lg:landscape:pb-10 max-lg:landscape:pt-[76px] max-lg:landscape:[touch-action:auto]"
       style={{
         transition: leaving
           ? `opacity ${LEAVE_MS}ms ease, transform ${LEAVE_MS}ms ease`
@@ -536,11 +596,17 @@ export default function Home() {
     >
       {/* The survey, computed on the cross-cap and swept in by the gesture. A
           background field behind the type, running off the top and right edges;
-          see the survey effect above and CC_HOME_VIEW for the framing. */}
+          see the survey effect above and CC_HOME_VIEW for the framing.
+
+          Inset to the box everywhere but on the flowing page, where the box is
+          the whole document and a field stretched down it would be a texture
+          rather than a drawing. There it is cut to one viewport height and
+          stays behind the first screen, which is the screen it was framed for:
+          the corner fragment belongs to the name, and the name is up there. */}
       <canvas
         ref={canvasRef}
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-0 h-full w-full"
+        className="pointer-events-none absolute inset-0 z-0 h-full w-full max-lg:landscape:bottom-auto max-lg:landscape:h-[var(--app-h)]"
       />
 
       <div ref={nameRef} className="relative z-10 w-[min(560px,88vw)]">
@@ -599,6 +665,11 @@ export default function Home() {
           simply there. Hidden from readers: the canvas it annotates is too,
           and spoken symbol soup serves nobody.
 
+          On the flowing page it is neither held to the floor nor metered: it
+          drops into the flow under the name, where a caption on a page that
+          scrolls belongs, and it is simply present, because the drawing it
+          annotates is already whole.
+
           Set in the mono's italic rather than its upright, and in accent rather
           than muted: the same voice the site labels things in, leaning, which is
           the difference between a caption printed on the drawing and a note
@@ -626,10 +697,10 @@ export default function Home() {
           rather than leading the next line. */}
       <p
         aria-hidden="true"
-        className="pointer-events-none absolute bottom-3 left-0 right-0 px-4 font-mono text-[0.6875rem] italic text-accent"
+        className="pointer-events-none absolute bottom-3 left-0 right-0 px-4 font-mono text-[0.6875rem] italic text-accent max-lg:landscape:static max-lg:landscape:mt-11"
         style={{
-          opacity: motionOk ? Math.min(1, p / 0.7) : 1,
-          transition: motionOk ? `opacity ${pMs}ms ease` : 'none',
+          opacity: motionOk && !flowing ? Math.min(1, p / 0.7) : 1,
+          transition: motionOk && !flowing ? `opacity ${pMs}ms ease` : 'none',
         }}
       >
         <span className="whitespace-nowrap">0 ≤ u, v ≤ π ·</span>{' '}
