@@ -1580,7 +1580,21 @@ export default function About() {
                 data-place
                 ref={(el) => { pinRefs.current[p.id] = el }}
                 aria-label={`${p.name}, ${p.cities}`}
-                className="pointer-events-none absolute left-0 top-0 cursor-pointer rounded-full p-[7px] opacity-0 outline-none"
+                /* The loop positions this box off its own measured size, so the
+                   padding cannot grow without moving every dot off its station.
+                   The centred 24px overlay reaches the minimum target size with
+                   no layout consequence — the dot itself stays 5-9px.
+
+                   zIndex settles contested pixels. Around the pinch the fold
+                   brings marks within a hit-target of each other (and turning
+                   it re-deals those distances every pose), so overlaps cannot
+                   be sized away. The tie goes to the mark the drawing already
+                   ranks first — the label thinning's own precedence — instead
+                   of to whichever button happens to come later in the DOM;
+                   each transform is a stacking context, so the button is the
+                   only place the rank can live. */
+                style={{ zIndex: p.kind === 'now' ? 3 : p.kind === 'lived' ? 2 : 1 }}
+                className="pointer-events-none absolute left-0 top-0 cursor-pointer rounded-full p-[7px] opacity-0 outline-none before:absolute before:left-1/2 before:top-1/2 before:h-6 before:w-6 before:-translate-x-1/2 before:-translate-y-1/2 before:content-['']"
                 onPointerEnter={() => { hoverRef.current = p.id }}
                 onPointerLeave={() => { if (hoverRef.current === p.id) hoverRef.current = null }}
                 onFocus={() => openPlace(p.id)}
@@ -1827,7 +1841,13 @@ export default function About() {
                 key={`${t.name}-${t.from}`}
                 type="button"
                 aria-label={`${t.name}, ${t.role}, ${t.dates}`}
-                className="absolute rounded-full outline-none transition-opacity"
+                /* The bar stays a hairline — that is the drawing — but a 3px
+                   pointer target is unusable, so an invisible 24px strip rides
+                   centred on it (the coefficient handles' trick, sized down:
+                   44px here would swallow the tick row below and the controls
+                   above). The lanes abut side by side, so taller never
+                   collides with a neighbour. */
+                className="absolute rounded-full outline-none transition-opacity before:absolute before:inset-x-0 before:top-1/2 before:h-6 before:-translate-y-1/2 before:content-['']"
                 style={{
                   left: `${tx(t.from)}%`,
                   width: `${Math.max(0, tx(Math.min(t.to, year)) - tx(t.from))}%`,
