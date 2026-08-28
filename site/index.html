@@ -13,12 +13,14 @@
     <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96.png?v=2" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- The two paper values from index.css, so a phone browser paints its chrome
-         the colour of the page rather than of its own default. The bare one
-         leads: a browser that ignores the media attribute takes the first tag,
-         and light is the ground the site opens on. -->
+    <!-- The paper value from index.css, so a phone browser paints its chrome
+         the colour of the page rather than of its own default. One tag, no
+         media attribute: the page follows the stored choice, not the OS scheme,
+         so a prefers-color-scheme variant here would paint dark chrome around a
+         light page whenever the OS is dark and no choice is stored. The boot
+         script below and the island's applyTheme keep this in step with
+         data-theme instead — both hardcode the same two paper values. -->
     <meta name="theme-color" content="#f4f5f6" />
-    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#131317" />
     <meta
       name="description"
       content="Charles Abi Chahine • architect & computational designer. MaCAD, IAAC. Computational design, BIM workflows, and AI in architecture."
@@ -94,6 +96,12 @@
           var stored = localStorage.getItem('theme')
           var theme = stored === 'dark' ? 'dark' : 'light'
           document.documentElement.setAttribute('data-theme', theme)
+          if (theme === 'dark') {
+            // Keep the browser chrome on the page's paper. The light value is
+            // already in the tag, so only dark needs writing.
+            var meta = document.querySelector('meta[name="theme-color"]')
+            if (meta) meta.setAttribute('content', '#131317')
+          }
         } catch (e) {
           // localStorage throws in some privacy modes — fall back to light.
           document.documentElement.setAttribute('data-theme', 'light')
@@ -103,6 +111,48 @@
   </head>
   <body>
     <div id="root"></div>
+    <!--
+      The one page a visitor without JavaScript gets. Every stylesheet ships
+      inside the JS bundle, so this block styles itself: without it, no-JS is
+      a blank white page with nothing to click. Colours are the paper/ink pair
+      from index.css.
+    -->
+    <noscript>
+      <style>
+        body { margin: 0; background: #f4f5f6; }
+        .njs {
+          min-height: 100vh; display: flex; flex-direction: column;
+          justify-content: center; align-items: center; text-align: center;
+          padding: 24px; box-sizing: border-box;
+          font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #17181c;
+        }
+        .njs h1 { font-size: 28px; font-weight: 500; margin: 0; letter-spacing: -0.01em; }
+        .njs h1 span { color: #c9261b; }
+        .njs .role {
+          margin-top: 10px; font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+          font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; color: #6a707b;
+        }
+        .njs p { margin: 22px 0 0; max-width: 34em; font-size: 15px; line-height: 1.6; color: #3d414a; }
+        .njs .links { margin-top: 26px; font-size: 14px; }
+        .njs a { color: #1a5fd0; text-decoration: underline; text-underline-offset: 3px; }
+      </style>
+      <div class="njs">
+        <h1>Charles Abi Chahine<span>.</span></h1>
+        <div class="role">architect &middot; computational designer</div>
+        <p>
+          This portfolio is drawn in the browser and needs JavaScript to render its
+          projects, galleries, and drawings. Enable JavaScript and reload &mdash; or
+          reach me directly below.
+        </p>
+        <div class="links">
+          <a href="mailto:charles.abichahine@gmail.com">charles.abichahine@gmail.com</a>
+          &nbsp;&middot;&nbsp;
+          <a href="https://www.linkedin.com/in/CharlesAbiChahine">LinkedIn</a>
+          &nbsp;&middot;&nbsp;
+          <a href="/cv.pdf">CV (PDF)</a>
+        </div>
+      </div>
+    </noscript>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

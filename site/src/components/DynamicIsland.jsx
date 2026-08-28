@@ -38,10 +38,17 @@ const readTheme = () =>
 // Flips the theme with colour transitions suppressed — see the theme-switch
 // guard in index.css for why. The forced reflow is load-bearing: it makes the
 // new token values take effect while transitions are still off.
+// The two paper values, mirroring --color-paper in index.css. Also hardcoded in
+// the index.html boot script, which sets the meta before this bundle exists.
+const THEME_COLOR = { light: '#f4f5f6', dark: '#131317' }
+
 const applyTheme = (theme) => {
   const root = document.documentElement
   root.setAttribute('data-theme-switching', '')
   root.setAttribute('data-theme', theme)
+  // The browser chrome follows the page, not the OS scheme — same reasoning as
+  // the single theme-color tag in index.html.
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', THEME_COLOR[theme])
   void root.offsetHeight
   // rAF gives the tightest re-enable, but it does not run in a hidden or
   // throttled tab — and leaving the guard on would kill every hover transition
