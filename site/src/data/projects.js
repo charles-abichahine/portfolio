@@ -55,7 +55,7 @@ const _projects = [
     tools: ['Python', 'LLM agents', 'Vision models', 'Web app'],
     tag: 'AI',
     toolsShort: 'PYTHON · SENSORY AI',
-    cover: 'projects/sensi/cover.webm',
+    cover: 'projects/sensi/cover.webp',
     category: 'Computation & AI',
     award: 'MaCAD 2026 Award',
     links: {

@@ -139,7 +139,7 @@ export const VARIANTS = {
   'projects/saria/waterfront.webp': [2000, 480, 640, 960, 1440],
   'projects/sensi/onboard-poster.webp': [1024, 480, 640, 960],
   'projects/sensi/onboarding.webp': [1389, 480, 640, 960],
-  'projects/sensi/poster.webp': [560, 480],
+  'projects/sensi/cover.webp': [1530, 480, 640, 960, 1440],
   'projects/sensi/report-01.webp': [1392, 480, 640, 960],
   'projects/sensi/report-02.webp': [1393, 480, 640, 960],
   'projects/sensi/report-poster.webp': [1024, 480, 640, 960],
