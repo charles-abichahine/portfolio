@@ -1,4 +1,4 @@
-<svg viewBox="0 0 920 400" xmlns="http://www.w3.org/2000/svg" font-family="Arial, Helvetica, sans-serif">
+<svg viewBox="30 20 740 280" xmlns="http://www.w3.org/2000/svg" font-family="Arial, Helvetica, sans-serif">
   <defs>
     <marker id="sm-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
       <path d="M0,0 L10,5 L0,10 z" fill="#1257C9"/>
@@ -9,19 +9,17 @@
     </radialGradient>
   </defs>
 
-  <rect x="2" y="2" width="916" height="396" rx="18" fill="#F6F2EA" stroke="#E6DECF"/>
+  <rect x="2" y="2" width="916" height="316" rx="18" fill="#ffffff"/>
 
   <text x="190" y="58" text-anchor="middle" font-size="15" font-weight="bold" fill="#2A2622">One layer of voxels</text>
-  <text x="190" y="78" text-anchor="middle" font-size="12" fill="#6B6258">coloured cubes, all 1&#215;1</text>
 
-  <text x="725" y="58" text-anchor="middle" font-size="15" font-weight="bold" fill="#2A2622">Legal bricks, largest-first</text>
-  <text x="725" y="78" text-anchor="middle" font-size="12" fill="#6B6258">same colour, real part IDs</text>
+  <text x="590" y="58" text-anchor="middle" font-size="15" font-weight="bold" fill="#2A2622">Legal bricks, largest-first</text>
 
   <!-- LEFT GRID: 6 cols x 4 rows, cell 40, origin (70,110) -->
   <g>
     <!-- region colours: A tan r0-1 c0-3, B blue r0-1 c4-5, C red r2-3 c0-1, D yellow r2-3 c2-3, E grey r2-3 c4-5 -->
     <!-- row0 -->
-    <g stroke="#F6F2EA" stroke-width="3">
+    <g stroke="#ffffff" stroke-width="3">
       <rect x="70"  y="110" width="40" height="40" fill="#C9A66B"/><rect x="110" y="110" width="40" height="40" fill="#C9A66B"/><rect x="150" y="110" width="40" height="40" fill="#C9A66B"/><rect x="190" y="110" width="40" height="40" fill="#C9A66B"/><rect x="230" y="110" width="40" height="40" fill="#2E5FA3"/><rect x="270" y="110" width="40" height="40" fill="#2E5FA3"/>
       <rect x="70"  y="150" width="40" height="40" fill="#C9A66B"/><rect x="110" y="150" width="40" height="40" fill="#C9A66B"/><rect x="150" y="150" width="40" height="40" fill="#C9A66B"/><rect x="190" y="150" width="40" height="40" fill="#C9A66B"/><rect x="230" y="150" width="40" height="40" fill="#2E5FA3"/><rect x="270" y="150" width="40" height="40" fill="#2E5FA3"/>
       <rect x="70"  y="190" width="40" height="40" fill="#B23A2E"/><rect x="110" y="190" width="40" height="40" fill="#B23A2E"/><rect x="150" y="190" width="40" height="40" fill="#E0B635"/><rect x="190" y="190" width="40" height="40" fill="#E0B635"/><rect x="230" y="190" width="40" height="40" fill="#8C877D"/><rect x="270" y="190" width="40" height="40" fill="#8C877D"/>
@@ -58,6 +56,4 @@
     </g>
   </g>
 
-  <text x="460" y="330" text-anchor="middle" font-size="13.5" fill="#4A4138">For each layer, a greedy search covers the studs with the <tspan font-weight="bold">largest legal brick</tspan> that fits and shares a colour.</text>
-  <text x="460" y="352" text-anchor="middle" font-size="13.5" fill="#4A4138">Bricks first, then plates, then smooth tiles on top. A 1&#215;1 is the guaranteed last resort.</text>
 </svg>

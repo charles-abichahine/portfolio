@@ -59,6 +59,7 @@ const _projects = [
     category: 'Computation & AI',
     award: 'MaCAD 2026 Award',
     links: {
+      live: 'https://sensi.emiliechidiac.com',
       github: 'https://github.com/sclebow/AIA26_Studio/tree/main/team_02',
       blog: 'https://blog.iaac.net/sensi-making-comfort-a-design-layer/',
     },
@@ -69,7 +70,7 @@ const _projects = [
       {
         heading: 'The sensory layer',
         brief:
-          'Comfort research studies one sense at a time, but we take a room in through all of them at once, and they are coupled: one moderates another. Add a bigger window and the daylight improves, but the same glass is a thinner sound barrier and leaks heat. The room score is half mean, half worst, because the worst sense is the one you would actually feel. Scoring is deterministic; the LLM routes intent and explains results, it never decides them.',
+          'Comfort research studies one sense at a time, but we take a room in through all of them at once, and they are coupled: one moderates another. The room score is half mean, half worst, because the worst sense is the one you would actually feel. Scoring is deterministic; the LLM explains results, it never decides them.',
         body: [
           'Comfort research studies one sense at a time: thermal has its own models, acoustic its own standards. But we take a room in through all of them at once, and the senses are coupled: one moderates another. We call it the ripple. Add a bigger window and the daylight improves, but the same glass is a thinner sound barrier and leaks heat, and the noise that gets in can even diminish the daylight you gained. One design move, a chain of consequences.',
           'The room score is not an average. It is half mean, half worst: the worst sense carries the room, because that is the one you would actually feel. A kitchen that scores fine on everything except smell does not get to hide behind its other senses. The scoring is deterministic: fixed rules over a coupling matrix. The LLM routes intent and explains results; it never decides the score. No black box.',
@@ -88,12 +89,13 @@ const _projects = [
         media: [
           { type: 'video', src: 'projects/sensi/onboard.mp4', caption: 'Onboarding: from a few questions and a moodboard to a personal weighting of the six senses.' },
           { type: 'image', src: 'projects/sensi/onboarding.webp', caption: 'The persona, visualized as a petal rose: your comfort priorities, made explicit.' },
+          { type: 'image', src: 'projects/sensi/persona.webp', caption: 'The profile reveal: who Sensi is designing for, and how the plan will be scored.' },
         ],
       },
       {
         heading: 'Act 2 · Shape: comfort you can edit',
         brief:
-          'The heart of the system. You talk to it in plain language and a fast routing model classifies your intent in about 0.6 seconds. An edit is planned, validated against the plan, applied and re-scored live, and kept as a checkpoint. Rooms are nodes and doors are edges, so comfort becomes a zoning problem you can see.',
+          'The heart of the system. You talk to it in plain language and a fast routing model classifies your intent in about 0.6 seconds. An edit is planned, validated, applied and re-scored live, kept as a checkpoint. Rooms are nodes and doors are edges, so comfort becomes a zoning problem you can see.',
         body: [
           'This is the heart of the system. You talk to it in plain language; a fast routing model classifies your intent in about 0.6 seconds: score a room, edit it, or explore the relationships. Ask a question and a heavier model reads the whole room and answers in words. Make an edit (change a material, add a window, place curtains, adjust ventilation) and the agent plans it, validates it against the plan, applies it, and re-scores, live. Every edit is kept as a checkpoint, so the plan improves honestly over time.',
           'Rooms are nodes, doors are edges: the kitchen’s noise and smell reaching the bedroom through the hallway makes comfort a zoning problem you can see. The galaxy view holds the whole project as one living map of rooms, senses, and the design levers behind them, so you can find the connection you did not know was there.',
@@ -103,12 +105,15 @@ const _projects = [
           { type: 'image', src: 'projects/sensi/shape-01.webp', caption: 'Reading the plan into rooms, uses, and adjacencies.' },
           { type: 'image', src: 'projects/sensi/shape-02.webp', caption: 'Scores respond to every edit, the ripple propagating by fixed rules.' },
           { type: 'image', src: 'projects/sensi/shape-03.webp', caption: 'The galaxy view: rooms, senses, and levers as one connected system.' },
+          { type: 'image', src: 'projects/sensi/galaxy.webp', caption: 'The galaxy at rest: the whole project held as one quiet map.' },
+          { type: 'image', src: 'projects/sensi/shape-analysis.webp', caption: 'A full analysis: the kitchen flagged, the fixes suggested, the whole layout read.' },
+          { type: 'image', src: 'projects/sensi/checkpoints.webp', caption: 'Senses across checkpoints: every edit committed, every sense a line that answers it.' },
         ],
       },
       {
         heading: 'Act 3 · Report: closing the loop',
         brief:
-          'Final scores write a prompt and a vision model renders each room under an honest rule: only the extreme senses speak, the comfortable middle stays quiet. You compare it back to the moodboard from Act 1. About $0.039 per room, 2.75× faster than the alternative we tested.',
+          'Final scores write a prompt and a vision model renders each room under an honest rule: only the extreme senses speak, the comfortable middle stays quiet. About $0.039 per room, 2.75× faster than the alternative we tested.',
         body: [
           'The last act closes the loop. Your final scores write a prompt and a vision model renders each room, under an honest rule: only the extreme senses speak. A clearly good or bad sense writes a phrase, the comfortable middle stays quiet, so the render stays grounded in what actually changed. You compare it back to the moodboard from Act 1; input and output meet. We benchmarked the renders across providers: about $0.039 per room and 2.75× faster than the alternative we tested.',
         ],
@@ -116,6 +121,7 @@ const _projects = [
           { type: 'video', src: 'projects/sensi/report.mp4', caption: 'Generating the report: final scores become a grounded render of each room.' },
           { type: 'image', src: 'projects/sensi/report-01.webp', caption: 'The comfort report: the sensory layer, made legible.' },
           { type: 'image', src: 'projects/sensi/report-02.webp', caption: 'Room-by-room detail, ready for a design team to act on.' },
+          { type: 'image', src: 'projects/sensi/report-vision.webp', caption: 'Before and after a change of materials, with the prompts the scores wrote.' },
         ],
       },
     ],
@@ -208,7 +214,9 @@ const _projects = [
           'With London as the training set, we applied the model to Barcelona’s Eixample and Trastevere in Rome. The Eixample comes out almost entirely high-risk, not because it is dangerous, but because its orthogonal grid, high enclosure, and high connectivity map onto London’s high-risk feature region. SHAP pinpoints the divergence: land use and visibility hit values the model has never seen, so it extrapolates into high-risk by default. Not an architecture flaw: a per-city normalisation and distribution-shift problem. English cities like Leeds and Birmingham, which share London’s morphological history, transfer far better; re-fitting the pipeline on Barcelona produces a contextually plausible spread of its own.',
         ],
         media: [
-          { type: 'image', src: 'projects/urban-risk/cross-city.webp', caption: 'The same model on London, Barcelona, and Rome: the reading breaks where the morphology diverges.' },
+          { type: 'image', src: 'projects/urban-risk/cross-city-islington.webp', caption: 'Islington, London: the model on home ground.' },
+          { type: 'image', src: 'projects/urban-risk/cross-city-eixample.webp', caption: 'The Eixample, Barcelona: a grid the training never saw.' },
+          { type: 'image', src: 'projects/urban-risk/cross-city-trastevere.webp', caption: 'Trastevere, Rome: medieval fabric, read at the edge of distribution.' },
           { type: 'image', src: 'projects/urban-risk/shap.webp', caption: 'SHAP: London’s high-risk drivers stay in-distribution; the Eixample’s do not.' },
         ],
       },
@@ -295,31 +303,31 @@ const _projects = [
       {
         heading: 'A LoRA that speaks LEGO',
         brief:
-          'Base FLUX.2 does not speak fluent LEGO Architecture. We trained a LoRA on the visual grammar of real LEGO Architecture sets and swept its strength from 0 to 1.5: at 0 a plain building, at 1.0 the studs and brick seams snap in. The LEGO-ness lives in the fine-tune, not in the words.',
+          'Base FLUX.2 does not speak fluent LEGO Architecture. We trained a LoRA on the visual grammar of real LEGO Architecture sets and swept its strength: at 1.0 the studs and brick seams snap in. The LEGO-ness lives in the fine-tune, not in the words.',
         body: [
           'Base FLUX.2 does not speak fluent LEGO Architecture: ask for a LEGO building and you get something vaguely blocky. So we trained a LoRA on the visual grammar of real LEGO Architecture sets and swept its strength from 0 to 1.5: at 0 the render is a plain building, at 1.0 the studs and brick seams snap in. The LEGO-ness genuinely lives in the fine-tune, not in the words.',
         ],
         media: [
-          { type: 'image', src: 'projects/legoarch/slide-lora.webp', caption: 'Same prompt, same seed, only the LoRA strength changes. 1.0 wins.' },
+          { type: 'image', src: 'projects/legoarch/lora-sweep.webp', caption: 'Same prompt, same seed, only the LoRA strength changes: at 1.0 the studs and seams snap in.' },
           { type: 'image', src: 'projects/legoarch/generative-sagrada.webp', caption: 'FLUX.2 + the legoarch LoRA rendering the Sagrada Família as an official-set photo.' },
         ],
       },
       {
         heading: 'From one photo to a whole object',
         brief:
-          'TRELLIS-2 completes the full 3D form from the single render, openly guessing the unseen back. Then the deterministic half begins: the mesh is voxelized onto plate-height layers, pre-stretched 2.5× vertically because bricks are not cubes, and colours are exposure-matched back to the render.',
+          'TRELLIS-2 completes the full 3D form from the single render, openly guessing the unseen back. Then the deterministic half begins: the mesh is voxelized onto plate-height layers, pre-stretched 2.5× vertically because bricks are not cubes.',
         body: [
           'TRELLIS-2 takes the single render and completes the full 3D form: openly guessing the unseen back from everything it knows about how buildings behave. Then the deterministic half begins: the mesh is voxelized onto plate-height layers (bricks are not cubes, so the mesh is pre-stretched 2.5× vertically), and colours are sampled and exposure-matched back to the original render.',
         ],
         media: [
           { type: 'image', src: 'projects/legoarch/mesh-sagrada.webp', caption: 'The TRELLIS mesh: a couple hundred thousand triangles with a wrapped texture.' },
-          { type: 'image', src: 'projects/legoarch/mesh-vs-lego.webp', caption: 'Smooth mesh versus legolized model.' },
+          { type: 'image', src: 'projects/legoarch/mesh-vs-lego.webp', caption: 'The builder, mid-handoff: the smooth mesh on one side of the slider, the bricks on the other.' },
         ],
       },
       {
         heading: 'The legolizer: where buildable gets earned',
         brief:
-          'The computational centrepiece contains no AI at all. A split-and-merge solver covers each layer with the largest legal bricks that fit, with a slope pass that bevels staircases and a running-bond penalty that offsets seams. Colours snap to the nearest real LEGO colour in CIEDE2000, and 44 parts by 48 colours give 1,598 validated combinations.',
+          'The computational centrepiece contains no AI at all. A split-and-merge solver covers each layer with the largest legal bricks that fit, with a slope pass and a running-bond penalty. 44 parts by 48 colours give 1,598 validated combinations.',
         body: [
           'The computational centrepiece contains no AI at all. A split-and-merge solver covers each layer with the largest legal bricks that fit, full-height bricks first, then plates, then smooth tiles, with a slope pass that bevels staircases (to our knowledge the first open implementation of a method published in 2019) and a running-bond penalty that offsets seams the way a real bricklayer would.',
           'Colours snap to the nearest real LEGO colour measured in CIEDE2000, the perceptual standard, not naive RGB distance. Every footprint is a real BrickLink part: 44 parts and 48 colours cross-validated between Rebrickable and LDraw into 1,598 legal combinations. Buildable means every piece goes in a cart.',
@@ -332,13 +340,12 @@ const _projects = [
       {
         heading: 'A set you can keep',
         brief:
-          'The output is a complete product: box art, a build booklet, a priced parts list, and a shelf that keeps every set you have generated.',
+          'The output is a product: box art, a build booklet, a priced parts list, and a shelf that keeps every set.',
         body: [
           'The output is a complete product: box art, a build booklet, a priced parts list, and a shelf that keeps every set you have generated. Re-roll the render, re-tune the bricks, reopen any set.',
         ],
         media: [
-          { type: 'image', src: 'projects/legoarch/sagrada-box.webp', caption: 'Box art, generated per set.' },
-          { type: 'image', src: 'projects/legoarch/sagrada-booklet.webp', caption: 'The build booklet.' },
+          { type: 'image', src: 'projects/legoarch/box-and-booklet.webp', caption: 'Box art and build booklet, generated per set.' },
           { type: 'image', src: 'projects/legoarch/shelf-3d.webp', caption: 'The shelf: every generated set, kept.' },
         ],
       },
@@ -370,7 +377,7 @@ const _projects = [
       {
         heading: 'The alveolar spine: a lung analogy',
         brief:
-          'The core takes its logic from the human lung: a porous structural core mirroring the bronchi, carrying load and moving air at once. The organising logic for both the structure and the way the tower breathes.',
+          'The core takes its logic from the human lung: a porous structural core mirroring the bronchi, carrying load and moving air at once.',
         body: [
           'The core of the building is defined by the Alveolar Spine. Taking inspiration from the human lung, we developed a porous structural core that mirrors the function of the bronchi: a spine that carries load and moves air at the same time. The concept is not decorative; it is the organising logic for both the structure and the way the tower breathes.',
         ],
@@ -381,30 +388,31 @@ const _projects = [
       {
         heading: 'A self-braced skeleton',
         brief:
-          'Volumes plug onto the core, and three cores form a self-bracing triangle. Alpaca read the stress, the optimization stripped what was idle, and the voxels that survived became a lattice: 1,650 tonnes down to 235.',
+          'Volumes plug onto the core, and three cores form a self-bracing triangle. Alpaca read the stress and the optimization stripped what was idle: 1,650 tonnes down to 235.',
         body: [
           'The structure rests on the core: each volume is plugged onto it, so load transfers from volume to core to foundation. Three cores form a triangle that turns vertical mass into a self-braced system. Using Alpaca we measured the stress at the points connecting the core to the volumes, ran a structural optimization to remove unnecessary material, and transformed the resulting voxels into a lattice: dense at high-load junctions, tapered where the loads fall away. The optimization cuts the primary structure from roughly 1,650 to 235 tonnes.',
         ],
         media: [
           { type: 'image', src: 'projects/breathing-mass/structure.webp', caption: 'Self-braced structural system: load transfer from plugged volumes through the triangulated cores.' },
-          { type: 'loop', src: 'projects/breathing-mass/topology.webm', caption: 'Topology optimization: the stressed column resolving into a load-following lattice.' },
+          { type: 'loop', src: 'projects/breathing-mass/topology.webm', caption: 'Topology optimization: column into lattice.' },
         ],
       },
       {
         heading: 'Growing the volumes',
         brief:
-          'The plugin masses are grown along the lattice, placed by incident radiation, wind pressure and volumetric density, each candidate measured across 232 branches.',
+          'The plugin masses are grown along the lattice, placed by radiation, wind pressure and density, each candidate measured across 232 branches.',
         body: [
           'The plugin masses are computationally grown along the lattice, their placement and density optimized by incident radiation for thermal regulation, wind pressure for airflow, and volumetric density. A data-driven deterministic engine measures each candidate volume across 232 branches and normalises it, so every form is justified by data before it is committed.',
         ],
         media: [
+          { type: 'image', src: 'projects/breathing-mass/data-engine.webp', caption: 'The deterministic engine: program requirements and environmental pressures negotiated into form, published to the program and data teams through Speckle.' },
           { type: 'image', src: 'projects/breathing-mass/volume-scatter.webp', caption: 'Volume scattering: candidate masses evaluated by radiation, wind, and density.' },
         ],
       },
       {
         heading: 'The breathing core: an environmental machine',
         brief:
-          'A water cascade, electrostatic precipitation and Climeworks-style capture pull CO₂ and particulates from the air before the spine redistributes it. Structure and environmental system are one object.',
+          'A water cascade, electrostatic precipitation and Climeworks-style capture pull CO₂ and particulates from the air before the spine redistributes it.',
         body: [
           'The core is where the tower earns its name. A water-cascade system, electrostatic precipitation for air purification, and Climeworks-style capture pull CO₂ and particulates from ambient air, cleaning it before it is redistributed through the spine and stored back into the ground. The structure and the environmental system are one and the same object.',
         ],
@@ -415,7 +423,7 @@ const _projects = [
       {
         heading: 'Fixed vs. adaptive facade',
         brief:
-          'A pattern from mashrabiya logic becomes a performative facade: adaptive where the skin must respond, fixed where it need not. Wind and radiation set it, and one grammar reads both ways.',
+          'A pattern from mashrabiya logic becomes a performative facade: adaptive where the skin must respond, fixed where it need not.',
         body: [
           'The skin operates in two modes depending on the program behind it. A pattern derived from mashrabiya logic becomes a performative facade geometry: an adaptive, dynamic system where it needs to breathe and respond, and a fixed, collated system where it does not. Wind direction and radiation set the pattern; the same grammar reads as both a static and a moving skin.',
         ],
@@ -452,7 +460,7 @@ const _projects = [
     tools: ['Rhino', 'Grasshopper', 'Wasp', 'Kangaroo', 'Speckle'],
     tag: 'GH',
     toolsShort: 'GH · WASP · KANGAROO',
-    cover: 'projects/huddle/persp-01.webp',
+    cover: 'projects/huddle/axonometric.webp',
     category: 'Design & Research',
     award: 'IAAC Exhibition',
     links: {
@@ -487,6 +495,7 @@ const _projects = [
         media: [
           { type: 'image', src: 'projects/huddle/kit-of-parts.webp', caption: 'The kit of parts across three levels: cross modules for general functions, reinforced cores for circulation, triangular connectors, and the 12 m theatre volume, coloured private, semi-private and public.' },
           { type: 'image', src: 'projects/huddle/module-rules.webp', caption: 'The rules the aggregation obeys: the semisphere reduced to a 4 m cube, the 16 m height limit, the wind-proof courtyards, and the wind tunnels the massing creates.' },
+          { type: 'image', src: 'projects/huddle/module-derivation.webp', caption: 'From semisphere to kit: the 4 m cube, the sleeping module, the triangle between them.' },
         ],
       },
       {
@@ -500,6 +509,8 @@ const _projects = [
         media: [
           { type: 'image', src: 'projects/huddle/workflow.webp', caption: 'The whole definition: program definition, two Kangaroo passes, the Wasp aggregation rule layout, skin generation, information extraction.' },
           { type: 'image', src: 'projects/huddle/aggregation.webp', caption: 'A Wasp run, from the precise subprogram gradient through the iterations to the part counts it reports back.' },
+          { type: 'image', src: 'projects/huddle/data-extraction.webp', caption: 'Everything the model reports back: counts and volumes by program and access type, structural and energy data, and the skin unstacked into its panel types.' },
+          { type: 'image', src: 'projects/huddle/wasp-iteration.webp', caption: 'Mid-run: the Kangaroo gradient above, the Wasp aggregation below.' },
         ],
       },
       {
@@ -525,6 +536,7 @@ const _projects = [
         media: [
           { type: 'image', src: 'projects/huddle/structure.webp', caption: 'Structure by part: the engineered-wood crosses, square modules and y-node, with the shear walls, the seismic isolators, and the three layers of the skin.' },
           { type: 'image', src: 'projects/huddle/panels.webp', caption: 'Three precedents synthesised into three panels: the Shield for windward pressure, the Lens for solar gain, the Gill for ventilation.' },
+          { type: 'image', src: 'projects/huddle/panel-placement.webp', caption: 'Panel placement as a morph: the skin in the render, and the mesh coloured by panel type from the daylight, orientation and wind indices.' },
         ],
       },
       {
@@ -566,12 +578,13 @@ const _projects = [
       {
         heading: 'More than a roof',
         brief:
-          'The system is deliberately independent: it revitalizes the market below without touching the historic walls. Voids are cut into the geometry precisely so the new form pulls away from its context. It reads as a continuous volume nested within the void, a porous buffer that protects the atrium without sealing it off.',
+          'The system is deliberately independent: it revitalizes the market below without touching the historic walls. Voids are cut into the geometry precisely so the new form pulls away from its context: a porous buffer nested within the void.',
         body: [
           'The system is deliberately independent: it revitalizes the market below without touching the historic walls. Voids are cut into the geometry precisely so the new form pulls away from its context, respecting the constraint of independence. It reads as a continuous volume that nests within the void: a porous buffer that protects the atrium without sealing it off.',
         ],
         media: [
-          { type: 'image', src: 'projects/luminous-stratum/concept.webp', caption: 'A volume of sedimented light: an independent system layered above the untouched historic market.' },
+          { type: 'image', src: 'projects/luminous-stratum/concept-strip.webp', caption: 'The references: a shaft of light in a dark room, sedimented strata, an excavated pit.' },
+          { type: 'image', src: 'projects/luminous-stratum/exploded-system.webp', caption: 'The system exploded, level by level: the historic hall untouched.' },
           { type: 'image', src: 'projects/luminous-stratum/axo.webp', caption: 'The lattice hovering within the historic market hall.' },
         ],
       },
@@ -590,7 +603,7 @@ const _projects = [
       {
         heading: 'Geometry becomes function',
         brief:
-          'Vertical faces become gradient frosted louvers that control sun glare; horizontal faces become structural lamellas serving as shelving and walkable surfaces. All of it materializes at once from the relaxed mesh. The system is modular, and for the last vault different anchor points turn it into a continuous staircase.',
+          'Vertical faces become gradient frosted louvers that control sun glare; horizontal faces become structural lamellas serving as shelving and walkable surfaces. The system is modular, and for the last vault different anchor points turn it into a continuous staircase.',
         body: [
           'Vertical faces become gradient frosted louvers that control sun glare; horizontal faces become structural lamellas that serve as shelving and walkable surfaces. The architectural elements all materialize simultaneously from the relaxed mesh: the form-finding is the generator, resolving the complex geometry into louvers, lamellas, and paths in one unified move. The system is modular, repeated along the market hall; for the last vault, different anchor points turn the workflow into a continuous staircase connecting the two levels.',
         ],
@@ -1256,18 +1269,20 @@ const _projects = [
       {
         heading: 'A ring in a crater',
         brief:
-          'Three concentric circles. The inner one is a controlled farm under a glass facade, visible from every room. The middle circle is transportation. The outer is living and working space, with five sleeping pods on the lowest level. The shell is 3D-printed regolith outside and high-density polyethylene inside for an air-tight seal, with BIPV panels over the facade; the canyon walls do the rest of the shielding.',
+          'Three concentric circles: a farm under glass at the centre, visible from every room, transportation in the middle, living and working outside, five sleeping pods on the lowest level. The shell is printed regolith over an air-tight HDPE liner, with BIPV panels over the facade; the canyon walls do the rest of the shielding.',
         body: [
           'Three concentric circles. The inner one is a controlled farm under a glass facade, visible from every room so the researchers far from home keep a piece of Earth’s green in view. The middle circle is transportation. The outer circle is living and working space, and on the lowest level five sleeping pods give the crew comfort and protection against the Martian environment. The shell is 3D-printed regolith on the outside, high-density polyethylene on the inside for an air-tight seal, and BIPV solar panels over the facade; the canyon walls of Valles Marineris do the rest of the radiation shielding.',
         ],
         media: [
           { type: 'image', src: 'projects/marception/render.webp', caption: 'Ring 4000 on its crater rim inside Valles Marineris.' },
+          { type: 'image', src: 'projects/marception/levels-and-plan.webp', caption: 'The ring by level, the shell to the base, with the transfer box, the sleeping pods and the plan of the outer circle at R30m.' },
+          { type: 'image', src: 'projects/marception/section.webp', caption: 'The long section through the crater pit: laboratory and farming on one side, gym, rail and the vehicle gate on the other, the sleeping pods and technical floors below.' },
         ],
       },
       {
         heading: 'Why a ring',
         brief:
-          'The craters are the site Mars already gives you, so the ring takes their shape instead of fighting it. The ecosystem closes on itself: water split into oxygen and hydrogen, plants turning the crew’s CO₂ into food, the carbon and water reacting back into HDPE for printing and fuel. Transport runs in a loop, and expansion is simply the next crater over.',
+          'The craters are the site Mars already gives you, so the ring takes their shape. The ecosystem closes on itself: water split into oxygen and hydrogen, plants turning the crew’s CO₂ into food, carbon and water reacting back into HDPE for printing and fuel. Transport runs in a loop, and expansion is the next crater over.',
         body: [
           'The craters are the site Mars already gives you, so the ring takes their shape instead of fighting it. And a ring suits everything a habitat needs: the ecosystem closes on itself, water split by electrolysis into oxygen and hydrogen, plants turning the crew’s CO₂ into food, the carbon and water reacting back into HDPE for printing and fuel for back-up power and vehicles; the transport runs in a loop; and expansion is simply the next crater over, 4,000 km of canyon to grow along.',
         ],
@@ -1276,7 +1291,7 @@ const _projects = [
       {
         heading: 'How it was made',
         brief:
-          'Regolith melted into a paste and printed by drone robotics, every surface shaped to stand at an angle that needs no support. Then the model in Rhino with SubD, from the massing of the ring down to the sleeping pods. Then the part that was new at the time: feeding the geometry to generative image tools when image generation was only just becoming a thing, and finishing in V-Ray.',
+          'Regolith melted into paste and printed by drones, every surface at an angle that needs no support. Modelled in Rhino with SubD, fed to generative image tools when that was still new, finished in V-Ray.',
         body: [
           'First the research: regolith melted into a paste and printed by drone robotics, and every surface shaped to stand at an angle that needs no support, because support structures are the thing nobody wants to print on Mars. Then the model, in Rhino with SubD, from the massing of the ring down to the sleeping pods. Then the part that was new at the time: feeding the geometry to generative image tools, when image generation was only just becoming a thing, to render concepts straight from the model, and finishing them in V-Ray.',
         ],
@@ -1287,7 +1302,7 @@ const _projects = [
       {
         heading: 'What came of it',
         brief:
-          'Top 50 at Marsception, with both our names on the public results page. And our first proof that generative tools and architecture could share a desk: an early bet, and it aged well.',
+          'Top 50 at Marsception, both our names on the results page, and our first proof that generative tools and architecture could share a desk.',
         body: [
           'Top 50 at Marsception, with both our names on the public results page. And our first proof that generative tools and architecture could share a desk: an early bet, and it aged well.',
         ],
@@ -1321,12 +1336,13 @@ const _projects = [
       {
         heading: 'A tower on the water',
         brief:
-          'The plot sits at the edge of the Maritime City peninsula, so the tower is read from the water first: a slender square plan rising off a podium, with the skyline of Business Bay behind it. Four podium levels carry the parking under a landscaped deck; above sit 38 levels, the roof at 167 m. The rhythm breaks once at level 20 and again at the top two floors.',
+          'The plot sits at the edge of the Maritime City peninsula, so the tower is read from the water first: a slender square plan rising off a podium. Four podium levels carry the parking under a landscaped deck, and 38 levels rise above them to a roof at 167 metres.',
         body: [
           'The plot sits at the edge of the Maritime City peninsula, so the tower is read from the water first: a slender square plan rising off a podium, with the skyline of Business Bay and the Burj behind it. Four levels of podium carry the parking under a landscaped deck; above it sit 38 levels, the roof at 167 m. The amenities are on the first level over the podium, a gym, a lounge and juice bar, an outdoor deck and a pool opening onto the planted terrace; the tower’s rhythm breaks once at level 20 and again at the top two floors, which have plans of their own.',
         ],
         media: [
           { type: 'image', src: 'projects/saria/waterfront.webp', caption: 'Saria from the water, the podium and tower in their context of neighbouring towers.' },
+          { type: 'image', src: 'projects/saria/skyline.webp', caption: 'The crown against the Dubai skyline, the Burj Khalifa on the horizon.' },
           { type: 'image', src: 'projects/saria/dusk-facade.webp', caption: 'The facade at dusk: stacked balconies with planters, the podium lit below.' },
           { type: 'image', src: 'projects/saria/massing-context.webp', caption: 'The massing in its context on the peninsula, seen from the water.' },
         ],
@@ -1334,32 +1350,33 @@ const _projects = [
       {
         heading: 'The facade',
         brief:
-          'The facade is where the parametric work went. The balconies shift and step across the elevation rather than stacking in a straight line, and the pattern was iterated in Rhino and Grasshopper: how far each band projects, where the planters sit, how the rhythm breaks. What survived went into the Revit model the drawings are cut from.',
+          'The facade is where the parametric work went. The balconies shift and step across the elevation rather than stacking in a line, iterated in Rhino and Grasshopper: how far each band projects, where the planters sit, how the rhythm breaks. What survived went into the Revit model.',
         body: [
           'The facade is where the parametric work went. The balconies shift and step across the elevation rather than stacking in a straight line, and the pattern was iterated in Rhino and Grasshopper: how far each band projects, where the planters sit, how the rhythm breaks at level 20 and again at the crown. What survived the iterations went into the BIM model in Revit, which is what the set below is cut from.',
         ],
         media: [
-          { type: 'image', src: 'projects/saria/elevation-north-west.webp', caption: 'North-west elevation: the podium, the stepping balcony bands, the break at level 20 and the crown, with the level datums from ground to the roof at 167.30 m.' },
+          { type: 'image', src: 'projects/saria/elevation-north-west.webp', caption: 'North-west elevation.' },
+          { type: 'image', src: 'projects/saria/elevation-north-east.webp', caption: 'North-east elevation.' },
           { type: 'image', src: 'projects/saria/section.webp', caption: 'Section through the tower and podium.' },
         ],
       },
       {
         heading: 'The podium and the ground',
         brief:
-          'At street level the podium is wrapped in planting and opens under a deep canopy at the entrance; the landscape runs over the podium roof and down to the promenade, so the tower lands in a garden rather than on a car park.',
+          'At street level the podium is wrapped in planting and opens under a deep canopy; the landscape runs over the podium roof down to the promenade, so the tower lands in a garden, not on a car park.',
         body: [
           'At street level the podium is wrapped in planting and opens under a deep canopy at the entrance; the landscape runs over the podium roof and down to the promenade, so the tower lands in a garden rather than on a car park. The ground floor takes the lobby and the drop-off, the podium levels the parking, and the deck above carries the pool and the outdoor amenity.',
         ],
         media: [
-          { type: 'image', src: 'projects/saria/podium-street.webp', caption: 'The podium from the street: the entrance canopy, the planted setbacks and the tower rising behind.' },
-          { type: 'image', src: 'projects/saria/podium-garden.webp', caption: 'The garden side of the podium, with the planted terraces stepping up to the amenity deck.' },
+          { type: 'image', src: 'projects/saria/podium-street.webp', caption: 'The podium from the street: the entrance canopy and the planted setbacks.' },
+          { type: 'image', src: 'projects/saria/podium-garden.webp', caption: 'The garden side of the podium.' },
           { type: 'image', src: 'projects/saria/path.webp', caption: 'The shaded walk along the podium edge.' },
         ],
       },
       {
         heading: 'The drawings',
         brief:
-          'The concept set: the master plan on its plot, the ground floor with the lobby and drop-off, the amenity level over the podium, and a typical residential floor running from the 12th to the 34th, core in the middle and apartments around it.',
+          'The concept set: the master plan, the ground floor with the lobby and drop-off, the amenity level over the podium, and a typical floor from the 12th to the 34th, core in the middle.',
         body: [
           'The concept set: the master plan on its plot, the ground floor with the lobby and drop-off, the amenity level over the podium, and a typical residential floor, which runs from the 12th to the 34th with the core in the middle and the apartments around it.',
         ],
@@ -1367,7 +1384,7 @@ const _projects = [
           { type: 'image', src: 'projects/saria/master-plan.webp', caption: 'Master plan: the tower and podium on the plot, setbacks and the waterfront edge.' },
           { type: 'image', src: 'projects/saria/plan-ground.webp', caption: 'Ground floor: lobby, drop-off and back of house.' },
           { type: 'image', src: 'projects/saria/plan-level-01.webp', caption: 'Level 01, the amenity floor over the podium: gym, outdoor deck and pool.' },
-          { type: 'image', src: 'projects/saria/plan-typical.webp', caption: 'Typical residential floor, levels 12 to 19 and 21 to 34: the core at the centre, apartments around it, balconies on all four sides.' },
+          { type: 'image', src: 'projects/saria/plan-typical.webp', caption: 'Typical floor: the core at the centre, apartments around it.' },
         ],
       },
     ],

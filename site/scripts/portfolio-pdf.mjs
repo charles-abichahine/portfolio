@@ -278,6 +278,8 @@ function pipelineHtml(p, widthMm) {
 const esc = (s) =>
   String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 const pad = (n) => String(n).padStart(2, '0')
+// An address for print: no protocol, no www, no trailing slash.
+const bare = (url) => url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/+$/, '')
 const mm = (n) => `${n.toFixed(1)}mm`
 
 // ── assets ────────────────────────────────────────────────────────────────
@@ -306,6 +308,16 @@ async function img(relPath, width) {
   if (cache.has(key)) return cache.get(key)
   const file = join(PUBLIC, relPath)
   if (!existsSync(file)) throw new Error(`portfolio-pdf: missing image ${relPath}`)
+  /* A vector stays a vector. Rasterizing a drawing to place it is how a
+   * hairline becomes a smudge, and the file is smaller than any raster of
+   * itself would be. */
+  if (relPath.endsWith('.svg')) {
+    const buf = readFileSync(file)
+    imageBytes += buf.length
+    const uri = `data:image/svg+xml;base64,${buf.toString('base64')}`
+    cache.set(key, uri)
+    return uri
+  }
   const buf = await sharp(file, { density: 150 })
     .resize({ width, withoutEnlargement: true })
     .flatten({ background: '#ffffff' })
@@ -329,7 +341,7 @@ async function aspectOf(relPath) {
   return a
 }
 
-// A project's cover is a video on three of them; the poster is the still.
+// A project's cover is a video on one of them; the poster is the still.
 const posterFor = (p) =>
   p.cover.endsWith('.webm') ? p.cover.replace(/cover\.webm$/, 'poster.webp') : p.cover
 
@@ -340,8 +352,7 @@ const stillOf = (m) => (m.type === 'image' ? m.src : m.src.replace(/\.[a-z0-9]+$
  * included: their captions already say what they are and the DEMO tag on the
  * label says how to see them move. The cover's own image is kept out, the way
  * the card's gallery keeps it out: it is the plate you are already looking at. */
-async function figPool(p) {
-  const cover = posterFor(p)
+async function figPool(p, cover = posterFor(p)) {
   // A drawn pipeline supersedes the flat image of the same diagram; the record
   // names it so neither the sheet nor the verso prints the picture twice.
   const drawn = p.pipeline?.replaces
@@ -366,41 +377,48 @@ async function figPool(p) {
  * measured per section rather than per page.
  */
 const LINE_MM = 4.24
-const CHAR_MM = 1.66
+/* Re-measured 2026-09-04 against the rendered book: forty briefs wrapped at
+ * 54 to 70 characters per 85mm line, so 64 is the working line and 1.33mm the
+ * character. The old 1.66 over-counted short paragraphs by a third and fired
+ * the overflow note on a page with twenty millimetres to spare. */
+const CHAR_MM = 1.33
 const SAFETY = 1.07
 const HEAD_MM = 4.6
 const CAP_MM = 8.2
+/* A figure on the page's bottom edge hangs its label and a fixed two-line
+ * caption below its plate: 12.8mm from plate to caption foot, measured on
+ * the rendered page. CAP_MM was used for it and is 4.6mm short, which let
+ * every planned row overrun the column into the margin by that much and
+ * put its plate line below the aside's. */
+const BOT_MM = 12.8
+/* A plate at the head of the column hangs a caption that is as long as it
+ * is: one line takes 9.5mm, two the full zone. Measured at 6.8pt Spectral,
+ * a caption fits one line at about 0.53 characters per millimetre of plate. */
+const TOP_MM = 9.5
+const topZone = (c) => ((c.plate.m.caption ?? '').length <= c.w * 0.53 ? TOP_MM : BOT_MM)
 
 function sectionTextMm(text, widthMm) {
-  const lines = text.length / (widthMm / CHAR_MM) + 0.9
+  const lines = text.length / (widthMm / CHAR_MM)
   return HEAD_MM + Math.ceil(lines) * LINE_MM * SAFETY
 }
 
 /*
  * One figure for the sheet, under the cover plate: the single unused image
- * that fills the space best, drawn at its own aspect. Two options per image,
- * caption below or caption in the leftover to the right, and the larger
- * printed area wins. Nothing under MIN_LONG_EDGE prints at all: a sheet with
- * a big cover plate and white space beats one with a thumbnail strip.
+ * that fills the space best, drawn at its own aspect and printed bare. The
+ * rule of annotation (see the pages section) keeps every label off the sheet,
+ * so the plate takes the caption's old room too. Nothing under MIN_LONG_EDGE
+ * prints at all: a sheet with a big cover plate and white space beats one
+ * with a thumbnail strip.
  */
 function pickSheetFig(pool, used, availH) {
   if (availH < 46) return null
   let best = null
   for (const f of pool) {
     if (used.has(f.src)) continue
-    const options = []
-    const hBelow = Math.min(availH - 12, PLATE_W / f.a)
-    if (hBelow * Math.max(1, f.a) >= MIN_LONG_EDGE) {
-      options.push({ h: hBelow, beside: false })
-    }
-    const hBeside = Math.min(availH, PLATE_W / f.a)
-    if (hBeside * f.a <= PLATE_W - 46 && hBeside * Math.max(1, f.a) >= MIN_LONG_EDGE) {
-      options.push({ h: hBeside, beside: true })
-    }
-    for (const o of options) {
-      const area = o.h * o.h * f.a
-      if (!best || area > best.area) best = { fig: f, h: o.h, w: o.h * f.a, beside: o.beside, area }
-    }
+    const h = Math.min(availH, PLATE_W / f.a)
+    if (h * Math.max(1, f.a) < MIN_LONG_EDGE) continue
+    const area = h * h * f.a
+    if (!best || area > best.area) best = { fig: f, h, w: h * f.a, area }
   }
   if (best) used.add(best.fig.src)
   return best
@@ -470,6 +488,7 @@ async function sectionPlates(p, used) {
  */
 const TEXT_COL = 85
 const VERSO_GUTTER = 11
+const ASIDE_GAP = 5
 
 function versoLayout(p, plates, sheetIndex) {
   const colH = PAGE_H - VERSO_HEAD
@@ -494,6 +513,372 @@ function versoLayout(p, plates, sheetIndex) {
 }
 
 /*
+ * One verso is art-directed rather than budgeted. The plan names which of the
+ * project's own images take which slot: `band` runs the full art column,
+ * `row` sits two-up beneath it, `aside` closes the text column at its foot at
+ * `asideW` millimetres wide (`band` may also be a list: a rank of plates at one
+ * shared height across the column), `foot` runs the full page width under both
+ * columns and takes its height off them; `cover` swaps the sheet's cover plate and
+ * `sheet` pins the figure under it. Every src must already be in the project's
+ * sections in projects.js, so a plan can place a picture but never smuggle
+ * one in: the guard still owns the content, this only owns the arrangement,
+ * the way SELECTION owns the running order. A slug without a plan keeps the
+ * measured budget below.
+ */
+const VERSO_PLAN = {
+  sensi: {
+    band: 'projects/sensi/shape-analysis.webp',
+    row: ['projects/sensi/checkpoints.webp', 'projects/sensi/report-vision.webp'],
+    /* The aside prints at the row's own cell width, so the three bottom
+     * plates read as one rank; the briefs above were shortened to leave it
+     * the room. */
+    aside: 'projects/sensi/persona.webp',
+    asideW: 83,
+    /* The sheet's figure is part of the same decision: without it the pick
+     * falls to whatever fills best of what the plan released, which is not
+     * the same thing as what belongs under the cover. */
+    sheet: 'projects/sensi/galaxy.webp',
+  },
+  /* The sheet is pinned so the seven-feature lineage prints under the cover;
+   * the verso holds the arc in two stacked plates, the failure above and the
+   * world test below. The pipeline diagram cedes its place: brief 03 already
+   * walks the eight steps in words. */
+  'urban-risk': {
+    sheet: 'projects/urban-risk/theory.webp',
+    /* The second stacked plate is a composed strip: three city maps side by
+     * side, each named in the booklet's own type, the risk legend set as
+     * text with sampled swatches. The baked-in titles the deck carried were
+     * furniture; these are the same words in this document's voice. */
+    stack: [
+      'projects/urban-risk/the-wall.webp',
+      {
+        strip: [
+          { src: 'projects/urban-risk/cross-city-islington.webp', label: 'Islington · London' },
+          { src: 'projects/urban-risk/cross-city-eixample.webp', label: 'The Eixample · Barcelona' },
+          { src: 'projects/urban-risk/cross-city-trastevere.webp', label: 'Trastevere · Rome' },
+        ],
+        legend: [
+          ['#64b787', 'low'],
+          ['#c1a671', 'medium'],
+          ['#9e5b51', 'high risk'],
+        ],
+        caption: 'One model, three fabrics: the reading breaks where the morphology diverges.',
+      },
+    ],
+  },
+  /* The sweep runs the full art column as the band, and what remains fits a
+   * single rank beneath it at one shared height: the solver's mechanism and
+   * the box it earns. The mesh steps off; it was the transitional state, and
+   * a band this tall leaves room only for the argument's two ends. Not the
+   * finished render either: the cover on the sheet is already that picture. */
+  legoarch: {
+    band: 'projects/legoarch/lora-sweep.webp',
+    row: ['projects/legoarch/split-and-merge.svg', 'projects/legoarch/box-and-booklet.webp'],
+    rowFit: 'height',
+    /* The briefs end near the band's foot, and the aside closes the text
+     * column the way sensi's persona does. It is the builder itself, caught
+     * mid-handoff: the one place the reader sees the interface, and the mesh
+     * lives on inside it, on the left of the slider. */
+    aside: 'projects/legoarch/mesh-vs-lego.webp',
+    /* Narrower than sensi's persona by a hand: at 83mm the builder's caption
+     * ran three millimetres into the foot margin under these briefs. */
+    asideW: 76,
+    /* The row keeps the height it had; the sweep yields the few millimetres
+     * the honest caption zone costs, rather than the solver and the box. */
+    rowH: 32,
+  },
+  /* The site's cover is the topology loop, and its poster is a card diagram:
+   * web furniture at sheet size. The sheet prints the Andes render instead,
+   * the picture the last section keeps for itself, with the environmental
+   * machine beneath it: the tagline says the tower breathes, and this is the
+   * drawing of how. The verso argues the structure in order: the lung
+   * analogy across the band, and under it the skeleton it becomes, the three
+   * load stages beside the column resolving into its lattice. The facade
+   * stays in the site's gallery; six sections do not fit on one page. */
+  'breathing-mass': {
+    /* The sheet is the seminar's core: the deterministic engine as the cover,
+     * the lung analogy it grew from beneath it. The verso then owes the
+     * tower itself, the render against the Andes, as the band; the facade's
+     * two modes close the text column as the aside; and the rank beneath the
+     * tower holds the skeleton's three load stages and the environmental
+     * machine. Every section but the volume scatter has its plate. The
+     * topology loop stays on the site. */
+    cover: 'projects/breathing-mass/data-engine.webp',
+    sheet: 'projects/breathing-mass/lung-analogy.webp',
+    band: 'projects/breathing-mass/cover.webp',
+    aside: 'projects/breathing-mass/adaptive-facade.webp',
+    asideW: 83,
+    row: ['projects/breathing-mass/structure.webp', 'projects/breathing-mass/breathing-core.webp'],
+    rowFit: 'height',
+    /* The row keeps its 45mm and the tower yields a little width for it:
+     * the three load stages and the machine are too small to read below that. */
+    rowH: 45,
+  },
+  /* The sheet came back as vector (the Feb 2025 .ai), so the board's
+   * drawings print without the photograph behind them: the ring by level
+   * with the pods and the plan as the band, the long section through the
+   * crater pit beneath it at the full width. Both are rendered from the .ai
+   * at 300dpi with the neighbouring drawings painted out of each crop. The
+   * systems diagram and the generated views stay on the site; at 177mm the
+   * diagram's type would be under three points. */
+  marception: {
+    /* The crater render fills the plate box: the ring keeps its place and
+     * the canyon flanks give up a fifth of their width, which beats paper
+     * above and below. No taller source exists; the board's copy has the
+     * title over its sky. */
+    /* The sheet prints the whole upscaled render rather than the site's 4:3
+     * cover: a 16:9 frame gives the box's crop room to sit where the ring is
+     * whole with ground on either side. The award mark is drawn on the page
+     * at the plate's bottom-left, so no crop can take it. */
+    cover: 'projects/marception/render.webp',
+    coverFit: 'cover',
+    coverPos: 'right center',
+    badge: { src: 'projects/marception/top-50.png', w: 26 },
+    band: 'projects/marception/levels-and-plan.webp',
+    /* The section runs the whole page as the foot, the one plate in the
+     * book that does: a long section wants length. It costs the columns
+     * above it 57mm, which is why the briefs here are the shortest set. */
+    foot: 'projects/marception/section.webp',
+  },
+  /* The step-by-step opens the page, the exploded system answers it beneath,
+   * and the three tonal references close the text column as a quiet strip.
+   * The old concept card held collage and axo as one picture; divided, each
+   * half sits where its argument is. */
+  /* The sheet reads image over instrument, the way legoarch's does: the
+   * render above, the whole definition beneath it. The verso then argues in
+   * order: the rule the aggregation obeys as the band, and everything the
+   * model reports back beneath it at the full width of the wall. */
+  huddle: {
+    sheet: 'projects/huddle/workflow.webp',
+    band: 'projects/huddle/module-derivation.webp',
+    /* Two portrait columns under the rule: the solver caught mid-iteration,
+     * and the skin's panels placed from the indices. The full data board was
+     * too much for one page; it stays in the site's gallery. */
+    row: ['projects/huddle/wasp-iteration.webp', 'projects/huddle/panel-placement.webp'],
+    rowFit: 'height',
+    /* Pinned to what a one-line caption on the derivation leaves: the
+     * diagram keeps its full width and the solver and the skin gain 3mm. */
+    rowH: 89,
+  },
+  /* The sheet is the dusk render and there is no room under it, so the
+   * verso is the drawing set. A practice project's evidence is its
+   * drawings; the renders are what the site's gallery is for. */
+  saria: {
+    /* The dusk render is a tall portrait and the 4:3 cover cut from it left
+     * paper above and below on the sheet. The render itself fills the box,
+     * anchored at the water so the podium and the promenade stay; what goes
+     * is sky and the tower's crown, which the elevation overleaf carries. */
+    cover: 'projects/saria/dusk-facade.webp',
+    coverFit: 'cover',
+    coverPos: 'center 80%',
+    /* The drawing set, cut from the vector SD1 sheets: two elevations and
+     * the section as one rank at a shared height; the two plans to the right
+     * beneath, pinned tall enough to read, so the elevations yield; the
+     * crown against the skyline closes the text column at its own 16:9. */
+    band: [
+      'projects/saria/elevation-north-west.webp',
+      'projects/saria/elevation-north-east.webp',
+      'projects/saria/section.webp',
+    ],
+    row: ['projects/saria/plan-level-01.webp', 'projects/saria/plan-typical.webp'],
+    rowFit: 'height',
+    rowH: 62,
+    rowAlign: 'right',
+    /* A wider gap than the gutter, so the amenity floor sits off the typical
+     * floor rather than against it. */
+    rowGap: 24,
+    /* Wider than the text column: the render runs into the gutter, which the
+     * plans, held to the right, leave clear. 105mm is what the briefs leave
+     * below them at 16:9. */
+    aside: 'projects/saria/skyline.webp',
+    asideW: 105,
+  },
+  /* The rank opens on the built thing: the section through the hall with
+   * the exploded system beside it on the right; the form-finding steps run
+   * beneath at the column's width; the references close the text column. */
+  'luminous-stratum': {
+    /* The cover and the interior pair under it summed to 175 of the box's
+     * 186mm, five and a half of paper at head and foot. The cover fills the
+     * difference, cropped a little at the flanks; the pair keeps its width. */
+    sheet: 'projects/luminous-stratum/interior.webp',
+    coverFit: 'cover',
+    coverH: 124,
+    band: ['projects/luminous-stratum/section.webp', 'projects/luminous-stratum/exploded-system.webp'],
+    row: ['projects/luminous-stratum/form-finding-poster.webp'],
+    rowFit: 'height',
+    aside: 'projects/luminous-stratum/concept-strip.webp',
+    asideW: 83,
+  },
+}
+
+function plannedVerso(p, pool, used) {
+  const plan = VERSO_PLAN[p.slug]
+  if (!plan) return null
+  const bySrc = new Map(pool.map((f) => [f.src, f]))
+  const claim = (s) => {
+    const f = bySrc.get(s)
+    if (!f) throw new Error(`verso plan for ${p.slug}: ${s} is not in its sections`)
+    used.add(s)
+    return f
+  }
+  /* A grid plan names four plates in reading order and hands them to the
+   * measured four-up arrangement; the sizing stays the engine's. */
+  if (plan.grid) return versoLayout(p, plan.grid.map(claim), 0)
+  /* A columns plan divides the art column into columns of its own, each a
+   * stack of entries top to bottom: a src prints at the column's width, a
+   * list prints as a rank at one shared height across it. A stack taller
+   * than the page is scaled down as one, so its plates keep their relation;
+   * a shorter one spreads to the head and the foot. Column widths are given
+   * in millimetres and must sum to the art column with a gutter between. */
+  if (plan.cols) {
+    const colH = PAGE_H - VERSO_HEAD
+    const cols = plan.cols.map((col) => {
+      const entries = col.stack.map((e) => {
+        if (Array.isArray(e)) {
+          const figs = e.map(claim)
+          const sumA = figs.reduce((a, f) => a + f.a, 0)
+          const h = (col.w - VERSO_GUTTER * (figs.length - 1)) / sumA
+          return { rank: figs.map((f) => ({ plate: f, w: h * f.a, h })), h }
+        }
+        const f = claim(e)
+        return { plate: f, w: col.w, h: col.w / f.a }
+      })
+      const zones = BOT_MM * entries.length + VERSO_GUTTER * (entries.length - 1)
+      const plates = entries.reduce((a, e) => a + e.h, 0)
+      const k = Math.min(1, (colH - zones) / plates)
+      const scale = (c) => ({ plate: c.plate, w: c.w * k, h: c.h * k })
+      return {
+        w: col.w,
+        entries: entries.map((e) => (e.rank ? { rank: e.rank.map(scale), h: e.h * k } : scale(e))),
+      }
+    })
+    let asideRank = null
+    let aside = null
+    if (Array.isArray(plan.aside)) {
+      const figs = plan.aside.map(claim)
+      const sumA = figs.reduce((a, f) => a + f.a, 0)
+      const h = (plan.asideW - ASIDE_GAP * (figs.length - 1)) / sumA
+      asideRank = figs.map((f) => ({ plate: f, w: h * f.a, h }))
+      aside = asideRank[0]
+    } else if (plan.aside) {
+      const f = claim(plan.aside)
+      aside = { plate: f, w: plan.asideW, h: plan.asideW / f.a }
+    }
+    return {
+      plan: { cols, aside, asideRank, band: null, bandRank: null, row: [], foot: null },
+      cols: 1,
+      cells: [],
+      text: p.sections.reduce((a, sec) => a + sectionTextMm(sec.brief ?? '', TEXT_COL), 0),
+      over: 0,
+      spare: 0,
+    }
+  }
+  /* A stacked plan names its two plates in the order they print. An entry is
+   * a src, sized the way the measured stacked arrangement sizes a plate, or
+   * a composed strip: a row of images at one shared height, each with its
+   * typeset sublabel, a swatch legend and a caption of its own. */
+  if (plan.stack) {
+    const colH = PAGE_H - VERSO_HEAD
+    const artW = PAGE_W - TEXT_COL - VERSO_GUTTER
+    const cellH = (colH - VERSO_GUTTER) / 2
+    const GAP = 4
+    const cells = plan.stack.map((entry) => {
+      if (typeof entry === 'string') {
+        const f = claim(entry)
+        const h = Math.min(cellH - CAP_MM, artW / f.a)
+        return { plate: f, w: h * f.a, h }
+      }
+      const figs = entry.strip.map((s) => ({ ...claim(s.src), label: s.label }))
+      const sumA = figs.reduce((a, f) => a + f.a, 0)
+      const h = Math.min(cellH - CAP_MM - 6, (artW - GAP * (figs.length - 1)) / sumA)
+      return { strip: { figs, h, gap: GAP, legend: entry.legend, caption: entry.caption }, w: artW, h }
+    })
+    return {
+      cols: 1,
+      cells,
+      text: p.sections.reduce((a, sec) => a + sectionTextMm(sec.brief ?? '', TEXT_COL), 0),
+      over: 0,
+      spare: 0,
+    }
+  }
+  if (!plan.band) return null
+  const artW = PAGE_W - TEXT_COL - VERSO_GUTTER
+  const fit = (f, w) => ({ plate: f, w, h: w / f.a })
+  /* A foot plate is drawn first because it decides the column: it takes the
+   * page's whole width and both columns above it shorten by its height. The
+   * text is measured against what is left, so a foot that leaves the briefs
+   * no room says so in the run rather than pushing a paragraph off the page. */
+  const foot = plan.foot ? fit(claim(plan.foot), PAGE_W) : null
+  const colH = PAGE_H - VERSO_HEAD - (foot ? foot.h + CAP_MM + VERSO_GUTTER : 0)
+  /* A rank shares one height and the column's width, gutter included, the
+   * way a composed strip does; a single plate takes the column's width. */
+  let bandRank = null
+  let band
+  if (Array.isArray(plan.band)) {
+    const figs = plan.band.map(claim)
+    const sumA = figs.reduce((a, f) => a + f.a, 0)
+    let h = (artW - VERSO_GUTTER * (figs.length - 1)) / sumA
+    h = Math.min(h, colH - CAP_MM)
+    bandRank = figs.map((f) => ({ plate: f, w: h * f.a, h }))
+    band = bandRank[0]
+  } else {
+    band = fit(claim(plan.band), artW)
+    if (band.h > colH - CAP_MM) band = { plate: band.plate, h: colH - CAP_MM, w: (colH - CAP_MM) * band.plate.a }
+  }
+  /* The row fits by width when the band leaves it room to stand tall, or by
+   * height when the band has taken most of the column: whatever the band and
+   * gutter leave, the rank shares as one plate line. A plan may pin the row's
+   * height instead (`rowH`), and then the band is what yields: it is scaled
+   * down to the room the pinned row leaves. */
+  let row = []
+  if (plan.rowFit === 'height') {
+    const bandZone = Math.max(...(bandRank ?? [band]).map(topZone))
+    let rankH = colH - (band.h + bandZone) - VERSO_GUTTER - BOT_MM
+    if (plan.rowH) {
+      rankH = plan.rowH
+      const maxBand = colH - bandZone - VERSO_GUTTER - rankH - BOT_MM
+      if (band.h > maxBand) {
+        const scale = (f) => ({ plate: f.plate, h: maxBand, w: maxBand * f.plate.a })
+        if (bandRank) { bandRank = bandRank.map(scale); band = bandRank[0] } else band = scale(band)
+      }
+    }
+    row = (plan.row ?? []).map((s) => {
+      const f = claim(s)
+      const w = Math.min(artW, rankH * f.a)
+      return { plate: f, w, h: w / f.a }
+    })
+  } else if (plan.row) {
+    const rowW = (artW - VERSO_GUTTER) / 2
+    row = plan.row.map((s) => fit(claim(s), rowW))
+  }
+  /* An aside may also be a rank: two plates at one shared height sharing
+   * the aside's width, with a tighter gap than the art column's gutter. */
+  let asideRank = null
+  if (Array.isArray(plan.aside)) {
+    const figs = plan.aside.map(claim)
+    const sumA = figs.reduce((a, f) => a + f.a, 0)
+    const h = (plan.asideW - ASIDE_GAP * (figs.length - 1)) / sumA
+    asideRank = figs.map((f) => ({ plate: f, w: h * f.a, h }))
+  }
+  return {
+    plan: {
+      band,
+      bandRank,
+      row,
+      aside: asideRank ? asideRank[0] : plan.aside ? fit(claim(plan.aside), plan.asideW) : null,
+      asideRank,
+      foot,
+    },
+    cols: 1,
+    cells: [],
+    colH,
+    text: p.sections.reduce((a, sec) => a + sectionTextMm(sec.brief ?? '', TEXT_COL), 0),
+    over: foot ? p.sections.reduce((a, sec) => a + sectionTextMm(sec.brief ?? '', TEXT_COL), 0) - colH : 0,
+    spare: 0,
+  }
+}
+
+/*
  * The whole spread, decided before any HTML exists. The sheet takes the cover
  * at its own aspect and at most one large figure; the verso tries a full
  * width band first, falls back to a figure column beside two wider text
@@ -501,29 +886,61 @@ function versoLayout(p, plates, sheetIndex) {
  * with a note so the run says which project is text bound.
  */
 async function layout(p, sheetIndex) {
-  const pool = await figPool(p)
+  const plan = VERSO_PLAN[p.slug]
+  /* A plan may name the cover plate itself. A project whose site cover is a
+   * video prints its poster by default, and the poster is not always the
+   * picture that belongs on the sheet. The override has to be one of the
+   * project's own section images, and it leaves the pool the way the cover
+   * does: it is the plate you are already looking at. */
+  const coverSrc = plan?.cover ?? posterFor(p)
+  if (plan?.cover && !p.sections.some((s) => s.media.some((m) => stillOf(m) === plan.cover)))
+    throw new Error(`verso plan for ${p.slug}: cover ${plan.cover} is not in its sections`)
+  const pool = await figPool(p, coverSrc)
   const used = new Set()
 
-  /* The verso is decided first, because its plates are bound to the sections
-   * that argue for them and the sheet's is not bound to anything. Claiming in
-   * the other order let the sheet take an image out from under the paragraph
-   * that was about it. Whatever the verso could not fit is released, so the
-   * sheet can still use a picture the writing had no room for. */
-  const plates = await sectionPlates(p, used)
-  const verso = versoLayout(p, plates, sheetIndex)
-
-  const coverA = await aspectOf(posterFor(p))
+  const coverA = await aspectOf(coverSrc)
   /* A pipeline strip is the sheet's second element when the project carries
    * one, and it takes its room before the cover rather than after: the cover
    * is the thing that can afford to be smaller. The strip is then drawn at the
    * cover's own width, so the two read as one block instead of one overhanging
    * the other. */
   const strip = p.pipeline ? DIAGRAM_H + 7 : 0
-  const coverH = Math.min(PAGE_H - strip, PLATE_W / coverA)
-  const coverW = Math.min(PLATE_W, coverH * coverA)
-  const sheetFig = p.pipeline ? null : pickSheetFig(pool, used, PAGE_H - coverH - 7)
+  /* A plan may fill the plate box with the cover instead of fitting it: the
+   * source is taller than the box, the box takes its width and height and
+   * the picture is cropped to it, anchored where the plan says. Bare on the
+   * sheet like any cover; only the fit changes. */
+  const fill = plan?.coverFit === 'cover'
+  /* A filled cover may stop short of the box (coverH), leaving the rest to
+   * the figure under it: the two then close the box between them. */
+  const coverH = fill ? (plan.coverH ?? PAGE_H - strip) : Math.min(PAGE_H - strip, PLATE_W / coverA)
+  const coverW = fill ? PLATE_W : Math.min(PLATE_W, coverH * coverA)
+  const coverPos = plan?.coverPos ?? 'center'
 
-  return { pool, coverA, coverH, coverW, sheetFig, ...verso }
+  /* A pinned sheet figure claims before the verso, deliberately reversing the
+   * usual order: the pin is the design saying this picture belongs under the
+   * cover, and the section that carried it takes its next image instead. */
+  /* A plan may also say the sheet is the cover alone: `sheet: false` leaves
+   * the room under it empty rather than letting the pick fill it. */
+  let sheetFig = null
+  if (!p.pipeline && plan?.sheet) {
+    const f = pool.find((x) => x.src === plan.sheet)
+    if (!f) throw new Error(`verso plan for ${p.slug}: ${plan.sheet} is not in its sections`)
+    used.add(f.src)
+    const h = Math.min(PAGE_H - coverH - 7, PLATE_W / f.a)
+    sheetFig = { fig: f, h, w: h * f.a }
+  }
+
+  /* Otherwise the verso is decided first, because its plates are bound to the
+   * sections that argue for them and the sheet's is not bound to anything.
+   * Claiming in the other order let the sheet take an image out from under
+   * the paragraph that was about it. Whatever the verso could not fit is
+   * released, so the sheet can still use a picture the writing had no room
+   * for. */
+  const verso = plannedVerso(p, pool, used) ?? versoLayout(p, await sectionPlates(p, used), sheetIndex)
+
+  if (!p.pipeline && !sheetFig && plan?.sheet !== false) sheetFig = pickSheetFig(pool, used, PAGE_H - coverH - 7)
+
+  return { pool, coverSrc, coverA, coverH, coverW, coverFit: fill ? 'cover' : 'fill', coverPos, sheetFig, ...verso }
 }
 
 // ── pages ─────────────────────────────────────────────────────────────────
@@ -580,6 +997,11 @@ const strip = (litOf, size, sub = null) =>
  * for the viewport off the same maths. */
 const CC_VIEW = { yaw: 90, pitch: 34, zoom: 2.4, cx: 0.86, cy: 0.3 }
 
+/* Only every seventeenth station carries its number, the cadence the landing
+ * uses (LABEL_EVERY in Home.jsx): one numbered circle says survey, four
+ * thousand say noise. Kept in step with the site by hand, like the colours. */
+const LABEL_EVERY = 17
+
 /* Fitted to the page at CC_VIEW.zoom times its natural size. Points outside the
  * trim plus a small bleed are dropped rather than drawn and clipped, because a
  * page carrying a thousand invisible circles is a page nobody's reader can open. */
@@ -608,7 +1030,11 @@ const cover = `
     ${coverField()
       .map(
         (p) =>
-          `<circle cx="${p.X.toFixed(2)}" cy="${p.Y.toFixed(2)}" r="0.32"/><text x="${(p.X + 1.7).toFixed(2)}" y="${(p.Y + 0.85).toFixed(2)}">${String(p.id).padStart(4, '0')}</text>`,
+          `<circle cx="${p.X.toFixed(2)}" cy="${p.Y.toFixed(2)}" r="0.24"/>${
+            p.id % LABEL_EVERY === 0
+              ? `<text x="${(p.X + 1.7).toFixed(2)}" y="${(p.Y + 0.85).toFixed(2)}">${String(p.id).padStart(4, '0')}</text>`
+              : ''
+          }`,
       )
       .join('')}
   </svg>
@@ -643,34 +1069,36 @@ const index = `
   <p class="foot">${Word(projects.length - chosen.length)} more, with every gallery and demo, at ${esc(site)}/work</p>
 </section>`
 
-// A plate with its annotation: the image plain, the caption under a hairline.
-async function figure(f, n, wMm, hMm, capW = null) {
-  const label = `FIG ${pad(n)}${f.m.type !== 'image' ? ' · DEMO' : ''}`
-  return `<figure style="width:${mm(capW === null ? wMm : wMm + 5 + capW)}">
-    <div class="fx${capW === null ? '' : ' fx-beside'}">
-      <img src="${await img(f.src, Math.min(2000, Math.round(wMm * 8)))}" alt="" style="width:${mm(wMm)};height:${mm(hMm)}">
-      <div class="cap" style="${capW === null ? `width:${mm(wMm)}` : `width:${mm(capW)}`}">
-        <p class="fl">${label}</p>
-        <p class="ct">${esc(f.m.caption ?? '')}</p>
-      </div>
-    </div>
-  </figure>`
-}
-
+/*
+ * The rule of annotation, held everywhere: a sheet shows its plates bare,
+ * the title block being the only voice the recto has; a verso numbers every
+ * plate it prints as FIG <sheet>.<count>, the sheet's own number then the
+ * figure's, counted from one in reading order, each with its title. A
+ * label on the sheet would compete with the title block, and a plate on the
+ * verso without one would be evidence with no exhibit number.
+ */
 async function sheet(p, i, lay) {
   const b = beltFor(p)
+  const plan = VERSO_PLAN[p.slug]
   const coverW = lay.coverW
   let fig = ''
   if (p.pipeline) {
     fig = `<div class="rband">${pipelineHtml(p, coverW)}</div>`
   } else if (lay.sheetFig) {
     const f = lay.sheetFig
-    fig = `<div class="rband">${await figure(f.fig, 1, f.w, f.h, f.beside ? PLATE_W - f.w - 5 : null)}</div>`
+    fig = `<div class="rband"><figure><img src="${await img(f.fig.src, Math.min(2000, Math.round(f.w * 8)))}" alt="" style="width:${mm(f.w)};height:${mm(f.h)}"></figure></div>`
   }
+  /* A badge is the one thing allowed over a cover: an award mark at the
+   * plate's bottom-left, embedded as PNG so its transparency survives (img()
+   * flattens onto white). It is decoration, not content, so it is the one
+   * src a plan may name that is not in the sections. */
+  const badge = plan?.badge
+    ? `<img class="badge" src="data:image/png;base64,${readFileSync(resolve(PUBLIC, plan.badge.src)).toString('base64')}" alt="" style="width:${mm(plan.badge.w)}">`
+    : ''
   return `
 <section class="page sheet">
   <div class="plates">
-    <figure class="cov"><img src="${await img(posterFor(p), Math.min(2000, Math.round(coverW * 8)))}" alt="" style="width:${mm(coverW)};height:${mm(lay.coverH)}"></figure>
+    <figure class="cov">${badge}<img src="${await img(lay.coverSrc, Math.min(2000, Math.round(coverW * 8)))}" alt="" style="width:${mm(coverW)};height:${mm(lay.coverH)};object-fit:${lay.coverFit};object-position:${lay.coverPos}"></figure>
     ${fig}
   </div>
   <div class="tb">
@@ -686,6 +1114,7 @@ async function sheet(p, i, lay) {
       <dt>Module</dt><dd>${esc(p.module)}</dd>
       <dt>Team</dt><dd>${esc(p.team.join(', '))}</dd>
       <dt>Tools</dt><dd>${esc(p.tools.join(' · '))}</dd>
+      ${p.links?.live ? `<dt>Live</dt><dd><a href="${esc(p.links.live)}">${esc(bare(p.links.live))}</a></dd>` : ''}
     </dl>
   </div>
 </section>`
@@ -702,17 +1131,112 @@ async function verso(p, i, lay) {
     )
     .join('')
 
-  const plates = []
-  for (const c of lay.cells) {
-    plates.push(`<figure class="vfig">
+  /* A planned figure carries its width on the figure itself, not only the
+   * image: left free, a flex row lets a long caption widen its figure and
+   * shove the neighbour off the band's edge. `cls` marks the ones that sit on
+   * the page's bottom content edge. Every verso plate is numbered, per the
+   * rule of annotation above: FIG on its own label line, DEMO beside it when
+   * the plate stands for something that moves. */
+  const vfig = async (c, n, cls = '') => `<figure class="vfig${cls ? ` ${cls}` : ''}"${cls ? ` style="width:${mm(c.w)}"` : ''}>
       <img src="${await img(c.plate.src, Math.min(2000, Math.round(c.w * 8)))}" alt="" style="width:${mm(c.w)};height:${mm(c.h)}">
-      <p class="ct">${c.plate.m.type !== 'image' ? '<span class="fl">DEMO · </span>' : ''}${esc(c.plate.m.caption ?? '')}</p>
-    </figure>`)
+      <p class="fl">FIG ${pad(i + 1)}.${n}${c.plate.m.type !== 'image' ? ' · DEMO' : ''}</p>
+      <p class="ct">${esc(c.plate.m.caption ?? '')}</p>
+    </figure>`
+
+  const run = `<div class="run"><span><a class="rl" href="${cardUrl(p)}">${esc(cardLabel(p))}</a> · ${esc(p.title)}</span><span style="color:${b.color}">${esc(b.label)}</span></div>`
+
+  if (lay.plan?.cols) {
+    const first = lay.plan.cols[0].entries[0]
+    const firstFigs = first.rank ?? [first]
+    const asideFigs = lay.plan.asideRank ?? (lay.plan.aside ? [lay.plan.aside] : [])
+    let n = firstFigs.length + asideFigs.length
+    const asideHtml = asideFigs.length
+      ? `<div class="vaside">${lay.plan.asideRank ? `<div class="vrow" style="gap:${mm(ASIDE_GAP)};justify-content:flex-start">` : ''}${(await Promise.all(asideFigs.map((c, ai) => vfig(c, firstFigs.length + ai + 1, 'vbot')))).join('')}${lay.plan.asideRank ? '</div>' : ''}</div>`
+      : ''
+    const colsHtml = []
+    for (const [ci, col] of lay.plan.cols.entries()) {
+      const parts = []
+      for (const [ei, e] of col.entries.entries()) {
+        const bottom = ei === col.entries.length - 1 ? 'vbot' : ''
+        const figs = e.rank ?? [e]
+        const html = []
+        for (const c of figs) {
+          const num = ci === 0 && ei === 0 ? figs.indexOf(c) + 1 : ++n
+          html.push(await vfig(c, num, bottom))
+        }
+        parts.push(e.rank ? `<div class="vrow" style="justify-content:flex-start">${html.join('')}</div>` : html.join(''))
+      }
+      colsHtml.push(`<div class="vcol" style="width:${mm(col.w)}">${parts.join('')}</div>`)
+    }
+    return `
+<section class="page verso">
+  ${run}
+  <div class="vbody">
+    <div class="vtext">${write}${asideHtml}</div>
+    <div class="vplan" style="flex-direction:row;justify-content:flex-start">${colsHtml.join('')}</div>
+  </div>
+</section>`
   }
+
+  if (lay.plan) {
+    /* Reading order numbers the band first, the aside second when the text
+     * column carries one, then the rank left to right. */
+    const bandFigs = lay.plan.bandRank ?? [lay.plan.band]
+    const asideFigs = lay.plan.asideRank ?? (lay.plan.aside ? [lay.plan.aside] : [])
+    const rowStart = bandFigs.length + asideFigs.length + 1
+    const asideHtml = asideFigs.length
+      ? `<div class="vaside">${lay.plan.asideRank ? `<div class="vrow" style="gap:${mm(ASIDE_GAP)};justify-content:flex-start">` : ''}${(await Promise.all(asideFigs.map((c, ai) => vfig(c, bandFigs.length + ai + 1, 'vbot')))).join('')}${lay.plan.asideRank ? '</div>' : ''}</div>`
+      : ''
+    const bandHtml = lay.plan.bandRank
+      ? `<div class="vrow"${VERSO_PLAN[p.slug]?.bandAlign === 'left' ? ' style="justify-content:flex-start"' : ''}>${(await Promise.all(bandFigs.map((c, bi) => vfig(c, bi + 1, 'vbot')))).join('')}</div>`
+      : await vfig(lay.plan.band, 1, 'vband')
+    const rowFigs = []
+    for (const [ri, c] of lay.plan.row.entries()) rowFigs.push(await vfig(c, rowStart + ri, 'vbot'))
+    /* The foot is read last: it is the page's bottom edge, under both columns. */
+    const foot = lay.plan.foot ? `<div class="vfoot">${await vfig(lay.plan.foot, rowStart + lay.plan.row.length)}</div>` : ''
+    return `
+<section class="page verso">
+  ${run}
+  <div class="vbody">
+    <div class="vtext">${write}${asideHtml}</div>
+    <div class="vplan">
+      ${bandHtml}
+      ${rowFigs.length ? `<div class="vrow" style="${VERSO_PLAN[p.slug]?.rowAlign === 'right' ? 'justify-content:flex-end;' : ''}${VERSO_PLAN[p.slug]?.rowGap ? `gap:${mm(VERSO_PLAN[p.slug].rowGap)};` : ''}">${rowFigs.join('')}</div>` : ''}
+    </div>
+  </div>
+  ${foot}
+</section>`
+  }
+
+  /* A composed strip: the row of maps at one height, the sublabels in the
+   * runner's voice, the legend drawn as swatches on the caption line. */
+  const vstrip = async (c, n) => {
+    const s = c.strip
+    const cols = []
+    for (const f of s.figs) {
+      const w = f.a * s.h
+      cols.push(`<div class="scol" style="width:${mm(w)}">
+        <img src="${await img(f.src, Math.min(2000, Math.round(w * 8)))}" alt="" style="width:${mm(w)};height:${mm(s.h)}">
+        <p class="sl">${esc(f.label)}</p>
+      </div>`)
+    }
+    const legend = s.legend
+      .map(([col, t]) => `<span class="lg" style="background:${col}"></span>${esc(t)}`)
+      .join('<span class="lgap"></span>')
+    return `<figure class="vfig">
+      <div class="srow" style="gap:${mm(s.gap)}">${cols.join('')}</div>
+      <p class="fl">FIG ${pad(i + 1)}.${n}</p>
+      <p class="ct">${legend}<span class="lgap"></span>${esc(s.caption)}</p>
+    </figure>`
+  }
+
+  const plates = []
+  for (const [ci, c] of lay.cells.entries())
+    plates.push(c.strip ? await vstrip(c, ci + 1) : await vfig(c, ci + 1))
 
   return `
 <section class="page verso">
-  <div class="run"><span><a class="rl" href="${cardUrl(p)}">${esc(cardLabel(p))}</a> · ${esc(p.title)}</span><span style="color:${b.color}">${esc(b.label)}</span></div>
+  ${run}
   <div class="vbody">
     <div class="vtext">${write}</div>
     <div class="vart" style="grid-template-columns:repeat(${lay.cols},minmax(0,1fr))">${plates.join('')}</div>
@@ -720,17 +1244,58 @@ async function verso(p, i, lay) {
 </section>`
 }
 
+/* The closing is the index's complement: the ten the book left out, listed
+ * the way the index lists the eight, each row a link to its page on the site,
+ * and the foot strip lighting those ten where the index lit the eight. The
+ * belts the landing once hung from are gone from the site; what remains of
+ * them here is the colour a project's group lends its mark. */
+const rest = grouped.filter((p) => !inBook(p))
 const closing = `
 <section class="page closing">
   <div>
     <p class="eyebrow">The rest of it</p>
-    <h2>${Word(projects.length)} projects, ${word(BELTS.length)} belts<span class="dot">.</span></h2>
-    <p class="lede">This portfolio is a selection of ${word(chosen.length)}. Every project, with its full gallery, demos, and write-up, is on the site.</p>
+    <h2>The other ${word(rest.length)}<span class="dot">.</span></h2>
+    <p class="lede">This portfolio is a selection of ${word(chosen.length)} from ${word(projects.length)}. The other ${word(rest.length)}, with every gallery, demo and write-up, are on the site.</p>
+    <ol class="rest">
+      ${rest
+        .map(
+          (p) => `<li>
+        <span style="color:${beltFor(p).color}">${glyph(p.slug, 5)}</span>
+        <a class="t" href="${cardUrl(p)}">${esc(p.title)}</a>
+        <span class="tag">${esc(p.tagline)}</span>
+        <span class="y">${esc(p.year)}</span>
+      </li>`,
+        )
+        .join('')}
+    </ol>
   </div>
   <div>
-    ${strip(() => true, 6)}
+    ${strip((p) => !inBook(p), 6)}
     <div class="cover-foot"><p>${esc(site)}/work</p><p>${esc(contact.email)}</p></div>
   </div>
+</section>`
+
+/* The back is the cover turned over, without the field: the mark takes the
+ * name's place at the centre of the plain page, with the three addresses on
+ * one line beneath it; the foot carries the copyright where the cover
+ * carries the site, and the site opposite. The mark is the site's logo.svg
+ * drawn inline so its red stroke is the print accent, the same red as the
+ * period after the name. The year is the latest project's, so the same
+ * sources keep printing the same page. */
+const thisYear = years.reduce((a, b) => (b > a ? b : a))
+const back = `
+<section class="page back">
+  <div class="mark">
+    <svg viewBox="0 0 110 100" aria-hidden="true">
+      <g fill="none" stroke="var(--ink)" stroke-linecap="round">
+        <circle cx="48" cy="50" r="40" stroke-width="6" pathLength="100" stroke-dasharray="86 14" transform="rotate(18 48 50)" />
+        <circle cx="48" cy="50" r="31" stroke-width="5.5" pathLength="100" stroke-dasharray="38 10 40 12" transform="rotate(-30 48 50)" />
+      </g>
+      <rect x="93" y="57" width="5" height="25" rx="1" fill="var(--accent)" />
+    </svg>
+    <p class="contacts"><a href="${esc(contact.linkedin)}">${esc(bare(contact.linkedin))}</a><span class="sep">·</span><a href="mailto:${esc(contact.email)}">${esc(contact.email)}</a><span class="sep">·</span><a href="${esc(contact.github)}">${esc(bare(contact.github))}</a></p>
+  </div>
+  <div class="cover-foot"><p>© ${thisYear} Charles Abi Chahine</p><p>${esc(site)}</p></div>
 </section>`
 
 const spreads = []
@@ -748,12 +1313,21 @@ for (const [i, p] of chosen.entries()) {
         '        Shorten a brief in projects.js; nothing here truncates.',
     )
   }
+  const versoNote = lay.plan?.cols
+    ? `verso planned: cols ${lay.plan.cols.map((c) => c.entries.map((e) => (e.rank ?? [e]).map((x) => `${Math.round(x.w)}x${Math.round(x.h)}`).join('/')).join('+')).join(' | ')}` +
+      (lay.plan.aside ? `, aside ${(lay.plan.asideRank ?? [lay.plan.aside]).map((c) => `${Math.round(c.w)}x${Math.round(c.h)}`).join('/')}` : '')
+    : lay.plan
+    ? `verso planned: band ${(lay.plan.bandRank ?? [lay.plan.band]).map((c) => `${Math.round(c.w)}x${Math.round(c.h)}`).join('/')}` +
+      (lay.plan.row.length ? `, row ${lay.plan.row.map((c) => `${Math.round(c.w)}x${Math.round(c.h)}`).join('/')}` : '') +
+      (lay.plan.aside ? `, aside ${(lay.plan.asideRank ?? [lay.plan.aside]).map((c) => `${Math.round(c.w)}x${Math.round(c.h)}`).join('/')}` : '') +
+      (lay.plan.foot ? `, foot ${Math.round(lay.plan.foot.w)}x${Math.round(lay.plan.foot.h)}` : '')
+    : `verso ${lay.cells.length} plates ${lay.cols === 2 ? '2x2' : 'stacked'} (${edges.join('/')}mm)`
   console.log(
     `  ${p.slug}: cover ${Math.round(lay.coverW)}x${Math.round(lay.coverH)}` +
       (p.pipeline ? ` + pipeline (${p.pipeline.halves.reduce((a, h) => a + h.stages.length, 0)} stages)` : '') +
       (lay.sheetFig ? `, sheet fig ${Math.round(lay.sheetFig.w)}x${Math.round(lay.sheetFig.h)}` : '') +
-      `, verso ${lay.cells.length} plates ${lay.cols === 2 ? '2x2' : 'stacked'} (${edges.join('/')}mm)` +
-      `, text ${Math.round(lay.text)}mm of ${PAGE_H - VERSO_HEAD}mm` +
+      `, ${versoNote}` +
+      `, text ${Math.round(lay.text)}mm of ${Math.round(lay.colH ?? PAGE_H - VERSO_HEAD)}mm` +
       (lay.spare ? `, ${lay.spare} spare` : ''),
   )
 }
@@ -806,11 +1380,9 @@ img, svg { display: block; }
 .cover-foot p { font-family: "IBM Plex Mono", monospace; font-size: 7.5pt; color: var(--muted);
                 letter-spacing: 0.1em; }
 
-/* a plate's annotation: FIG number and caption under a hairline */
+/* a plate's annotation: FIG number over its title. Verso only; the sheet
+   prints its plates bare, per the rule of annotation in the pages section. */
 figure { margin: 0; }
-.fx-beside { display: flex; gap: 5mm; align-items: flex-end; }
-.cap { margin-top: 2.6mm; }
-.fx-beside .cap { margin-top: 0; }
 .fl { font-family: "IBM Plex Mono", monospace; font-size: 6.4pt; letter-spacing: 0.14em;
       color: var(--muted); margin-bottom: 1mm; }
 .ct { font-family: "Spectral", Georgia, serif; font-size: 7.6pt; line-height: 1.45;
@@ -827,16 +1399,16 @@ figure { margin: 0; }
 
 /* cover: the landing, translated. The marks are the drawing; the type is the
    subject; the belts close the sheet. */
-/* The surveyed cross-cap, behind everything. Hairline circles with their grid
-   index beside them, in the pale grey the site keeps for marks that are ground
-   rather than figure. */
+/* The surveyed cross-cap, behind everything. Hairline dots with a sparse run
+   of station numbers, in the muted grey the site keeps for marks that are
+   ground rather than figure. */
 .ccfield { position: absolute; left: 0; top: 0; }
-/* Filled, not open. At the size this started, an open ring was the only way to
-   keep the field light; small and dark it is a dot, and a dot is what holds the
-   arcs together as a surface rather than a scatter. The numbers stay quieter
-   than the points they label, but not so quiet they read as paper grain. */
-.ccfield circle { fill: var(--ink); }
-.ccfield text { font-family: "IBM Plex Mono", monospace; font-size: 1.4px; fill: var(--faint); }
+/* The landing's ink, carried to the page: dots in --muted at the canvas's own
+   0.9, not full ink — printed dark they pulled the field forward of the name.
+   The numbers sit at the viewport's own proportion (8px on a laptop's ~1100 is
+   2.1 on 297mm), big enough to be read as numerals rather than paper grain. */
+.ccfield circle { fill: var(--muted); fill-opacity: 0.9; }
+.ccfield text { font-family: "IBM Plex Mono", monospace; font-size: 2.1px; fill: var(--faint); }
 .cover .name { position: absolute; left: 50%; top: 76mm; transform: translate(-50%, -50%);
                width: 165mm; text-align: center; }
 /* The landing solves this exact problem the same way: the type has to stay
@@ -861,20 +1433,38 @@ figure { margin: 0; }
 
 /* index page */
 .sidx .strip { margin-top: 9mm; }
-.sidx ol { list-style: none; margin-top: 10mm; }
-.sidx li { display: grid; grid-template-columns: 9mm 7mm 88mm 1fr 16mm; align-items: center;
-           gap: 4mm; padding: 4.2mm 0; }
-.sidx li .no { font-family: "IBM Plex Mono", monospace; font-size: 7pt; color: var(--accent); }
-.sidx li .t { font-size: 11pt; font-weight: 600; letter-spacing: -0.01em; }
-.sidx li .tag { font-family: "Spectral", Georgia, serif; font-size: 8.5pt; color: var(--muted); }
-.sidx li .y { font-family: "IBM Plex Mono", monospace; font-size: 7pt; color: var(--muted); text-align: right; }
+/* Two columns of four, read down then across, the closing's row a size up:
+   number, mark, the title with its tagline beneath, the year at the right. */
+.sidx ol { list-style: none; margin-top: 12mm; display: grid; grid-template-columns: 1fr 1fr;
+           grid-template-rows: repeat(4, auto); grid-auto-flow: column; column-gap: 14mm; }
+.sidx li { display: grid; grid-template-columns: 9mm 7mm 1fr 16mm; grid-template-rows: auto auto;
+           column-gap: 3.5mm; align-items: baseline; padding: 4.2mm 0; }
+.sidx li .no { font-family: "IBM Plex Mono", monospace; font-size: 7pt; color: var(--accent);
+               grid-column: 1; grid-row: 1; }
+.sidx li > span:nth-child(2) { grid-column: 2; grid-row: 1 / span 2; align-self: start; }
+.sidx li .t { font-size: 11pt; font-weight: 600; letter-spacing: -0.01em; grid-column: 3; grid-row: 1; }
+.sidx li .tag { font-family: "Spectral", Georgia, serif; font-size: 8.5pt; color: var(--muted);
+                grid-column: 3 / span 2; grid-row: 2; margin-top: 0.8mm; }
+.sidx li .y { font-family: "IBM Plex Mono", monospace; font-size: 7pt; color: var(--muted); text-align: right;
+              grid-column: 4; grid-row: 1; }
 .sidx .foot { font-family: "IBM Plex Mono", monospace; font-size: 7.5pt; color: var(--muted);
               letter-spacing: 0.08em; margin-top: auto; }
 
 /* the sheet */
 .sheet { flex-direction: row; }
-.sheet .plates { flex: 1; display: flex; flex-direction: column; padding-right: 8mm; min-width: 0; }
-.sheet .rband { margin-top: 7mm; }
+/* Centred on the page's height: a cover that ends short of the foot leaves
+   equal paper above and below rather than a corner void under it. The title
+   block is already held at both ends, by the address and the meta, so the
+   plates sit between those anchors. A column that fills the height does not
+   move, so the five full sheets keep their hang and the three short ones are
+   the only ones this touches. */
+.sheet .plates { flex: 1; display: flex; flex-direction: column; justify-content: center;
+                 padding-right: 8mm; min-width: 0; }
+/* A figure narrower than the cover centres under it; the two read as one
+   column either way. */
+.sheet .rband { margin-top: 7mm; display: flex; justify-content: center; }
+.sheet .cov { position: relative; align-self: flex-start; }
+.sheet .cov .badge { position: absolute; left: 7mm; bottom: 7mm; z-index: 1; }
 /* the pipeline strip. The half headers are the cover's belt rule reused: a
    coloured hairline with a mono name under it. The stage boxes are hairline
    boxes with square corners, because the fillet is a screen idiom and this is
@@ -933,7 +1523,7 @@ figure { margin: 0; }
    be case sensitive, so the link opts out of both and reads as what it is. */
 .verso .run .rl { text-transform: none; letter-spacing: 0; }
 .vbody { display: flex; gap: 11mm; flex: 1; min-height: 0; margin-top: 6mm; }
-.vtext { width: 85mm; flex: none; }
+.vtext { width: 85mm; flex: none; display: flex; flex-direction: column; }
 .ws + .ws { margin-top: 5mm; }
 .verso h4 { font-family: "IBM Plex Mono", monospace; font-size: 6.8pt; letter-spacing: 0.14em;
             text-transform: uppercase; margin: 0 0 2mm; }
@@ -950,7 +1540,33 @@ figure { margin: 0; }
             color: var(--soft); margin: 1.8mm 0 0; display: -webkit-box; -webkit-line-clamp: 2;
             -webkit-box-orient: vertical; overflow: hidden; }
 .vfig .fl { font-family: "IBM Plex Mono", monospace; font-size: 5.8pt; letter-spacing: 0.14em;
-            color: var(--muted); }
+            color: var(--muted); margin-top: 1.8mm; }
+.vfig .fl + .ct { margin-top: 0.8mm; }
+/* The art-directed verso, drawn against the page's own invisible edges: the
+   band opens the art column at its head, the row closes it at its foot, and
+   the aside closes the text column the same way. Every bottom figure hangs
+   its caption in the same fixed zone below one shared plate line, so three
+   plates with three different captions still end on one edge; the plate is
+   the drawing and the drawings align, captions are annotation and annotations
+   hang. */
+/* the composed strip: a row of images at one shared height, each named
+   beneath in the runner's voice; the legend chips sit on the caption line. */
+.srow { display: flex; }
+.scol .sl { font-family: "IBM Plex Mono", monospace; font-size: 5.8pt; letter-spacing: 0.14em;
+            text-transform: uppercase; color: var(--muted); text-align: center; margin-top: 1.6mm; }
+.lg { display: inline-block; width: 4mm; height: 1.1mm; margin: 0 1.2mm 0.4mm 0;
+      vertical-align: middle; border-radius: 0.55mm; }
+.lgap { display: inline-block; width: 2.5mm; }
+.vplan { flex: 1; min-width: 0; display: flex; flex-direction: column;
+         justify-content: space-between; gap: 11mm; }
+.vrow { display: flex; gap: 11mm; justify-content: space-between; }
+/* a column of the columns layout: its stack spreads head to foot */
+.vcol { flex: none; display: flex; flex-direction: column; justify-content: space-between; gap: 11mm; }
+.vaside { margin-top: auto; padding-top: 3.5mm; }
+/* the foot: one plate across the page, under both columns, on the same
+   gutter the art column keeps between its own plates. */
+.vfoot { flex: none; margin-top: 11mm; }
+.vfig.vbot .ct { height: 6.6mm; }
 
 /* closing */
 .closing { justify-content: space-between; }
@@ -958,8 +1574,30 @@ figure { margin: 0; }
 .closing .lede { font-family: "Spectral", Georgia, serif; font-size: 12pt; line-height: 1.6;
                  color: var(--soft); margin-top: 7mm; max-width: 140mm; }
 .closing .strip { margin-bottom: 8mm; }
+/* the other ten, in two columns of the index's row, a size down */
+.closing .rest { list-style: none; margin-top: 11mm; display: grid; grid-template-columns: 1fr 1fr;
+                 column-gap: 14mm; row-gap: 0; }
+.closing .rest li { display: grid; grid-template-columns: 7mm 1fr 13mm; grid-template-rows: auto auto;
+                    column-gap: 3.5mm; align-items: baseline; padding: 3.2mm 0; }
+.closing .rest li > span:first-child { grid-row: 1 / span 2; align-self: start; }
+.closing .rest .t { font-size: 10pt; font-weight: 600; letter-spacing: -0.01em; grid-column: 2; grid-row: 1; }
+.closing .rest .tag { font-family: "Spectral", Georgia, serif; font-size: 8pt; color: var(--muted);
+                      grid-column: 2 / span 2; grid-row: 2; margin-top: 0.6mm; }
+.closing .rest .y { font-family: "IBM Plex Mono", monospace; font-size: 7pt; color: var(--muted);
+                    text-align: right; grid-column: 3; grid-row: 1; }
+
+/* back: the mark where the name was, the addresses on one line, the foot on
+   the cover's foot line. */
+.back .mark { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -54%);
+              width: 190mm; display: flex; flex-direction: column; align-items: center; }
+.back .mark svg { width: 38mm; height: auto; display: block; }
+.back .contacts { margin-top: 13mm; font-family: "IBM Plex Mono", monospace; font-size: 7.5pt;
+                  letter-spacing: 0.08em; color: var(--soft); white-space: nowrap; }
+.back .contacts .sep { color: var(--faint); margin: 0 3.2mm; }
+.back .cover-foot { position: relative; margin-top: auto; }
+
 </style></head>
-<body>${cover}${index}${spreads.join('')}${closing}</body></html>`
+<body>${cover}${index}${spreads.join('')}${closing}${back}</body></html>`
 
 const tmpHtml = resolve(here, '.book.tmp.html')
 writeFileSync(tmpHtml, html)
@@ -985,9 +1623,9 @@ console.log(
   `portfolio.pdf: ${chosen.length} projects, ${pages} pages, ${mbOf(statSync(PDF).size)} ` +
     `(${cache.size} images, ${mbOf(imageBytes)} before embedding)`,
 )
-if (pages !== chosen.length * 2 + 3) {
+if (pages !== chosen.length * 2 + 4) {
   console.log(
-    `  note: expected ${chosen.length * 2 + 3} pages (cover, index, a spread per project, closing).\n` +
+    `  note: expected ${chosen.length * 2 + 4} pages (cover, index, a spread per project, closing, back).\n` +
       '        A different count means something overflowed its page.',
   )
 }

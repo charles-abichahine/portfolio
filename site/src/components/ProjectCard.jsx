@@ -491,12 +491,24 @@ export default function ProjectCard({ project, onClose }) {
             </div>
           )}
 
-          {(project.links?.github || project.links?.blog) && (
+          {(project.links?.live || project.links?.github || project.links?.blog) && (
             <div className="col-span-2">
               <dt className="mb-0.5 font-mono text-[0.6875rem] font-medium uppercase tracking-[0.14em] text-muted">
                 Links
               </dt>
               <dd className="flex gap-3.5 font-mono text-[0.6875rem] leading-[1.4]">
+                {/* A deployment leads: it is the one link that is the project
+                    itself rather than something about it. */}
+                {project.links.live && (
+                  <a
+                    href={project.links.live}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-soft transition-colors hover:text-accent"
+                  >
+                    Live <span className="text-muted">↗</span>
+                  </a>
+                )}
                 {project.links.github && (
                   <a
                     href={project.links.github}
