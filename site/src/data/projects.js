@@ -440,6 +440,7 @@ const _projects = [
           'Assembled, the system reads as a stack of plugged volumes around a breathing spine: a tower that behaves less like an object and more like a piece of the city’s respiratory infrastructure.',
         ],
         media: [
+          { type: 'image', src: 'projects/breathing-mass/three-steps.webp', caption: 'The tower in three steps: the primary skeleton, the structural framing with the plug-in volumes, and the fixed and adaptive facade.' },
           { type: 'image', src: 'projects/breathing-mass/cover.webp', caption: 'The Hyper Lung against the Andes.' },
           { type: 'image', src: 'projects/breathing-mass/renders.webp', caption: 'Plugged volumes around the breathing spine.' },
           { type: 'image', src: 'projects/breathing-mass/context.webp', caption: 'The tower against the Santiago skyline.' },
@@ -800,10 +801,10 @@ const _projects = [
   {
     slug: 'integrative-modeling',
     date: '2026-03-17',
-    title: 'Hyperbuilding 01 · Integrative Modeling',
+    title: 'Three Towers, One Script',
     subtitle:
       'A data-driven parametric skyscraper complex inspired by the lung: three towers shaped by a deterministic Grasshopper script, with a lattice core, plug-in volumes, and an adaptive facade of 67,218 panels, documented through Speckle and Revit.',
-    tagline: 'Three towers from one deterministic script.',
+    tagline: 'A skyscraper complex the script decides, down to the last panel.',
     year: '2026',
     module: 'Integrative Modeling · MaCAD, IAAC',
     team: ['Ramy Ayoub', 'Charles Abi Chahine', 'Hani Karime'],
@@ -870,7 +871,7 @@ const _projects = [
   {
     slug: 'collaborative-workflow',
     date: '2026-03-14',
-    title: 'Hyperbuilding 01 · Collaborative Workflow',
+    title: 'Push to Sheet',
     subtitle:
       'An automated Speckle pipeline that fires on every model push: traversing Grasshopper and Rhino geometry, extracting structured properties, and exporting to Excel and Google Sheets, so architectural analytics become repeatable instead of manual.',
     tagline: 'Model data shipped on every push.',
@@ -880,7 +881,7 @@ const _projects = [
     tools: ['Speckle Automate', 'Grasshopper', 'Python'],
     tag: 'BIM',
     toolsShort: 'SPECKLE · GH · PYTHON',
-    cover: 'projects/collaborative-workflow/who-when.webp',
+    cover: 'projects/collaborative-workflow/cover.webm',
     category: 'BIM & Workflows',
     award: null,
     links: {

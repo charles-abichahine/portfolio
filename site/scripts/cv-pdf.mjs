@@ -286,7 +286,7 @@ const html = `<!doctype html>
 </style></head><body>
 <header>
   <div>
-    <h1>Charles Abi Chahine<span>.</span></h1>
+    <h1>Charles Abi Chahine</h1>
     <div class="role mono">${esc(role)}</div>
     <p class="lede">${esc(summary)}</p>
   </div>

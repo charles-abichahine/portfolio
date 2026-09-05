@@ -379,7 +379,6 @@ export default function ProjectCard({ project, onClose }) {
 
         <h2 className="mt-3 shrink-0 text-[1.55rem] font-bold leading-[1.12] tracking-tight lg:mt-3.5 lg:text-[1.9rem]">
           {project.title}
-          <span className="text-accent">.</span>
         </h2>
 
         {/*

@@ -175,7 +175,7 @@ export default function CV() {
          */}
         <div className="max-w-[52ch]">
           <h1 className="text-[clamp(2rem,4.4vw,3.25rem)] font-light leading-[1.03] tracking-[-0.024em]">
-            Charles Abi Chahine<span className="text-accent">.</span>
+            Charles Abi Chahine
           </h1>
           <p className="mt-3.5 font-mono text-[0.72rem] lowercase tracking-[0.08em] text-soft">
             {role}

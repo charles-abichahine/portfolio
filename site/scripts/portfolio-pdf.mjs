@@ -220,8 +220,11 @@ const GLYPHS = {}
 for (const p of projects) {
   if (!GLYPHS[p.slug]) throw new Error(`portfolio-pdf: no glyph found for "${p.slug}" in projectGlyphs.jsx`)
 }
+/* Drawn a shade lighter than the site's 1.4: on paper the same stroke reads
+ * heavier than on a screen, the way the rules do. */
+const GLYPH_STROKE = 1.1
 const glyph = (slug, mm) =>
-  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="width:${mm}mm;height:${mm}mm">${GLYPHS[slug]}</svg>`
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${GLYPH_STROKE}" stroke-linecap="round" stroke-linejoin="round" style="width:${mm}mm;height:${mm}mm">${GLYPHS[slug]}</svg>`
 
 /*
  * The marks a pipeline stage can name, in the grammar the project glyphs use:
@@ -246,7 +249,7 @@ const MARKS = {
 }
 const mark = (key, mm) => {
   if (!MARKS[key]) throw new Error(`portfolio-pdf: no pipeline mark named "${key}"`)
-  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="width:${mm}mm;height:${mm}mm">${MARKS[key]}</svg>`
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${GLYPH_STROKE}" stroke-linecap="round" stroke-linejoin="round" style="width:${mm}mm;height:${mm}mm">${MARKS[key]}</svg>`
 }
 
 /* The pipeline strip: the halves side by side, split by a dashed rule, each
@@ -596,23 +599,24 @@ const VERSO_PLAN = {
    * load stages beside the column resolving into its lattice. The facade
    * stays in the site's gallery; six sections do not fit on one page. */
   'breathing-mass': {
-    /* The sheet is the seminar's core: the deterministic engine as the cover,
-     * the lung analogy it grew from beneath it. The verso then owes the
-     * tower itself, the render against the Andes, as the band; the facade's
-     * two modes close the text column as the aside; and the rank beneath the
-     * tower holds the skeleton's three load stages and the environmental
-     * machine. Every section but the volume scatter has its plate. The
-     * topology loop stays on the site. */
-    cover: 'projects/breathing-mass/data-engine.webp',
+    /* The sheet is the tower in three steps, skeleton to facade, with the
+     * lung analogy it grew from beneath it. The verso opens on the seminar's
+     * core, the deterministic engine, as the band, and closes on one line
+     * across the page: the skeleton's three load stages, the environmental
+     * machine, the facade's two modes. The Andes render and the topology
+     * loop stay on the site. */
+    cover: 'projects/breathing-mass/three-steps.webp',
     sheet: 'projects/breathing-mass/lung-analogy.webp',
-    band: 'projects/breathing-mass/cover.webp',
-    aside: 'projects/breathing-mass/adaptive-facade.webp',
-    asideW: 83,
-    row: ['projects/breathing-mass/structure.webp', 'projects/breathing-mass/breathing-core.webp'],
-    rowFit: 'height',
-    /* The row keeps its 45mm and the tower yields a little width for it:
-     * the three load stages and the machine are too small to read below that. */
-    rowH: 45,
+    band: 'projects/breathing-mass/data-engine.webp',
+    /* The three plates as one line across the whole page at a shared height:
+     * the load stages, the machine, the facade's two modes. */
+    foot: [
+      'projects/breathing-mass/structure.webp',
+      'projects/breathing-mass/breathing-core.webp',
+      'projects/breathing-mass/adaptive-facade.webp',
+    ],
+    /* Six briefs over a foot rank: the writing takes a size down to fit. */
+    textScale: 0.88,
   },
   /* The sheet came back as vector (the Feb 2025 .ai), so the board's
    * drawings print without the photograph behind them: the ring by level
@@ -808,7 +812,17 @@ function plannedVerso(p, pool, used) {
    * page's whole width and both columns above it shorten by its height. The
    * text is measured against what is left, so a foot that leaves the briefs
    * no room says so in the run rather than pushing a paragraph off the page. */
-  const foot = plan.foot ? fit(claim(plan.foot), PAGE_W) : null
+  /* A foot may be a rank: plates at one shared height across the page's
+   * width, the gutter between them, the way a band rank shares the column. */
+  let footRank = null
+  let foot = null
+  if (Array.isArray(plan.foot)) {
+    const figs = plan.foot.map(claim)
+    const sumA = figs.reduce((a, f) => a + f.a, 0)
+    const h = (PAGE_W - VERSO_GUTTER * (figs.length - 1)) / sumA
+    footRank = figs.map((f) => ({ plate: f, w: h * f.a, h }))
+    foot = footRank[0]
+  } else if (plan.foot) foot = fit(claim(plan.foot), PAGE_W)
   const colH = PAGE_H - VERSO_HEAD - (foot ? foot.h + CAP_MM + VERSO_GUTTER : 0)
   /* A rank shares one height and the column's width, gutter included, the
    * way a composed strip does; a single plate takes the column's width. */
@@ -868,6 +882,7 @@ function plannedVerso(p, pool, used) {
       aside: asideRank ? asideRank[0] : plan.aside ? fit(claim(plan.aside), plan.asideW) : null,
       asideRank,
       foot,
+      footRank,
     },
     cols: 1,
     cells: [],
@@ -1040,33 +1055,43 @@ const cover = `
   </svg>
   <div class="name">
     <span class="wash" aria-hidden="true"></span>
-    <h1>Charles Abi Chahine<span class="dot">.</span></h1>
+    <h1>Charles Abi Chahine</h1>
     <p class="role">${esc(role)}</p>
     <p class="lede">${esc(summary)}</p>
   </div>
-  <div class="cover-foot"><p>${esc(site)}</p></div>
+  <div class="cover-foot"><p><a href="${siteUrl}">${esc(site)}</a></p></div>
 </section>`
 
 /* The index names the eight that are printed; the other ten are marks on the
  * strip and a count in the foot, not a list, because /work is their index. */
+/* The about, short: the site's About page cut to the four sentences a reader
+ * of the index needs before the list. Kept here rather than in cv.js because
+ * it is written for this page's width and no other surface prints it. */
+const ABOUT =
+  'Architect and computational designer, finishing the MaCAD at IAAC. I build the tools I used to ask other people for: Rhino, Grasshopper and Python, wired to Rhino Compute, BIM pipelines and generative AI, so a design can be scored, priced or proven while it is still on the screen. The machine generates; I curate, steer, and shape the output into architecture.'
+
 const index = `
 <section class="page sidx">
-  <p class="eyebrow">The index · ${word(chosen.length)} sheets from ${word(projects.length)} projects</p>
-  ${strip(inBook, 8, (p) => pad(chosen.indexOf(p) + 1))}
-  <ol>
-    ${chosen
-      .map(
-        (p, i) => `<li>
-      <span class="no">${pad(i + 1)}</span>
-      <span style="color:${beltFor(p).color}">${glyph(p.slug, 5)}</span>
-      <span class="t">${esc(p.title)}</span>
-      <span class="tag">${esc(p.tagline)}</span>
-      <span class="y">${esc(p.year)}</span>
-    </li>`,
-      )
-      .join('')}
-  </ol>
-  <p class="foot">${Word(projects.length - chosen.length)} more, with every gallery and demo, at ${esc(site)}/work</p>
+  <div>
+    <h2>Index</h2>
+    <p class="lede">${esc(ABOUT)}</p>
+    <ol>
+      ${chosen
+        .map(
+          (p, i) => `<li>
+        <span class="no">${pad(i + 1)}</span>
+        <span style="color:${beltFor(p).color}">${glyph(p.slug, 5)}</span>
+        <span class="t">${esc(p.title)}</span>
+        <span class="tag">${esc(p.tagline)}</span>
+      </li>`,
+        )
+        .join('')}
+    </ol>
+  </div>
+  <div>
+    ${strip(inBook, 8, (p) => pad(chosen.indexOf(p) + 1))}
+    <div class="cover-foot"><p><a href="${siteUrl}/work">${esc(site)}/work</a></p><p><a href="mailto:${esc(contact.email)}">${esc(contact.email)}</a></p></div>
+  </div>
 </section>`
 
 /*
@@ -1104,7 +1129,7 @@ async function sheet(p, i, lay) {
   <div class="tb">
     <p class="sno"><a href="${cardUrl(p)}">${esc(cardLabel(p))}</a></p>
     <span class="g" style="color:${b.color}">${glyph(p.slug, 12)}</span>
-    <h2>${esc(p.title)}<span class="dot">.</span></h2>
+    <h2>${esc(p.title)}</h2>
     <p class="yr">${esc(p.year)}</p>
     <p class="bl" style="color:${b.color}">${esc(b.label)}</p>
     <p class="award">${p.award ? esc(p.award) : ''}</p>
@@ -1193,12 +1218,16 @@ async function verso(p, i, lay) {
     const rowFigs = []
     for (const [ri, c] of lay.plan.row.entries()) rowFigs.push(await vfig(c, rowStart + ri, 'vbot'))
     /* The foot is read last: it is the page's bottom edge, under both columns. */
-    const foot = lay.plan.foot ? `<div class="vfoot">${await vfig(lay.plan.foot, rowStart + lay.plan.row.length)}</div>` : ''
+    const footFigs = lay.plan.footRank ?? (lay.plan.foot ? [lay.plan.foot] : [])
+    const footStart = rowStart + lay.plan.row.length
+    const foot = footFigs.length
+      ? `<div class="vfoot">${lay.plan.footRank ? '<div class="vrow">' : ''}${(await Promise.all(footFigs.map((c, fi) => vfig(c, footStart + fi, lay.plan.footRank ? 'vbot' : '')))).join('')}${lay.plan.footRank ? '</div>' : ''}</div>`
+      : ''
     return `
 <section class="page verso">
   ${run}
   <div class="vbody">
-    <div class="vtext">${write}${asideHtml}</div>
+    <div class="vtext"${VERSO_PLAN[p.slug]?.textScale ? ` style="--ts:${VERSO_PLAN[p.slug].textScale}"` : ''}>${write}${asideHtml}</div>
     <div class="vplan">
       ${bandHtml}
       ${rowFigs.length ? `<div class="vrow" style="${VERSO_PLAN[p.slug]?.rowAlign === 'right' ? 'justify-content:flex-end;' : ''}${VERSO_PLAN[p.slug]?.rowGap ? `gap:${mm(VERSO_PLAN[p.slug].rowGap)};` : ''}">${rowFigs.join('')}</div>` : ''}
@@ -1253,8 +1282,7 @@ const rest = grouped.filter((p) => !inBook(p))
 const closing = `
 <section class="page closing">
   <div>
-    <p class="eyebrow">The rest of it</p>
-    <h2>The other ${word(rest.length)}<span class="dot">.</span></h2>
+    <h2>The rest of it</h2>
     <p class="lede">This portfolio is a selection of ${word(chosen.length)} from ${word(projects.length)}. The other ${word(rest.length)}, with every gallery, demo and write-up, are on the site.</p>
     <ol class="rest">
       ${rest
@@ -1263,7 +1291,6 @@ const closing = `
         <span style="color:${beltFor(p).color}">${glyph(p.slug, 5)}</span>
         <a class="t" href="${cardUrl(p)}">${esc(p.title)}</a>
         <span class="tag">${esc(p.tagline)}</span>
-        <span class="y">${esc(p.year)}</span>
       </li>`,
         )
         .join('')}
@@ -1271,7 +1298,7 @@ const closing = `
   </div>
   <div>
     ${strip((p) => !inBook(p), 6)}
-    <div class="cover-foot"><p>${esc(site)}/work</p><p>${esc(contact.email)}</p></div>
+    <div class="cover-foot"><p><a href="${siteUrl}/work">${esc(site)}/work</a></p><p><a href="mailto:${esc(contact.email)}">${esc(contact.email)}</a></p></div>
   </div>
 </section>`
 
@@ -1295,7 +1322,7 @@ const back = `
     </svg>
     <p class="contacts"><a href="${esc(contact.linkedin)}">${esc(bare(contact.linkedin))}</a><span class="sep">·</span><a href="mailto:${esc(contact.email)}">${esc(contact.email)}</a><span class="sep">·</span><a href="${esc(contact.github)}">${esc(bare(contact.github))}</a></p>
   </div>
-  <div class="cover-foot"><p>© ${thisYear} Charles Abi Chahine</p><p>${esc(site)}</p></div>
+  <div class="cover-foot"><p>© ${thisYear} Charles Abi Chahine</p><p><a href="${siteUrl}">${esc(site)}</a></p></div>
 </section>`
 
 const spreads = []
@@ -1320,7 +1347,7 @@ for (const [i, p] of chosen.entries()) {
     ? `verso planned: band ${(lay.plan.bandRank ?? [lay.plan.band]).map((c) => `${Math.round(c.w)}x${Math.round(c.h)}`).join('/')}` +
       (lay.plan.row.length ? `, row ${lay.plan.row.map((c) => `${Math.round(c.w)}x${Math.round(c.h)}`).join('/')}` : '') +
       (lay.plan.aside ? `, aside ${(lay.plan.asideRank ?? [lay.plan.aside]).map((c) => `${Math.round(c.w)}x${Math.round(c.h)}`).join('/')}` : '') +
-      (lay.plan.foot ? `, foot ${Math.round(lay.plan.foot.w)}x${Math.round(lay.plan.foot.h)}` : '')
+      (lay.plan.foot ? `, foot ${(lay.plan.footRank ?? [lay.plan.foot]).map((c) => `${Math.round(c.w)}x${Math.round(c.h)}`).join('/')}` : '')
     : `verso ${lay.cells.length} plates ${lay.cols === 2 ? '2x2' : 'stacked'} (${edges.join('/')}mm)`
   console.log(
     `  ${p.slug}: cover ${Math.round(lay.coverW)}x${Math.round(lay.coverH)}` +
@@ -1375,7 +1402,6 @@ img, svg { display: block; }
 
 .eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 7pt; letter-spacing: 0.18em;
            text-transform: uppercase; color: var(--muted); }
-.dot { color: var(--accent); }
 .cover-foot { display: flex; justify-content: space-between; align-items: baseline; }
 .cover-foot p { font-family: "IBM Plex Mono", monospace; font-size: 7.5pt; color: var(--muted);
                 letter-spacing: 0.1em; }
@@ -1432,23 +1458,26 @@ figure { margin: 0; }
 .cover .cover-foot { position: relative; margin-top: auto; }
 
 /* index page */
-.sidx .strip { margin-top: 9mm; }
+/* The index closes the way the closing does: the strip on the foot with the
+   eight lit, the addresses on the foot line beneath it. */
+.sidx { justify-content: space-between; }
+/* The one word, set as a sheet sets its project's title. */
+.sidx h2 { font-size: 16.5pt; font-weight: 700; letter-spacing: -0.02em; line-height: 1.12; }
+.sidx .lede { font-family: "Spectral", Georgia, serif; font-size: 11pt; line-height: 1.6;
+              color: var(--soft); margin-top: 7mm; max-width: 175mm; }
+.sidx .strip { margin-bottom: 8mm; }
 /* Two columns of four, read down then across, the closing's row a size up:
    number, mark, the title with its tagline beneath, the year at the right. */
 .sidx ol { list-style: none; margin-top: 12mm; display: grid; grid-template-columns: 1fr 1fr;
            grid-template-rows: repeat(4, auto); grid-auto-flow: column; column-gap: 14mm; }
-.sidx li { display: grid; grid-template-columns: 9mm 7mm 1fr 16mm; grid-template-rows: auto auto;
+.sidx li { display: grid; grid-template-columns: 9mm 7mm 1fr; grid-template-rows: auto auto;
            column-gap: 3.5mm; align-items: baseline; padding: 4.2mm 0; }
 .sidx li .no { font-family: "IBM Plex Mono", monospace; font-size: 7pt; color: var(--accent);
                grid-column: 1; grid-row: 1; }
 .sidx li > span:nth-child(2) { grid-column: 2; grid-row: 1 / span 2; align-self: start; }
 .sidx li .t { font-size: 11pt; font-weight: 600; letter-spacing: -0.01em; grid-column: 3; grid-row: 1; }
 .sidx li .tag { font-family: "Spectral", Georgia, serif; font-size: 8.5pt; color: var(--muted);
-                grid-column: 3 / span 2; grid-row: 2; margin-top: 0.8mm; }
-.sidx li .y { font-family: "IBM Plex Mono", monospace; font-size: 7pt; color: var(--muted); text-align: right;
-              grid-column: 4; grid-row: 1; }
-.sidx .foot { font-family: "IBM Plex Mono", monospace; font-size: 7.5pt; color: var(--muted);
-              letter-spacing: 0.08em; margin-top: auto; }
+                grid-column: 3; grid-row: 2; margin-top: 0.8mm; }
 
 /* the sheet */
 .sheet { flex-direction: row; }
@@ -1524,10 +1553,13 @@ figure { margin: 0; }
 .verso .run .rl { text-transform: none; letter-spacing: 0; }
 .vbody { display: flex; gap: 11mm; flex: 1; min-height: 0; margin-top: 6mm; }
 .vtext { width: 85mm; flex: none; display: flex; flex-direction: column; }
-.ws + .ws { margin-top: 5mm; }
-.verso h4 { font-family: "IBM Plex Mono", monospace; font-size: 6.8pt; letter-spacing: 0.14em;
-            text-transform: uppercase; margin: 0 0 2mm; }
-.vtext p { font-family: "Spectral", Georgia, serif; font-size: 7.9pt; line-height: 1.52;
+/* --ts scales the writing's type and its gaps together: a plan may set it
+   below one on a page where a foot rank leaves the briefs less column. */
+.vtext { --ts: 1; }
+.ws + .ws { margin-top: calc(5mm * var(--ts)); }
+.verso h4 { font-family: "IBM Plex Mono", monospace; font-size: calc(6.8pt * var(--ts)); letter-spacing: 0.14em;
+            text-transform: uppercase; margin: 0 0 calc(2mm * var(--ts)); }
+.vtext p { font-family: "Spectral", Georgia, serif; font-size: calc(7.9pt * var(--ts)); line-height: 1.52;
            color: var(--soft); }
 /* Rows sized to their plates, then pushed to the head and the foot of the
    column. Equal rows left every plate hanging from the top of its own band and
@@ -1570,21 +1602,20 @@ figure { margin: 0; }
 
 /* closing */
 .closing { justify-content: space-between; }
-.closing h2 { font-size: 26pt; font-weight: 400; letter-spacing: -0.02em; margin-top: 6mm; }
+/* Titled the way the index is: a sheet's title type, no eyebrow. */
+.closing h2 { font-size: 16.5pt; font-weight: 700; letter-spacing: -0.02em; line-height: 1.12; }
 .closing .lede { font-family: "Spectral", Georgia, serif; font-size: 12pt; line-height: 1.6;
                  color: var(--soft); margin-top: 7mm; max-width: 140mm; }
 .closing .strip { margin-bottom: 8mm; }
 /* the other ten, in two columns of the index's row, a size down */
 .closing .rest { list-style: none; margin-top: 11mm; display: grid; grid-template-columns: 1fr 1fr;
                  column-gap: 14mm; row-gap: 0; }
-.closing .rest li { display: grid; grid-template-columns: 7mm 1fr 13mm; grid-template-rows: auto auto;
+.closing .rest li { display: grid; grid-template-columns: 7mm 1fr; grid-template-rows: auto auto;
                     column-gap: 3.5mm; align-items: baseline; padding: 3.2mm 0; }
 .closing .rest li > span:first-child { grid-row: 1 / span 2; align-self: start; }
 .closing .rest .t { font-size: 10pt; font-weight: 600; letter-spacing: -0.01em; grid-column: 2; grid-row: 1; }
 .closing .rest .tag { font-family: "Spectral", Georgia, serif; font-size: 8pt; color: var(--muted);
-                      grid-column: 2 / span 2; grid-row: 2; margin-top: 0.6mm; }
-.closing .rest .y { font-family: "IBM Plex Mono", monospace; font-size: 7pt; color: var(--muted);
-                    text-align: right; grid-column: 3; grid-row: 1; }
+                      grid-column: 2; grid-row: 2; margin-top: 0.6mm; }
 
 /* back: the mark where the name was, the addresses on one line, the foot on
    the cover's foot line. */
