@@ -707,6 +707,7 @@ export default function Work() {
             <a
               href={asset('portfolio.pdf')}
               download="Charles-Abi-Chahine-Portfolio.pdf"
+              data-track="download/portfolio"
               className="inline-flex shrink-0 whitespace-nowrap rounded-[10px] border border-ink bg-ink px-4 py-2.5 font-mono text-[0.6875rem] uppercase leading-none tracking-[0.14em] text-paper transition-colors hover:border-accent hover:bg-accent"
             >
               <span className="lg:max-xl:hidden">Portfolio (PDF) ↓</span>

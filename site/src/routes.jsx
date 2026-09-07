@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { matchPath, Route, Routes, useLocation } from 'react-router-dom'
 import App from './App.jsx'
 import { canonicalFor, titleFor } from './documentMeta.js'
+import { useAnalytics } from './analytics.js'
 import ProjectOverlay from './components/ProjectOverlay.jsx'
 import { getProject } from './data/projects.js'
 import Home from './pages/Home.jsx'
@@ -49,6 +50,8 @@ export default function AppRoutes() {
    */
   const title = titleFor(location.pathname, known ? known.title : undefined)
   const canonical = canonicalFor(location.pathname)
+  // Page views, the filter and the tracked clicks, all from here; see analytics.js.
+  useAnalytics(location.pathname, location.search, title)
   useEffect(() => {
     document.title = title
     let link = document.querySelector('link[rel="canonical"]')

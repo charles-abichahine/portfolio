@@ -501,6 +501,7 @@ export default function ProjectCard({ project, onClose }) {
                 {project.links.live && (
                   <a
                     href={project.links.live}
+                    data-track={`outbound/live/${project.slug}`}
                     target="_blank"
                     rel="noreferrer"
                     className="text-soft transition-colors hover:text-accent"
@@ -511,6 +512,7 @@ export default function ProjectCard({ project, onClose }) {
                 {project.links.github && (
                   <a
                     href={project.links.github}
+                    data-track={`outbound/github/${project.slug}`}
                     target="_blank"
                     rel="noreferrer"
                     className="text-soft transition-colors hover:text-accent"
@@ -521,6 +523,7 @@ export default function ProjectCard({ project, onClose }) {
                 {project.links.blog && (
                   <a
                     href={project.links.blog}
+                    data-track={`outbound/blog/${project.slug}`}
                     target="_blank"
                     rel="noreferrer"
                     className="text-soft transition-colors hover:text-accent"

@@ -200,6 +200,7 @@ export default function CV() {
         <a
           href={`${base}cv.pdf`}
           download="Charles-Abi-Chahine-CV.pdf"
+          data-track="download/cv"
           className="shrink-0 whitespace-nowrap rounded-[10px] border border-ink bg-ink px-5 py-3 font-mono text-[0.6875rem] uppercase leading-none tracking-[0.14em] text-paper transition-colors hover:border-accent hover:bg-accent"
         >
           Download PDF ↓
