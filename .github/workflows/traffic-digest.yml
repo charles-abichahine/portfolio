@@ -1,0 +1,49 @@
+# Every Monday morning, the past week's visits to charlesabichahine.com from
+# GoatCounter, posted as a comment on the open "Site traffic" issue (created on
+# the first run) and shown as the run's summary. Nothing is committed, so the
+# Pages deploy never runs because of this.
+#
+# Needs one repository secret, GOATCOUNTER_TOKEN: an API key from the
+# GoatCounter dashboard (Settings, API) with only "read statistics".
+name: Traffic digest
+
+on:
+  schedule:
+    - cron: '0 7 * * 1' # Mondays, 07:00 UTC
+  workflow_dispatch:
+    inputs:
+      days:
+        description: Days to cover
+        default: '7'
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch the week from GoatCounter
+        env:
+          GOATCOUNTER_SITE: https://charlesabichahine.goatcounter.com
+          GOATCOUNTER_TOKEN: ${{ secrets.GOATCOUNTER_TOKEN }}
+          DAYS: ${{ inputs.days || '7' }}
+          OUT: digest.md
+        run: node .github/scripts/traffic-digest.mjs
+
+      - name: Post to the Site traffic issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          n=$(gh issue list --state open --search 'in:title "Site traffic"' \
+            --json number,title --jq '[.[] | select(.title == "Site traffic")][0].number // empty')
+          if [ -z "$n" ]; then
+            url=$(gh issue create --title "Site traffic" \
+              --body "Weekly digests of visits to charlesabichahine.com, from GoatCounter, posted by the traffic-digest workflow.")
+            n=${url##*/}
+          fi
+          gh issue comment "$n" --body-file digest.md
