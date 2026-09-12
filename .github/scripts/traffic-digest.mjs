@@ -36,7 +36,17 @@ async function api(path, params = {}) {
   const r = await fetch(url, {
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
   })
-  if (!r.ok) throw new Error(`${path}: HTTP ${r.status} ${await r.text()}`)
+  if (!r.ok) {
+    // The token is looked up as "this value, on the account that owns this
+    // site"; when that finds nothing the hosted service answers 404, not 401.
+    const hint =
+      r.status === 401 || r.status === 404
+        ? ` (GOATCOUNTER_TOKEN is not an API key of the account that owns ${site})`
+        : r.status === 403
+          ? ' (the API key lacks the "read statistics" permission)'
+          : ''
+    throw new Error(`GET ${url.pathname}${url.search}: HTTP ${r.status} ${await r.text()}${hint}`)
+  }
   return r.json()
 }
 
