@@ -24,7 +24,8 @@ import { normalize } from '../documentMeta.js'
 const links = [
   { to: '/work', label: 'Work' },
   { to: '/cv', label: 'CV' },
-  { to: '/about', label: 'About' },
+  { to: '/traces', label: 'Traces' },
+  { to: '/contact', label: 'Contact' },
 ]
 
 // The 'theme' key and the light/dark literals are also hardcoded in the boot

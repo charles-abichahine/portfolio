@@ -115,11 +115,12 @@ function Mark({ d }) {
 export default function Footer({ slotRef }) {
   const bandRef = useRef(null)
   /*
-   * /about carries the contacts in its own text, so the band there is the
+   * /contact carries the contacts in its own text, so the band there is the
    * identity and nothing else. Two corners need two things to sit in them; one
-   * line alone belongs in the middle.
+   * line alone belongs in the middle. (/about did too; while it shows its
+   * holding page it carries none, so it gets the full band.)
    */
-  const bare = normalize(useLocation().pathname) === '/about'
+  const bare = normalize(useLocation().pathname) === '/contact'
 
   /* The landing is built to be exactly two screens with nothing to scroll past,
      which it can only stay if it knows how tall this band is. Published as a

@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { matchPath, Route, Routes, useLocation } from 'react-router-dom'
+import { matchPath, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import App from './App.jsx'
 import { canonicalFor, titleFor } from './documentMeta.js'
 import { useAnalytics } from './analytics.js'
@@ -7,7 +7,10 @@ import ProjectOverlay from './components/ProjectOverlay.jsx'
 import { getProject } from './data/projects.js'
 import Home from './pages/Home.jsx'
 import Work from './pages/Work.jsx'
-import About from './pages/About.jsx'
+// TEMPORARY: /traces (the old /about) shows a holding page while it is
+// reworked. About.jsx is kept; swap the element back to <About /> to restore it.
+import AboutInProgress from './pages/AboutInProgress.jsx'
+import Contact from './pages/Contact.jsx'
 import CV from './pages/CV.jsx'
 import NotFound from './pages/NotFound.jsx'
 
@@ -69,7 +72,10 @@ export default function AppRoutes() {
         <Route path="/" element={<App />}>
           <Route index element={<Home />} />
           <Route path="work" element={<Work />} />
-          <Route path="about" element={<About />} />
+          <Route path="traces" element={<AboutInProgress />} />
+          {/* The page's old address, kept so links to it still land. */}
+          <Route path="about" element={<Navigate to="/traces" replace />} />
+          <Route path="contact" element={<Contact />} />
           <Route path="cv" element={<CV />} />
           <Route path="*" element={<NotFound />} />
         </Route>

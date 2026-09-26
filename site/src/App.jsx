@@ -61,7 +61,7 @@ function App() {
   // /work: comparing the raw pathname dropped the flex column on every direct
   // load, and the page inside it lost the height its centring resolves against.
   const route = normalize(pathname)
-  const fullBleed = route === '/' || route === '/about' || route === '/work'
+  const fullBleed = route === '/' || route === '/traces' || route === '/work'
   /*
    * And the two of those three that give the lock up on a phone held sideways.
    *
@@ -78,7 +78,7 @@ function App() {
    * two pages are already written against is the whole of the mechanism, so the
    * shell has nothing to observe and no state to keep in step.
    */
-  const flowsShort = route === '/' || route === '/about'
+  const flowsShort = route === '/' || route === '/traces'
 
   // Held in state rather than a ref so that setting it re-renders and the
   // portal in FooterSlot finds its target on the pass after the footer mounts.

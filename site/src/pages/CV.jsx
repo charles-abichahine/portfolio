@@ -182,26 +182,15 @@ export default function CV() {
           </p>
           <p className="mt-5 font-serif text-[1.05rem] leading-[1.5] text-soft">{summary}</p>
         </div>
-        {/* The filter pills' grammar, at a primary action's size.
-            This was the only square-cornered control on the site — every other
-            bordered thing has a radius, from the 10px filter pills to the card's
-            14px — so it read as a button borrowed from somewhere else.
-            Filled rather than outlined because that is already how this site
-            says "this is the one": /work's active filter is its colour filled
-            with paper type, and on a page whose whole job is handing over a
-            file, the file is the one. 10px is the pills' radius, written out
-            because it now appears in three files; worth a token if a fourth
-            wants it.
-            Set at the site's 0.6875rem floor like every other label: at 0.6rem
-            this was 9.6px, which is smaller than the colophon under it and the
-            wrong size for the page's primary action. The padding is unchanged —
-            it was drawn around a 44px-ish target, and 1.4px of type does not
-            change what the block wants to be. */}
+        {/* The same unpressed ink pill that offers the portfolio on /work and
+            both files on /contact, so every download on the site looks alike.
+            It used to be filled in ink as this page's one action, which made it
+            the only download drawn differently from the others. */}
         <a
           href={`${base}cv.pdf`}
           download="Charles-Abi-Chahine-CV.pdf"
           data-track="download/cv"
-          className="control-label shrink-0 whitespace-nowrap rounded-[10px] border border-ink bg-ink px-5 py-3 leading-none text-paper transition-colors hover:border-accent hover:bg-accent"
+          className="control-label shrink-0 whitespace-nowrap rounded-[10px] border border-[color-mix(in_srgb,var(--color-ink)_34%,transparent)] px-4 py-2.5 leading-none text-ink transition-colors hover:border-ink hover:bg-ink hover:text-paper"
         >
           Download PDF ↓
         </a>

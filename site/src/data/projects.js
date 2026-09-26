@@ -239,6 +239,7 @@ const _projects = [
     category: 'Computation & AI',
     award: 'IAAC Exhibition',
     links: {
+      live: 'https://legoarch.charlesabichahine.com',
       github: 'https://github.com/hi-em/genai-legoarch',
       blog: 'https://blog.iaac.net/legoarch-behind-the-sets/',
     },

@@ -24,7 +24,7 @@ export default class ErrorBoundary extends Component {
       <div className="flex min-h-screen flex-col items-center justify-center gap-5 bg-paper px-6 text-center">
         <p className="label-mono text-accent">Something went wrong</p>
         <h1 className="max-w-[28ch] text-2xl font-bold tracking-tight text-ink">
-          This page hit an unexpected error<span className="text-accent">.</span>
+          This page hit an unexpected error
         </h1>
         <p className="max-w-[42ch] leading-relaxed text-soft">
           Reloading usually fixes it. If it keeps happening, do let me know.

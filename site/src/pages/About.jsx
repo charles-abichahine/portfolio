@@ -1655,7 +1655,7 @@ export default function About() {
         <div className="max-w-[58ch] md:portrait:max-w-[48%] lg:max-w-[48%]">
           <p className={`${MONO} mb-4 text-muted`}>About</p>
           <h1 className="max-w-[28ch] text-balance text-[clamp(1.2rem,1.85vw,1.6rem)] font-light leading-[1.32] text-ink">
-            Trained to draw buildings, went back for the machinery<span className="text-accent">.</span>
+            Trained to draw buildings, went back for the machinery
           </h1>
           <p className="mt-4 max-w-[56ch] font-serif text-[0.92rem] leading-[1.75] text-soft">
             Practice across Beirut, Dubai and Kuwait, then the MaCAD master at IAAC. Now I build the

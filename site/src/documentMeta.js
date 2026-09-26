@@ -16,7 +16,16 @@ export const ORIGIN = 'https://charlesabichahine.com'
 // label followed by the name.
 export const HOME_TITLE = 'Charles Abi Chahine • Architect & Computational Designer'
 
-const PAGES = { '/work': 'Work', '/about': 'About', '/cv': 'CV' }
+const PAGES = { '/work': 'Work', '/traces': 'Traces', '/cv': 'CV', '/contact': 'Contact' }
+
+/*
+ * Pages that have moved, old path to new. /about became /traces when the page
+ * was renamed; the old address still answers (routes.jsx redirects it, and
+ * prerender.mjs gives it a file), but it names the new page as its title and
+ * its canonical, so a crawler following an old link learns where it went.
+ */
+export const MOVED = { '/about': '/traces' }
+const current = (path) => MOVED[path] ?? path
 
 // A trailing slash is the same page; without this /work/ would title as a 404.
 /*
@@ -34,7 +43,7 @@ export const normalize = (pathname) => pathname.replace(/\/+$/, '') || '/'
  * when the slug is unknown — which is a 404 like any other unmatched path.
  */
 export function titleFor(pathname, projectTitle) {
-  const path = normalize(pathname)
+  const path = current(normalize(pathname))
   if (path === '/') return HOME_TITLE
   const label = path.startsWith('/work/') ? projectTitle : PAGES[path]
   return `${label || 'Not found'} • Charles Abi Chahine`
@@ -49,6 +58,6 @@ export function titleFor(pathname, projectTitle) {
  * that redirects, which is the one thing a canonical must never do.
  */
 export const canonicalFor = (pathname) => {
-  const path = normalize(pathname)
+  const path = current(normalize(pathname))
   return ORIGIN + (path === '/' ? path : `${path}/`)
 }

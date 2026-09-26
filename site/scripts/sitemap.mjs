@@ -34,8 +34,8 @@ import { execFileSync } from 'node:child_process'
 import { writeFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, resolve } from 'node:path'
-import { routes } from './routes.mjs'
-import { canonicalFor } from '../src/documentMeta.js'
+import { projects, routes } from './routes.mjs'
+import { canonicalFor, MOVED } from '../src/documentMeta.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 
@@ -68,8 +68,9 @@ const PROJECTS_MOD = lastCommit(resolve(here, '../src/data/projects.js'))
 const PAGE_SOURCE = {
   '/': '../src/pages/Home.jsx',
   '/work': '../src/pages/Work.jsx',
-  '/about': '../src/pages/About.jsx',
+  '/traces': '../src/pages/AboutInProgress.jsx',
   '/cv': '../src/pages/CV.jsx',
+  '/contact': '../src/pages/Contact.jsx',
 }
 const STATIC_MOD = Object.fromEntries(
   Object.entries(PAGE_SOURCE).map(([loc, f]) => [loc, lastCommit(resolve(here, f))]),
@@ -79,11 +80,13 @@ const STATIC_MOD = Object.fromEntries(
 const RANK = {
   '/': { priority: '1.0', changefreq: 'monthly' },
   '/work': { priority: '0.9', changefreq: 'monthly' },
-  '/about': { priority: '0.7', changefreq: 'yearly' },
+  '/traces': { priority: '0.7', changefreq: 'yearly' },
   '/cv': { priority: '0.7', changefreq: 'monthly' },
+  '/contact': { priority: '0.6', changefreq: 'yearly' },
 }
 
-const urls = routes.map((loc) => ({
+// A moved page's old address redirects, and a sitemap lists only pages.
+const urls = routes.filter((loc) => !MOVED[loc]).map((loc) => ({
   loc,
   lastmod: STATIC_MOD[loc] ?? PROJECTS_MOD,
   ...(RANK[loc] ?? { priority: '0.8', changefreq: 'yearly' }),
@@ -105,4 +108,4 @@ ${urls
 `
 
 writeFileSync(resolve(here, '../public/sitemap.xml'), xml)
-console.log(`sitemap: ${urls.length} urls (${routes.length - 4} projects)`)
+console.log(`sitemap: ${urls.length} urls (${projects.length} projects)`)
