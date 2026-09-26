@@ -136,14 +136,23 @@ const DESKTOP_MIN = 1024
 const SHORT_LAND = '(max-width: 1023.98px) and (orientation: landscape)'
 // What is drawn at rest, and what the gesture opens toward whole. On the laptop
 // it is a fraction of the u-rows, drawn in order — the fan grows out of the
-// corner as the wheel turns. On a phone it is a fraction of the field's RADIUS:
+// corner as the wheel turns. A third, not the eighth it used to be: at 0.12 the
+// resting cover was thirteen rows of loose single dots, a scatter rather than a
+// drawing, and the surface only became legible partway through the gesture that
+// leaves the page, which most visitors never stop in. At a third the rest state
+// is already a form, an oval framing the name with the pinch on the right, and
+// the sweep still has the loops round the pinch left to draw. On a phone it is a fraction of the field's RADIUS:
 // at rest a bloom sits behind the name, and the gesture pushes the frontier
 // outward to the edges, so the field visibly grows the way the laptop's does,
 // only from the centre rather than a corner — and symmetric, so it never sits
-// lopsided. Area goes as the square of the radius, so 0.55 → 1 more than triples
-// what is drawn: the reason the phone transition now reads as strongly as it does.
-const REST_ROWS = 0.12
-const REST_RADIUS_MOBILE = 0.55
+// lopsided. Area goes as the square of the radius, so 0.72 → 1 about doubles
+// what is drawn. It rested at 0.55, which tripled it, but the cross-cap's arches
+// sit above its eye, so at 0.55 the bloom was all over the name and the lower
+// 40% of a phone screen was bare. At 0.72 the lower band reaches in under the
+// cue and the field frames the name on both sides, and the gesture still has
+// the outer arches and the edges to grow into.
+const REST_ROWS = 0.34
+const REST_RADIUS_MOBILE = 0.72
 // The radial reveal, taken bare, grows as a perfect circle — a compass arc that
 // reads as mechanical against a hand-plotted survey. So the frontier each point
 // is measured against is bent: a smooth low-frequency wobble in the angle turns
@@ -156,6 +165,11 @@ const POINT_R = 0.7 // muted-ink station points, in CSS px
 const LABEL_PX = 8 // the station numbers, in the mono voice
 const LABEL_EVERY = 17 // only a sparse subset carry their number, survey-style
 const LABEL_EVERY_FULL = 43 // sparser again on the dense full-bleed phone field
+// The clear space a station number keeps around itself. Near the pinch the
+// surface folds points onto each other, and every labelled one there printed its
+// number over its neighbours' into a grey smudge that read as debug output.
+// A number that would land inside another's box is not drawn; the dot still is.
+const LABEL_GAP = 4
 const TAU = Math.PI * 2
 // A stable pseudo-random in [0,1) from an integer — the classic sine hash, used
 // to feather the reveal edge without a per-render Math.random that would flicker.
@@ -561,7 +575,18 @@ export default function Home() {
         ctx.font = `${LABEL_PX}px ${pal.mono}`
         ctx.globalAlpha = 0.65
         ctx.textBaseline = 'alphabetic'
-        for (const q of labels) ctx.fillText(String(q.id).padStart(4, '0'), q.X + 2.5, q.Y + 2)
+        // Every number is four digits in a monospace, so one width serves all.
+        const lw = ctx.measureText('0000').width
+        const taken = []
+        for (const q of labels) {
+          const l = q.X + 2.5 - LABEL_GAP
+          const t = q.Y + 2 - LABEL_PX - LABEL_GAP
+          const r = q.X + 2.5 + lw + LABEL_GAP
+          const b = q.Y + 2 + LABEL_GAP
+          if (taken.some((o) => l < o.r && r > o.l && t < o.b && b > o.t)) continue
+          taken.push({ l, t, r, b })
+          ctx.fillText(String(q.id).padStart(4, '0'), q.X + 2.5, q.Y + 2)
+        }
       }
       ctx.globalAlpha = 1
 
@@ -731,8 +756,9 @@ export default function Home() {
             architect · computational designer
           </p>
           {/* The one sentence on the cover, so it is set as one: the serif here is
-              what tells you the rest of the site has writing in it. */}
-          <p className="mt-5 font-serif text-[clamp(0.95rem,1.2vw,1.05rem)] leading-[1.6] text-soft">
+              what tells you the rest of the site has writing in it. Balanced,
+              because on a phone it broke with "built." alone on the last line. */}
+          <p className="mt-5 text-balance font-serif text-[clamp(0.95rem,1.2vw,1.05rem)] leading-[1.6] text-soft">
             {summary}
           </p>
           {/* The cue is the handoff made visible and the handoff made a link: a
