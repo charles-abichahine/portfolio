@@ -69,6 +69,13 @@ function galleryFor(project) {
  * portraits. At 19/11 the average item covers 82% of the well rather than 78%,
  * and widening the column from 632 to 760 put about 41% more pixels on screen.
  *
+ * The column is no longer a fixed 760, though. It is what the rail leaves: the
+ * rail takes 36% of the card, held between 320 and 420, and the gallery takes the
+ * rest. A fixed gallery made the rail the remainder instead, and below about
+ * 1260px of window the remainder was a hundred pixels, which hid the write-up
+ * entirely and pushed Close off the card. With the card's cap raised to 1280 the
+ * gallery still comes out at 772 on a 1440 screen.
+ *
  * It is still not native size. Nothing here is: 54% on average. That is what
  * MediaLightbox is for.
  */
@@ -132,12 +139,13 @@ export default function ProjectCard({ project, onClose }) {
     // The content only changes with the project.
   }, [project.slug])
 
+  // Year and module are one short line under the title now; what is left is the
+  // part that wraps, set as labelled rows rather than a two-column form.
   const record = [
-    ['Year', project.year],
-    ['Module', project.module],
-    ['Team', project.team.join(', '), true],
-    ['Tools', project.tools.join(' · '), true],
+    ['Team', project.team.join(', ')],
+    ['Tools', project.tools.join(' · ')],
   ]
+  const MONO_LABEL = 'font-mono text-[0.6875rem] font-medium uppercase tracking-[0.14em] text-muted'
 
   return (
     <div
@@ -175,7 +183,7 @@ export default function ProjectCard({ project, onClose }) {
        * scroller, because a 1fr row in a capped grid gets the cap rather than
        * the content and the record drew straight through the prose.
        */
-      className="grid h-[calc(100svh-1.5rem)] w-full max-w-[1180px] grid-cols-1 grid-rows-[auto_auto_minmax(0,1fr)] overflow-hidden rounded-[14px] border border-line bg-paper p-3.5 shadow-[0_24px_80px_-20px_rgba(0,0,0,0.45)] sm:h-[calc(100svh-3rem)] wide-short:grid-cols-[minmax(0,1.55fr)_24px_minmax(0,1fr)] wide-short:grid-rows-[minmax(0,1fr)] lg:h-[622px] lg:max-h-[calc(100vh-5rem)] lg:grid-cols-[760px_40px_minmax(0,1fr)] lg:grid-rows-[minmax(0,1fr)] lg:p-6"
+      className="grid h-[calc(100svh-1.5rem)] w-full max-w-[1280px] grid-cols-1 grid-rows-[auto_auto_minmax(0,1fr)] overflow-hidden rounded-[14px] border border-line bg-paper p-3.5 shadow-[0_24px_80px_-20px_rgba(0,0,0,0.45)] sm:h-[calc(100svh-3rem)] wide-short:grid-cols-[minmax(0,1.55fr)_24px_minmax(0,1fr)] wide-short:grid-rows-[minmax(0,1fr)] lg:h-[622px] lg:max-h-[calc(100vh-5rem)] lg:grid-cols-[minmax(0,1fr)_40px_clamp(320px,36%,420px)] lg:grid-rows-[minmax(0,1fr)] lg:p-6"
       style={{ '--c': color }}
     >
       {/* ── the gallery ───────────────────────────────────────────────────── */}
@@ -204,11 +212,11 @@ export default function ProjectCard({ project, onClose }) {
             // of its own, so the media letterboxes inside the frame rather than
             // setting it.
             className="max-h-full max-w-full"
-            // The well is 760px at most and the card is nearly the full width
+            // The well is about 780px at most and the card is nearly the full width
             // below that, so this asks for the 960 on a desktop and the 480 on
             // a phone. The viewer on top of it keeps the default and takes the
             // original, which is the whole reason it exists.
-            sizes="(min-width: 1024px) 760px, 92vw"
+            sizes="(min-width: 1024px) 780px, 92vw"
           />
 
           {/* The way to native size. Everything in here is drawn smaller than it
@@ -381,6 +389,18 @@ export default function ProjectCard({ project, onClose }) {
           {project.title}
         </h2>
 
+        {/* When and where it was made, and the award if there is one: the two
+            facts a reader wants before deciding to read on, so they sit with
+            the title instead of at the foot of the rail. */}
+        <p className="mt-2 shrink-0 font-mono text-[0.6875rem] uppercase leading-[1.5] tracking-[0.12em] text-muted">
+          <span className="tabular-nums">{project.year}</span> · {project.module}
+          {project.award && (
+            <>
+              {' '}· <span className="whitespace-nowrap text-accent">{project.award}</span>
+            </>
+          )}
+        </p>
+
         {/*
          * The only thing on the card that scrolls, and only from lg up.
          *
@@ -466,36 +486,22 @@ export default function ProjectCard({ project, onClose }) {
             as tall as its content, so there is no foot to pin to and it simply
             follows the writing.
 
-            It used to be smaller than the page sets it as well — 8.64px labels
-            over 10.08px values — which made the one block on the card you are
-            meant to scan the one block you could not. Both are on the site's
-            0.6875rem floor now. The card does not grow: its height is fixed and
-            the rail's prose box is what gives the room back. */}
-        <dl className="mt-auto grid shrink-0 grid-cols-2 max-lg:mt-3.5 wide-short:mt-3 gap-x-[18px] gap-y-[7px] border-t border-rule pt-3 lg:mt-3 lg:gap-y-[9px] lg:pt-3.5">
-          {record.map(([k, v, wide]) => (
-            <div key={k} className={wide ? 'col-span-2' : undefined}>
-              <dt className="mb-0.5 font-mono text-[0.6875rem] font-medium uppercase tracking-[0.14em] text-muted">
-                {k}
-              </dt>
-              <dd className="font-mono text-[0.6875rem] leading-[1.4]">{v}</dd>
+            Label beside value rather than over it. Stacked, in two columns, this
+            was 224px on a 622px card, most of it labels and gaps, and it came out
+            of the prose box above: the writing got 258px. Side by side it is
+            the three rows' own lines and little else. */}
+        <dl className="mt-auto grid shrink-0 grid-cols-[4.25rem_minmax(0,1fr)] gap-x-3 gap-y-1.5 border-t border-rule pt-3 max-lg:mt-3.5 wide-short:mt-3 lg:mt-3">
+          {record.map(([k, v]) => (
+            <div key={k} className="contents">
+              <dt className={MONO_LABEL}>{k}</dt>
+              <dd className="font-mono text-[0.6875rem] leading-[1.45]">{v}</dd>
             </div>
           ))}
 
-          {project.award && (
-            <div className="col-span-2">
-              <dt className="mb-0.5 font-mono text-[0.6875rem] font-medium uppercase tracking-[0.14em] text-muted">
-                Award
-              </dt>
-              <dd className="font-mono text-[0.6875rem] leading-[1.4] text-accent">{project.award}</dd>
-            </div>
-          )}
-
           {(project.links?.live || project.links?.github || project.links?.blog) && (
-            <div className="col-span-2">
-              <dt className="mb-0.5 font-mono text-[0.6875rem] font-medium uppercase tracking-[0.14em] text-muted">
-                Links
-              </dt>
-              <dd className="flex gap-3.5 font-mono text-[0.6875rem] leading-[1.4]">
+            <div className="contents">
+              <dt className={MONO_LABEL}>Links</dt>
+              <dd className="flex flex-wrap gap-x-3.5 font-mono text-[0.6875rem] leading-[1.45]">
                 {/* A deployment leads: it is the one link that is the project
                     itself rather than something about it. */}
                 {project.links.live && (

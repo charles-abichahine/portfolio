@@ -98,7 +98,7 @@ export default function ProjectOverlay() {
           aria-modal="true"
           aria-label={project ? project.title : 'Project'}
           tabIndex={-1}
-          className="pointer-events-auto relative flex max-h-full w-full max-w-[1180px] justify-center outline-none"
+          className="pointer-events-auto relative flex max-h-full w-full max-w-[1280px] justify-center outline-none"
         >
           {project && <ProjectCard project={project} onClose={close} />}
         </div>
