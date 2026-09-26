@@ -379,7 +379,7 @@ export default function ProjectCard({ project, onClose }) {
           <button
             type="button"
             onClick={onClose}
-            className="label-mono ml-auto rounded-[8px] border border-line px-2.5 py-1.5 text-[0.6875rem] text-muted transition-colors hover:border-accent hover:text-accent"
+            className="control-label ml-auto rounded-[8px] border border-line px-2.5 py-1.5 text-soft transition-colors hover:border-accent hover:text-accent"
           >
             Close ✕
           </button>

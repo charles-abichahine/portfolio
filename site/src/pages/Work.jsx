@@ -755,19 +755,16 @@ export default function Work() {
                 read as the same kind of control, and on a phone the download
                 outweighed the filters and the work. On the CV the download is
                 the page's one action; here it is secondary to browsing, and it
-                fills in ink only on hover. Between lg and xl the
-                filter pills leave the label row no room for the full wording
-                (the pills alone take 662px of a 944px line), so the button
-                keeps its size and drops to "PDF" there rather than hiding:
-                it is the only place the file is offered. */}
+                fills in ink only on hover. It used to drop to "PDF" between lg
+                and xl, where the mono pills took 662px of a 944px line; set as
+                controls they take 575, and the full wording fits at 1024. */}
             <a
               href={asset('portfolio.pdf')}
               download="Charles-Abi-Chahine-Portfolio.pdf"
               data-track="download/portfolio"
-              className="inline-flex shrink-0 whitespace-nowrap rounded-[10px] border border-[color-mix(in_srgb,var(--color-ink)_34%,transparent)] px-3.5 py-2.5 font-mono text-[0.6875rem] uppercase leading-none tracking-[0.14em] text-ink transition-colors hover:border-ink hover:bg-ink hover:text-paper"
+              className="control-label inline-flex shrink-0 whitespace-nowrap rounded-[10px] border border-[color-mix(in_srgb,var(--color-ink)_34%,transparent)] px-3.5 py-2.5 leading-none text-ink transition-colors hover:border-ink hover:bg-ink hover:text-paper"
             >
-              <span className="lg:max-xl:hidden">Portfolio (PDF) ↓</span>
-              <span className="hidden lg:max-xl:inline">PDF ↓</span>
+              Portfolio (PDF) ↓
             </a>
           </div>
 
@@ -789,7 +786,7 @@ export default function Work() {
                   aria-pressed={on}
                   data-on={on}
                   style={{ '--c': cat === 'All' ? 'var(--color-ink)' : CATEGORY_COLOR[cat] }}
-                  className={`shrink-0 whitespace-nowrap border px-3.5 py-2.5 font-mono text-[0.6875rem] uppercase leading-none tracking-[0.14em] transition-colors ${R} data-[on=false]:border-[color-mix(in_srgb,var(--c)_34%,transparent)] data-[on=false]:text-[var(--c)] data-[on=false]:hover:border-[color-mix(in_srgb,var(--c)_62%,transparent)] data-[on=false]:hover:bg-[color-mix(in_srgb,var(--c)_9%,transparent)] data-[on=true]:border-[var(--c)] data-[on=true]:bg-[var(--c)] data-[on=true]:text-paper`}
+                  className={`control-label shrink-0 whitespace-nowrap border px-3.5 py-2.5 leading-none transition-colors ${R} data-[on=false]:border-[color-mix(in_srgb,var(--c)_34%,transparent)] data-[on=false]:text-[var(--c)] data-[on=false]:hover:border-[color-mix(in_srgb,var(--c)_62%,transparent)] data-[on=false]:hover:bg-[color-mix(in_srgb,var(--c)_9%,transparent)] data-[on=true]:border-[var(--c)] data-[on=true]:bg-[var(--c)] data-[on=true]:text-paper`}
                 >
                   {cat}
                 </button>

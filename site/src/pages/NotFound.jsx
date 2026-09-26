@@ -11,7 +11,7 @@ export default function NotFound() {
     <div className="mx-auto max-w-6xl px-6 py-24">
       <p className="label-mono mb-4 text-muted">404 · Not Found</p>
       <h1 className="mb-6 text-3xl font-bold">Nothing here.</h1>
-      <Link to="/work" className="label-mono text-accent">
+      <Link to="/work" className="control-label text-accent">
         ← Back to the index
       </Link>
     </div>

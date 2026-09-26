@@ -32,7 +32,7 @@ export default class ErrorBoundary extends Component {
         <button
           type="button"
           onClick={() => window.location.reload()}
-          className="label-mono border border-ink px-5 py-3 text-ink transition-colors hover:border-accent hover:text-accent"
+          className="control-label border border-ink px-5 py-3 text-ink transition-colors hover:border-accent hover:text-accent"
         >
           Reload
         </button>

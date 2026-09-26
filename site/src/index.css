@@ -295,6 +295,23 @@ html[data-theme-switching] *::after {
   text-transform: uppercase;
 }
 
+/* The voice of a thing you press.
+   Mono uppercase used to set everything that was not prose: the dates and
+   counts, and also every pill, button and text link, so an annotation and a
+   control looked the same and nothing on a page stood out as the thing to do.
+   The split is now by role. Mono uppercase is annotation (dates, counts,
+   categories, section and record labels) and the site's frame (the island and
+   the band), which is its identity and stays put. A control inside a page is
+   set in the sans the headings use, sentence case, at a size a notch above the
+   label floor, so it reads as a different kind of thing at a glance. */
+@utility control-label {
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
 /* Wide and short: a phone lying down, and anything else with more width than
    height to spare. Stacking anything above anything else fails here — a 16/9
    well over a column of text wants 431px of a 342px card — so the layouts that

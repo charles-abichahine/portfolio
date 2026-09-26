@@ -1628,10 +1628,10 @@ export default function About() {
           <button
             type="button"
             onClick={replay}
-            className={`${MONO} absolute left-4 z-[3] cursor-pointer whitespace-nowrap rounded-[3px] px-1 text-muted outline-none transition-[color,opacity] duration-300 hover:text-accent focus-visible:ring-1 focus-visible:ring-accent motion-reduce:transition-none sm:left-7 lg:left-11 ${flowing ? 'top-2.5' : 'top-[104px] md:top-[92px]'}`}
+            className={`control-label absolute left-4 z-[3] cursor-pointer whitespace-nowrap rounded-[3px] px-1 text-soft outline-none transition-[color,opacity] duration-300 hover:text-accent focus-visible:ring-1 focus-visible:ring-accent motion-reduce:transition-none sm:left-7 lg:left-11 ${flowing ? 'top-2.5' : 'top-[104px] md:top-[92px]'}`}
             style={{ opacity: replayable ? 1 : 0, visibility: replayable ? 'visible' : 'hidden' }}
           >
-            <span aria-hidden="true" className="pr-1">↻</span>replay the fold
+            <span aria-hidden="true" className="pr-1">↻</span>Replay the fold
           </button>
         )}
       </div>
@@ -1822,7 +1822,7 @@ export default function About() {
               aria-label="Play the years"
               aria-pressed={touring}
               onClick={playTour}
-              className={`${MONO} pointer-events-auto -mr-1 shrink-0 cursor-pointer whitespace-nowrap rounded-[3px] px-1 text-muted outline-none transition-colors hover:text-accent focus-visible:ring-1 focus-visible:ring-accent ${touring ? 'text-accent' : ''}`}
+              className={`control-label pointer-events-auto -mr-1 shrink-0 cursor-pointer whitespace-nowrap rounded-[3px] px-1 text-soft outline-none transition-colors hover:text-accent focus-visible:ring-1 focus-visible:ring-accent ${touring ? 'text-accent' : ''}`}
             >
               <span aria-hidden="true" className="pr-1 not-italic">{touring ? '■' : '▶'}</span>
               Play the years
@@ -1967,7 +1967,7 @@ export default function About() {
               ) : (
                 <Link
                   to="/cv"
-                  className={`${MONO} mt-4 inline-block text-muted transition-colors hover:text-accent`}
+                  className="control-label mt-4 inline-block text-soft transition-colors hover:text-accent"
                 >
                   Full record → CV
                 </Link>

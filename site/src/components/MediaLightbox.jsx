@@ -73,7 +73,7 @@ export default function MediaLightbox({ items, at, onStep, onClose, title, color
 
       <div className="relative mt-4 flex w-full max-w-[1000px] shrink-0 items-start gap-6">
         <div className="min-w-0">
-          <p className="font-mono text-[0.6rem] font-medium uppercase tracking-[0.13em] text-[var(--c)]">
+          <p className="font-mono text-[0.6875rem] font-medium uppercase tracking-[0.13em] text-[var(--c)]">
             {item.section}
           </p>
           {item.caption && (
@@ -81,7 +81,7 @@ export default function MediaLightbox({ items, at, onStep, onClose, title, color
           )}
         </div>
         {many && (
-          <span className="ml-auto shrink-0 font-mono text-[0.62rem] tabular-nums tracking-[0.11em] text-muted">
+          <span className="ml-auto shrink-0 font-mono text-[0.6875rem] tabular-nums tracking-[0.11em] text-muted">
             {String(at + 1).padStart(2, '0')} / {String(items.length).padStart(2, '0')}
           </span>
         )}
@@ -90,7 +90,7 @@ export default function MediaLightbox({ items, at, onStep, onClose, title, color
       <button
         type="button"
         onClick={onClose}
-        className="label-mono absolute right-6 top-6 z-10 rounded-[8px] border border-line bg-paper/85 px-2.5 py-1.5 text-muted transition-colors hover:border-accent hover:text-accent lg:right-10 lg:top-10"
+        className="control-label absolute right-6 top-6 z-10 rounded-[8px] border border-line bg-paper/85 px-2.5 py-1.5 text-soft transition-colors hover:border-accent hover:text-accent lg:right-10 lg:top-10"
       >
         Close ✕
       </button>
