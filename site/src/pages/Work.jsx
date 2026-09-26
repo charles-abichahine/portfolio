@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import ProjectLink from '../components/ProjectLink.jsx'
 import ProjectGlyph from '../components/projectGlyphs.jsx'
@@ -59,13 +59,33 @@ const ARROW =
   'rounded-[10px] border border-line bg-paper/80 text-ink opacity-0 ' +
   'transition-[opacity,color,border-color] duration-300 hover:border-accent hover:text-accent lg:flex'
 
-// 38vh rather than the 46vh this page used to run at: three tiles plus a slice
-// of the fourth fit, and that slice is what tells you the strip scrolls. The
-// clamp used to be the cover's height; now the whole tile is a card and the
-// text block below the cover is part of it, so the clamp sets the card's WIDTH
-// (the cover's 4:3 of the same height) and the cover follows from that. Same
-// density, and the card is the one bordered surface — no shadow, no plate.
-const CARD = `flex h-full flex-col overflow-hidden border border-line bg-paper lg:h-auto lg:w-[calc(clamp(250px,38vh,400px)*4/3)] ${R}`
+// The card's width is measured rather than declared: see fitTiles below. The
+// clamp is only the fallback for the first paint and for anything below lg,
+// where the card is a grid cell and this width never applies. The card is the
+// one bordered surface — no shadow, no plate.
+
+// The filmstrip has to show whole cards and a clear slice of the next one: the
+// slice is what says the strip scrolls. A height-only size could not promise
+// that. At 38vh a 1440x900 screen fitted 2.9 cards, so the third read as
+// cropped by mistake, with the arrow sitting on its picture. So the width is
+// solved for: as many whole cards as fit, plus a slice of 25–66% of the next,
+// at the largest size the height leaves for a cover.
+const GAP = 24 // lg:gap-6
+const LEAD = 40 // lg:px-10, the strip's left inset
+const SLICE = [0.25, 0.66]
+const AIR = 96 // what the block keeps free above and below, together
+const COVER_MAX = 520
+
+function fitTiles(avail, coverBudget, count) {
+  const most = (Math.min(coverBudget, COVER_MAX) * 4) / 3
+  if (count * most + (count - 1) * GAP <= avail) return most
+  for (let n = 1; n < count; n++) {
+    const small = (avail - n * GAP) / (n + SLICE[1])
+    if (small <= most) return Math.min(most, (avail - n * GAP) / (n + SLICE[0]))
+  }
+  return most
+}
+const CARD = `flex h-full flex-col overflow-hidden border border-line bg-paper lg:h-auto lg:w-[var(--tile-w,calc(clamp(250px,38vh,400px)*4/3))] ${R}`
 const COVER = 'relative aspect-[4/3] w-full overflow-hidden bg-line'
 
 function ProjectTile({ p, hot, motionOk, onFocus, onBlur }) {
@@ -326,6 +346,37 @@ export default function Work() {
     mq.addEventListener('change', apply)
     return () => mq.removeEventListener('change', apply)
   }, [])
+
+  // Sets --tile-w from the room the column actually has: its height less the
+  // header, the index strip and the text under each cover, and its width less
+  // the strip's lead. Re-measured on resize and on a filter, since a short
+  // category may fit whole and needs no slice at all.
+  useLayoutEffect(() => {
+    const el = stripRef.current
+    if (!el || !filmstrip) {
+      el?.style.removeProperty('--tile-w')
+      return
+    }
+    const column = el.parentElement.parentElement
+    const fit = () => {
+      const li = el.querySelector('li')
+      const cover = li?.querySelector('img')?.parentElement
+      if (!li || !cover) return
+      const [header, , index] = column.children
+      const indexBox = index.getBoundingClientRect().height + parseFloat(getComputedStyle(index).marginTop)
+      const text = li.getBoundingClientRect().height - cover.getBoundingClientRect().height
+      const room =
+        column.clientHeight - parseFloat(getComputedStyle(column).paddingTop) -
+        header.getBoundingClientRect().height - indexBox - text - AIR
+      const w = fitTiles(el.clientWidth - LEAD, room, filtered.length)
+      el.style.setProperty('--tile-w', `${Math.floor(w)}px`)
+      syncRef.current()
+    }
+    fit()
+    const ro = new ResizeObserver(fit)
+    ro.observe(column)
+    return () => ro.disconnect()
+  }, [filmstrip, filtered.length])
 
   useEffect(() => {
     const el = stripRef.current
@@ -698,8 +749,13 @@ export default function Work() {
             <span aria-live="polite" className={`${MONO} tabular-nums text-muted`}>
               {filtered.length} {filtered.length === 1 ? 'Project' : 'Projects'}
             </span>
-            {/* The portfolio PDF, in the CV page's own button, so the two
-                pages offer their files the same way. Between lg and xl the
+            {/* The portfolio PDF, drawn as an unpressed pill in ink rather than
+                the CV page's filled button. Filled, it was a second black
+                block on the same line as the pressed All pill, so the two
+                read as the same kind of control, and on a phone the download
+                outweighed the filters and the work. On the CV the download is
+                the page's one action; here it is secondary to browsing, and it
+                fills in ink only on hover. Between lg and xl the
                 filter pills leave the label row no room for the full wording
                 (the pills alone take 662px of a 944px line), so the button
                 keeps its size and drops to "PDF" there rather than hiding:
@@ -708,7 +764,7 @@ export default function Work() {
               href={asset('portfolio.pdf')}
               download="Charles-Abi-Chahine-Portfolio.pdf"
               data-track="download/portfolio"
-              className="inline-flex shrink-0 whitespace-nowrap rounded-[10px] border border-ink bg-ink px-4 py-2.5 font-mono text-[0.6875rem] uppercase leading-none tracking-[0.14em] text-paper transition-colors hover:border-accent hover:bg-accent"
+              className="inline-flex shrink-0 whitespace-nowrap rounded-[10px] border border-[color-mix(in_srgb,var(--color-ink)_34%,transparent)] px-3.5 py-2.5 font-mono text-[0.6875rem] uppercase leading-none tracking-[0.14em] text-ink transition-colors hover:border-ink hover:bg-ink hover:text-paper"
             >
               <span className="lg:max-xl:hidden">Portfolio (PDF) ↓</span>
               <span className="hidden lg:max-xl:inline">PDF ↓</span>
@@ -854,9 +910,9 @@ export default function Work() {
                   aria-label={`Go to ${p.title}`}
                   onClick={() => jumpRef.current(i)}
                   style={{ '--b': beltFor(p).color }}
-                  className="relative flex h-[30px] flex-1 items-end justify-center pb-[4px] text-muted opacity-35 transition-[opacity,color] duration-200 after:absolute after:-top-px after:left-1.5 after:right-1.5 after:h-[1.5px] after:bg-[var(--b)] after:opacity-0 after:transition-opacity after:duration-200 hover:opacity-100 hover:text-[var(--b)] data-[lit=true]:opacity-100 data-[lit=true]:text-[var(--b)] data-[lit=true]:after:opacity-100"
+                  className="relative flex h-[32px] flex-1 items-end justify-center pb-[4px] text-muted opacity-55 transition-[opacity,color] duration-200 after:absolute after:-top-px after:left-1.5 after:right-1.5 after:h-[1.5px] after:bg-[var(--b)] after:opacity-0 after:transition-opacity after:duration-200 hover:opacity-100 hover:text-[var(--b)] data-[lit=true]:opacity-100 data-[lit=true]:text-[var(--b)] data-[lit=true]:after:opacity-100"
                 >
-                  <ProjectGlyph slug={p.slug} className="h-[17px] w-[17px]" />
+                  <ProjectGlyph slug={p.slug} className="h-[19px] w-[19px]" />
                 </button>
               ))}
             </div>
