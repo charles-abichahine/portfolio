@@ -13,18 +13,19 @@ import { normalize } from '../documentMeta.js'
  * booklet link lived inside /work's private footer despite belonging to the
  * whole site.
  *
- * Three zones. The identity is flush left and the contact links flush right,
+ * Two zones. The identity is flush left and the contact links flush right,
  * both hard against the page edge rather than inset, because these pages are
  * full bleed and an inset footer under a full-bleed page reads as a different
- * component. The middle belongs to the page: see FooterSlot.
+ * component. (There was a third, a middle slot a page could portal a file
+ * into; nothing used it once the portfolio download moved to /work's header,
+ * and it is gone.)
  *
  * A band, not an overlay. The landing and /about are drawings, and a transparent
  * footer over them means text on an unpredictable ground; the band gives the
  * type a floor to stand on and ends the page deliberately.
  */
 /* Same voice as the island, and now the same size: the band was one step down
-   at 0.56rem, which put the identity line and whatever file a page hangs in the
-   slot at 8.96px. The band is quieter than the island by colour instead, which
+   at 0.56rem, which put the identity line at 8.96px. The band is quieter than the island by colour instead, which
    is where the difference belonged anyway — muted or soft at rest, ink for the
    one you are on, accent under the cursor. */
 const MONO = 'chrome-label text-[0.6875rem]'
@@ -112,13 +113,12 @@ function Mark({ d }) {
   )
 }
 
-export default function Footer({ slotRef }) {
+export default function Footer() {
   const bandRef = useRef(null)
   /*
    * /contact carries the contacts in its own text, so the band there is the
    * identity and nothing else. Two corners need two things to sit in them; one
-   * line alone belongs in the middle. (/about did too; while it shows its
-   * holding page it carries none, so it gets the full band.)
+   * line alone belongs in the middle.
    */
   const bare = normalize(useLocation().pathname) === '/contact'
 
@@ -132,11 +132,8 @@ export default function Footer({ slotRef }) {
     if (el) document.documentElement.style.setProperty('--footer-h', `${el.offsetHeight}px`)
   }, [])
 
-  /* Twice over, because the two things that change this height change it by
-     different routes. Width is the observer's job. The slot is not: it arrives
-     by portal from a page below, so the band grows a row on a phone during a
-     commit this component is part of, and measuring after every commit catches
-     that in the same frame the row appears rather than a beat later. */
+  /* Twice over: after every commit, which catches a route change swapping the
+     bare band for the full one, and on resize, which is the observer's job. */
   useLayoutEffect(publish)
 
   useEffect(() => {
@@ -164,36 +161,18 @@ export default function Footer({ slotRef }) {
           say so by being marks. That contrast is the point: one thing floats,
           because only one thing is a control.
 
-          Two corners, not three. The page's own item joins the contacts on the
-          right rather than taking the centre, because a centred item needs a
-          band across the full width to be centred *in*, and there is no longer
-          a band.
-
-          Three cells, placed by source order on a phone and pinned from sm up.
-          The slot leads, spanning both columns, so a route that has one gets it
-          on its own line and the name keeps the full width underneath — sharing
-          that line squeezed the name into 141px of the 178px it needs and broke
-          it across two lines. A route with no slot collapses it, and the name
-          and the marks fall back onto a single line together, which is the
-          arrangement the reference actually shows. */}
+          Two corners and nothing between them: the name on the left, the
+          marks on the right, on one line at every width. */}
       {bare ? (
         <p className={`${MONO} px-6 pb-4 pt-2 text-center text-muted sm:pb-5 lg:px-10`}>
           © 2026 Charles Abi Chahine
           <span className="hidden lg:inline"> · {role}</span>
         </p>
       ) : (
-      <div className="grid grid-cols-[1fr_auto] items-end gap-x-4 gap-y-1 px-6 pb-4 pt-2 sm:grid-cols-[1fr_auto_auto] sm:items-center sm:gap-x-5 sm:gap-y-0 sm:pb-5 lg:px-10">
-        {/* flex, so this is the height of what a page puts in it rather than of
-            a line box — pages hand it an <a> or a <button> as often as a <p>,
-            and an inline child drags in the footer's own 16px strut. */}
-        <div
-          ref={slotRef}
-          className="col-span-2 flex items-center justify-self-end empty:hidden sm:col-span-1 sm:col-start-2 sm:row-start-1"
-        />
-
+      <div className="grid grid-cols-[1fr_auto] items-center gap-x-4 px-6 pb-4 pt-2 sm:gap-x-5 sm:pb-5 lg:px-10">
         {/* Bottom left. The role waits for lg, where the line has room beside
             everything on the right of it. */}
-        <p className={`${MONO} text-muted sm:col-start-1 sm:row-start-1`}>
+        <p className={`${MONO} text-muted`}>
           © 2026 Charles Abi Chahine
           <span className="hidden lg:inline"> · {role}</span>
         </p>
@@ -206,13 +185,13 @@ export default function Footer({ slotRef }) {
         {/* The names come back at sm — one row up from the single phone column,
             which is the landscape phone and everything wider. The note above
             records that the three words cost 170px and once broke the row, but
-            that was when a page hung a chip in the middle cell too; with the
-            slot empty the row is only the identity and the marks, and the two
-            clear the 592px an sm row has with room to spare. Portrait phones
+            that was when a page could hang a chip in a middle cell too; the
+            row is only the identity and the marks, and the two clear the 592px
+            an sm row has with room to spare. Portrait phones
             (below sm) stay marks, where the column is narrow and the row tight. */}
         <nav
           aria-label="Contact"
-          className="-my-1 -mr-1.5 flex justify-self-end gap-0.5 sm:col-start-3 sm:row-start-1 sm:gap-2.5"
+          className="-my-1 -mr-1.5 flex justify-self-end gap-0.5 sm:gap-2.5"
         >
           {MARKS.map((m) => (
             <a

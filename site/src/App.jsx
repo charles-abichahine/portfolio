@@ -1,8 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import DynamicIsland from './components/DynamicIsland.jsx'
 import Footer from './components/Footer.jsx'
-import { FooterSlotContext } from './components/footerSlotContext.js'
 import { normalize } from './documentMeta.js'
 
 function App() {
@@ -81,10 +80,6 @@ function App() {
    */
   const flowsShort = route === '/'
 
-  // Held in state rather than a ref so that setting it re-renders and the
-  // portal in FooterSlot finds its target on the pass after the footer mounts.
-  const [slotNode, setSlotNode] = useState(null)
-
   return (
     /*
      * --app-h, which is 100svh by default (see index.css), not min-h-screen. A
@@ -120,24 +115,22 @@ function App() {
         Skip to content
       </a>
       <DynamicIsland />
-      <FooterSlotContext.Provider value={slotNode}>
-        {/* tabIndex -1 so the skip link has somewhere to land. The ring is
-            suppressed because a focus outline around the whole page reads as a
-            rendering fault rather than as feedback; the proof that the skip
-            worked is the next Tab landing in the content. */}
-        <main
-          id="main"
-          tabIndex={-1}
-          className={`outline-none ${
-            fullBleed
-              ? `flex min-h-0 flex-1 flex-col${flowsShort ? ' max-lg:landscape:min-h-[auto]' : ''}`
-              : 'flex-1'
-          }`}
-        >
-          <Outlet />
-        </main>
-        <Footer slotRef={setSlotNode} />
-      </FooterSlotContext.Provider>
+      {/* tabIndex -1 so the skip link has somewhere to land. The ring is
+          suppressed because a focus outline around the whole page reads as a
+          rendering fault rather than as feedback; the proof that the skip
+          worked is the next Tab landing in the content. */}
+      <main
+        id="main"
+        tabIndex={-1}
+        className={`outline-none ${
+          fullBleed
+            ? `flex min-h-0 flex-1 flex-col${flowsShort ? ' max-lg:landscape:min-h-[auto]' : ''}`
+            : 'flex-1'
+        }`}
+      >
+        <Outlet />
+      </main>
+      <Footer />
     </div>
   )
 }

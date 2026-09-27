@@ -130,7 +130,6 @@ const WORDS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'e
   'twenty-three', 'twenty-four', 'twenty-five', 'twenty-six', 'twenty-seven',
   'twenty-eight', 'twenty-nine', 'thirty']
 const word = (n) => WORDS[n] ?? String(n)
-const Word = (n) => word(n).replace(/^./, (c) => c.toUpperCase())
 
 const CHROME = [
   'C:/Program Files/Google/Chrome/Application/chrome.exe',
