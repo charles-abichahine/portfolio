@@ -1,7 +1,7 @@
 /*
  * One drawn mark per project, for the /work index cards.
  *
- * All eighteen share a single grammar, and the grammar is the point: a 24-unit
+ * All nineteen share a single grammar, and the grammar is the point: a 24-unit
  * square, line only, stroke 1.4 with round caps and joins, no fills. Each glyph
  * abstracts what the project IS — the persona rose, the spatial graph, the
  * braced column — rather than what category it sits in; the filter pills
@@ -166,6 +166,13 @@ const GLYPHS = {
   ),
   // The salt-pond grid, on the shore it works. Unequal cells, because a window
   // is even and a salt pan is not.
+  // The master panel: a square with a slot cut into each side, the joint that
+  // lets two of them lock without glue or screws.
+  'nexus-booth': (
+    <>
+      <path d="M4 4H11.2V8.5H12.8V4H20V11.2H15.5V12.8H20V20H12.8V15.5H11.2V20H4V12.8H8.5V11.2H4Z" />
+    </>
+  ),
   'lau-anfeh': (
     <>
       <path d="M6.5 3.5C4.2 7.5 6.2 11 5.2 14.5 4.5 17 3.6 18.7 3.6 20.5" />

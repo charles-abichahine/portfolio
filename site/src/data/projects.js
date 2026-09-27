@@ -1313,6 +1313,85 @@ const _projects = [
     ],
   },
   {
+    slug: 'nexus-booth',
+    // Built in 2024 at Dynamic Solution Co.; the month is not recorded, so this
+    // sits after the Aug 24 start the CV gives for the role.
+    date: '2024-10-01',
+    title: 'Nexus Booth',
+    subtitle:
+      'A modular exhibition booth grown from two slotted puzzle panels: a Grasshopper tool finds the assemblies within the rules, turns the chosen one into a numbered kit of parts, and the pieces slot together with no glue or screws.',
+    tagline: 'A booth grown from two puzzle pieces.',
+    year: '2024',
+    module: 'Dynamic Solution Co. · Design Technology Architect',
+    team: ['Dynamic Solution Co.: office project'],
+    tools: ['Rhino', 'Grasshopper', 'CNC'],
+    tag: 'GH',
+    toolsShort: 'PRACTICE',
+    cover: 'projects/nexus-booth/cover.webp',
+    category: 'Design & Research',
+    award: null,
+    links: {},
+    intro: [
+      'Nexus is an exhibition booth made from only two pieces: a white panel that always stands and a black one that always lies flat, each cut with slots that let it lock into the other. Rather than drawing the booth, we grew it. A form-finding tool in Grasshopper builds assemblies out of compatible joints inside a set of rules, lays the options out side by side, and turns the one we chose into a numbered kit of parts cut on a CNC.',
+    ],
+    sections: [
+      {
+        heading: 'Two pieces',
+        body: [
+          'Both master pieces are 780 × 780 mm and 36 mm thick, with 120 mm slots and 50 mm corner radii. The joint is cut into the panel itself, so nothing is glued or screwed: the vertical pieces carry the horizontal ones and the crossing slots restrain the assembly. The same two pieces make the connection, the support and the furniture. A black panel low down becomes a seat, one higher up becomes a counter.',
+        ],
+        media: [
+          { type: 'image', src: 'projects/nexus-booth/two-pieces.webp', caption: 'Slot together, support one another, make room to gather: the same two pieces at every step.' },
+          { type: 'image', src: 'projects/nexus-booth/on-site.webp', caption: 'The real joints: the white and black masters in the workshop, the slots meeting on site.' },
+        ],
+      },
+      {
+        heading: 'Growing the booth',
+        body: [
+          'The tool starts with one white panel, whose slots define where growth can go, and tries a direction: extend, turn, rise, or branch from an earlier piece. A horizontal addition arrives with the white support it needs. Every move has to fit the chosen width, depth and height, stay clear of the other pieces (slots may overlap, solid material may not), and keep the total mass inside the budget. If it fails, the tool tries another move.',
+          'Once the assembly has grown, the whole of it is checked against the rules, its joints and its support paths. A piece that breaks one is flagged by its ID and the problem explained, so it can be removed and the rest rechecked.',
+        ],
+        media: [
+          { type: 'video', src: 'projects/nexus-booth/growth.mp4', caption: 'An assembly growing one valid connection at a time.' },
+          { type: 'image', src: 'projects/nexus-booth/growth-logic.webp', caption: 'The growth logic: start with one white, try a direction, add the support with it, then check the space, the clearance and the mass.' },
+          { type: 'image', src: 'projects/nexus-booth/flow.webp', caption: 'The full flow: the two master pieces, the design controls, the form-finding core, the checks, and the kit of parts.' },
+        ],
+      },
+      {
+        heading: 'Many booths, one chosen',
+        body: [
+          'Change the extent, the density or the seed and the same rules grow a different booth. Thirty candidates were grown and ten compared side by side, at one camera and one scale, each with its dimensions, density, panel count and its split of white and black, all inside a 650 kg mass budget. Lowering a single input shows the rules at work: with the height limit cut from 2940 to 1320 mm, the booth drops from 34 panels to 21.',
+          'Option 29 was chosen: 34 connected panels on a 2940 × 3480 mm footprint, with a counter at 948 mm to stand and talk at and a seat at 408 mm to stay a little longer, and open edges that let people walk in.',
+        ],
+        media: [
+          { type: 'video', src: 'projects/nexus-booth/design-space.mp4', caption: 'The design space: thirty candidates, ten compared, one chosen.' },
+          { type: 'image', src: 'projects/nexus-booth/options.webp', caption: 'Ten options at one camera and scale, with dimensions, density, panel counts and the white and black split.' },
+          { type: 'image', src: 'projects/nexus-booth/height-limit.webp', caption: 'One input changes and the connection rules stay the same: a lower height limit, fewer levels, 21 panels instead of 34.' },
+          { type: 'image', src: 'projects/nexus-booth/option-29.webp', caption: 'Option 29: counters at 948 mm, seats at 408 mm, 34 connected panels.' },
+        ],
+      },
+      {
+        heading: 'A kit of parts',
+        body: [
+          'The chosen booth becomes a kit: 34 unique IDs, 23 white and 11 black, in one connected assembly of seven groups. Every part carries its axis, its level, its group, its position, its area and its mass, the IDs it mates with, and the stock sheet it is cut from. The flat profiles are nested onto twelve sheets and cut on a CNC.',
+        ],
+        media: [
+          { type: 'video', src: 'projects/nexus-booth/model-to-cuts.mp4', caption: 'From the model to the cuts: every panel flattened, numbered and nested onto its sheet.' },
+          { type: 'image', src: 'projects/nexus-booth/part-data.webp', caption: 'The part data: every panel labelled on the model, with its axis, level, group, position, mass and sheet.' },
+        ],
+      },
+      {
+        heading: 'On site',
+        body: [
+          'Then it had to stand up. The panels were pre-assembled group by group and slotted together on site. Some of the pieces went missing, and there were no spares, so we worked out new connections with the pieces we had: what could move, what could still fit, and how to keep the seats and the counters useful.',
+        ],
+        media: [
+          { type: 'video', src: 'projects/nexus-booth/preassembly.mp4', caption: 'Pre-assembly: the groups coming together before they meet on site.' },
+        ],
+      },
+    ],
+  },
+  {
     slug: 'saria',
     // The SD1 set in the source folder is dated 2024-03-15; the CV puts the
     // SOMA role at Aug 23 to Jul 24.
