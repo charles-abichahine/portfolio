@@ -1313,6 +1313,80 @@ const _projects = [
     ],
   },
   {
+    slug: 'lincoln-booth',
+    // Built in 2025 at Dynamic Solution Co.; the month is not recorded.
+    date: '2025-06-01',
+    title: 'Lincoln Booth',
+    subtitle:
+      'A reveal booth for Lincoln in Kuwait: sixty mirrored panels hung between two rings, shaped by a sea-wave curve in Grasshopper, keep the car to glimpses and reflections until the whole enclosure lifts away.',
+    tagline: 'A mirrored wave that hides a car, then lifts.',
+    year: '2025',
+    module: 'Dynamic Solution Co. · Design Technology Architect',
+    team: ['Dynamic Solution Co.: office project'],
+    tools: ['Rhino', 'Grasshopper', '3D printing', 'Laser / CNC cutting'],
+    tag: 'GH',
+    toolsShort: 'PRACTICE',
+    cover: 'projects/lincoln-booth/cover.webp',
+    category: 'Design & Research',
+    award: null,
+    links: {},
+    intro: [
+      'A car launch usually puts the car on a plinth and lets you look. This booth for Lincoln does the opposite: it hides the car inside a ring of shaped mirror panels, hung from a truss over a floor of moving water light. From outside you catch the car only in slices between the panels and in what they reflect, so you move around the ring to see more. Then the enclosure lifts, and the car is the only thing left to look at.',
+    ],
+    sections: [
+      {
+        heading: 'Hiding the car',
+        body: [
+          'The booth is a sequence rather than a display. The enclosure draws you in from across the floor and reflects the room and the moving images around it. Walking its perimeter, you get a different glimpse between each pair of panels. The reveal is the last step: the ring rises on its chains and the car becomes the main object of attention.',
+          'How much of the car shows was studied from where people actually stand, at an eye height of 1.60 m, with the sight lines drawn in plan for each viewpoint.',
+        ],
+        media: [
+          { type: 'image', src: 'projects/lincoln-booth/concept.webp', caption: 'Sea waves become a spatial rule: abstract the rhythm into an attractor curve, then repeat it into an enclosure that teases.' },
+          { type: 'image', src: 'projects/lincoln-booth/visitor-sequence.webp', caption: 'Draw attention, offer a glimpse, reveal the car: the visitor, the enclosure and the hidden car in sequence.' },
+          { type: 'video', src: 'projects/lincoln-booth/key-plan-visibility.mp4', caption: 'Move around, catch a glimpse: the sight fan from each viewpoint in plan, and what it lets you see of the car.' },
+        ],
+      },
+      {
+        heading: 'The sea as a rule',
+        body: [
+          'The rhythm of the panels comes from one curve. A sea-wave rhythm is held in a closed 3D attractor curve; the ring is divided into sixty vertical lines, and each line meets the wave at a different height. That point is moved outward along the normal and connected to the top and bottom rings, so every panel is the same rule with a different crest.',
+          'In Grasshopper the chain runs from the saved curve through divide, loft, pull and intersect, to the profiles (move, shift, connect), to the parts (extrude, cap, rotate, with thickness and angle as controls), and on to the kit. The base definition sets 60 divisions, a 170 cm height and a 40 cm normal move.',
+        ],
+        media: [
+          { type: 'image', src: 'projects/lincoln-booth/attractor.webp', caption: 'The sea became a rule for the panels: draw the attractor, pull and intersect, then move, shift and connect.' },
+          { type: 'video', src: 'projects/lincoln-booth/wave-study.mp4', caption: 'The saved attractor against two explanatory variations: a lower wave and a shifted rhythm.' },
+          { type: 'image', src: 'projects/lincoln-booth/grasshopper.webp', caption: 'Inside the Grasshopper definition: the wave attractor, the carrier, the crest, the profiles, the parts and the numbered kit.' },
+          { type: 'video', src: 'projects/lincoln-booth/panel-rotation.mp4', caption: 'How much should the panels reveal? The wave and the visitor stay fixed while the fins rotate.' },
+        ],
+      },
+      {
+        heading: 'A family of enclosures',
+        body: [
+          'Once the wave is a rule, it is also a family. Seeded curves grow different enclosures from the same count and rotation, and a matrix crosses four families of wave (a broad swell, a double crest, an asymmetric wave and a rapid ripple) with six panel settings, from fewer and more panels to shallower, deeper and turned fins. They are different ways to hide, compared side by side rather than ranked.',
+          'Two ways of making the wave were printed as physical models: a complex source and a simplified one, compared under the same camera and the same light before the geometry was committed to.',
+        ],
+        media: [
+          { type: 'video', src: 'projects/lincoln-booth/curves-and-seeds.mp4', caption: 'A wave becomes a family of enclosures: follow the height curve from input to panel rhythm.' },
+          { type: 'video', src: 'projects/lincoln-booth/revised-matrix.mp4', caption: 'The revised option matrix: rows change the wave, columns change one panel control from the baseline.' },
+          { type: 'image', src: 'projects/lincoln-booth/archived-variants.webp', caption: 'Two archived ways of making the wave, the complex and the simplified source: same camera, same light.' },
+        ],
+      },
+      {
+        heading: 'Built, then revealed',
+        body: [
+          'The enclosure is sixty shaped panels between two rings. Every panel belongs to a ring, a number and a sheet: the parts are unrolled, nested and cut, then located by their IDs, connected and suspended from the overhead frame. The ring was 3D-printed first, then built at full size in mirror panels, and at the event it lifted to show the car.',
+        ],
+        media: [
+          { type: 'image', src: 'projects/lincoln-booth/enclosure.webp', caption: 'Sixty shaped panels, two rings, one repeated rule.' },
+          { type: 'image', src: 'projects/lincoln-booth/exploded-kit.webp', caption: 'The exploded kit: the top ring, the base ring, and one panel followed from part to profile to sheet.' },
+          { type: 'video', src: 'projects/lincoln-booth/assembly-reveal.mp4', caption: 'Build the enclosure, then release the view: the kit, the overhead frame, the suspension, and the lift.' },
+          { type: 'image', src: 'projects/lincoln-booth/behind-the-scenes.webp', caption: 'Behind the scenes: a mirror panel in hand, the two printed test rings, and the enclosure hanging in the workshop.' },
+          { type: 'image', src: 'projects/lincoln-booth/lift.webp', caption: 'The reveal: the enclosure lifted over the car.' },
+        ],
+      },
+    ],
+  },
+  {
     slug: 'nexus-booth',
     // Built in 2024 at Dynamic Solution Co.; the month is not recorded, so this
     // sits after the Aug 24 start the CV gives for the role.
