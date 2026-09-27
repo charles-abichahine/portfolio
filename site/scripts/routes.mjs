@@ -44,11 +44,12 @@ if (projects.length === 0) {
 export const routes = [
   '/',
   '/work',
-  '/traces',
-  // Moved to /traces. Still prerendered so the old address answers 200 and
-  // redirects; the sitemap leaves it out (see MOVED in documentMeta.js).
-  '/about',
   '/cv',
   '/contact',
+  // Retired, both now redirecting to /contact. Still prerendered so an old link
+  // answers 200 and redirects; the sitemap leaves them out (see MOVED in
+  // documentMeta.js).
+  '/about',
+  '/traces',
   ...projects.map((p) => `/work/${p.slug}`),
 ]

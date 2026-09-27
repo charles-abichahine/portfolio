@@ -7,9 +7,6 @@ import ProjectOverlay from './components/ProjectOverlay.jsx'
 import { getProject } from './data/projects.js'
 import Home from './pages/Home.jsx'
 import Work from './pages/Work.jsx'
-// TEMPORARY: /traces (the old /about) shows a holding page while it is
-// reworked. About.jsx is kept; swap the element back to <About /> to restore it.
-import AboutInProgress from './pages/AboutInProgress.jsx'
 import Contact from './pages/Contact.jsx'
 import CV from './pages/CV.jsx'
 import NotFound from './pages/NotFound.jsx'
@@ -72,9 +69,12 @@ export default function AppRoutes() {
         <Route path="/" element={<App />}>
           <Route index element={<Home />} />
           <Route path="work" element={<Work />} />
-          <Route path="traces" element={<AboutInProgress />} />
-          {/* The page's old address, kept so links to it still land. */}
-          <Route path="about" element={<Navigate to="/traces" replace />} />
+          {/* Retired pages, kept as addresses so old links still land. About
+              became Traces, and Traces is off the site for now; both send a
+              visitor to the page about the person. The exhibit itself is
+              kept, unrouted, in pages/About.jsx. */}
+          <Route path="about" element={<Navigate to="/contact" replace />} />
+          <Route path="traces" element={<Navigate to="/contact" replace />} />
           <Route path="contact" element={<Contact />} />
           <Route path="cv" element={<CV />} />
           <Route path="*" element={<NotFound />} />

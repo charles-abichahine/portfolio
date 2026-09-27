@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ContactMarks } from '../components/Footer.jsx'
 import { CC, crossCap, makeProjector } from '../lib/crosscap.js'
 import { byId, LAND_ROWS, latToY, lonToX, places, VIEWBOX } from '../data/places.js'
 import { NOW, START, TIMELINE, TOUCHES } from '../data/journey.js'
@@ -885,7 +884,10 @@ export default function About() {
     // width and the caption has to sit under it rather than beside it; on a wide
     // screen the writing keeps to the left half and the caption tucks into the
     // space it already leaves above the rail.
-    const bottom = flow ? CC_STAGE.pad : 70 + LANE_H + 26 + (w < 768 ? 208 : 74)
+    // 232 on a phone, up from 208: the legend under the writing stands a few
+    // lines taller than the contact marks that used to close it, and at 208
+    // the label sat on the drawing's lowest row.
+    const bottom = flow ? CC_STAGE.pad : 70 + LANE_H + 26 + (w < 768 ? 232 : 74)
     const availH = Math.max(120, h - top - bottom)
     const availW = Math.max(120, w - 48)
     // 135 is the surface's own extent in its units, so this reads as "fill the
@@ -1643,36 +1645,70 @@ export default function About() {
 
           On a phone lying down it is not over the drawing at all: it drops out
           of the corner and into the flow, directly under the stage, which is
-          where a column of writing on a page that scrolls belongs. Nothing is
-          hung off an edge there, so nothing needs to be trimmed to clear one —
-          the label, the contact names and the full measure are all back.
+          where a column of writing on a page that scrolls belongs.
 
           The measure is written as two rules rather than one because the flowing
           page is exactly md-and-up in landscape below lg: the half-width column
           belongs to a portrait tablet and to the desk, and this asks for those
-          two by name rather than asking for md and then arguing with it. */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-[136px] z-[3] px-5 sm:px-8 max-lg:landscape:static max-lg:landscape:mt-8 lg:px-12">
-        <div className="max-w-[58ch] md:portrait:max-w-[48%] lg:max-w-[48%]">
-          <p className={`${MONO} mb-4 text-muted`}>About</p>
-          <h1 className="max-w-[28ch] text-balance text-[clamp(1.2rem,1.85vw,1.6rem)] font-light leading-[1.32] text-ink">
-            Trained to draw buildings, went back for the machinery
-          </h1>
-          <p className="mt-4 max-w-[56ch] font-serif text-[0.92rem] leading-[1.75] text-soft">
-            Practice across Beirut, Dubai and Kuwait, then the MaCAD master at IAAC. Now I build the
-            tools I used to ask for.
-          </p>
-          {/* The contacts, out of the band and under the writing. This is the
-              page about the person, so it is where a way to reach him belongs;
-              the band below keeps the identity alone and centred. The block
-              above is pointer-events-none so the drawing stays reachable
-              through it, which the marks have to opt back out of.
+          two by name rather than asking for md and then arguing with it.
 
-              They used to be exiled to the island's own line, as three bare
-              marks without their names, on a phone lying down: there was no
-              room for them under the writing there and this page's footer is
-              bare precisely because it carries them. The flowing page has the
-              room, so they are back where they belong at every size, named. */}
-          <ContactMarks named className="pointer-events-auto mt-7 -ml-1.5 text-muted" />
+          This was the biography's corner while the page was About. The person
+          has /contact now, so what stands here is the exhibit's own label: a
+          title, one line on what the drawing is, and the key to its marks,
+          which the page used to leave to hovering. */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-[136px] z-[3] px-5 sm:px-8 max-lg:landscape:static max-lg:landscape:mt-8 lg:px-12">
+        <div className="max-w-[58ch] md:portrait:max-w-[48%] lg:max-w-[40%]">
+          <p className={`${MONO} mb-4 text-muted`}>Traces</p>
+          <h1 className="max-w-[28ch] text-balance text-[clamp(1.2rem,1.85vw,1.6rem)] font-light leading-[1.32] text-ink">
+            Where I have been, and when
+          </h1>
+          <p className="mt-4 max-w-[52ch] font-serif text-[0.92rem] leading-[1.75] text-soft">
+            Every place I have lived, studied, worked in or visited since {START}, pinned to the surface
+            this site is drawn from. The years run along its rows: wind them back and it un-builds.
+          </p>
+          {/* The key. The dots are the three sizes and tones the pins are drawn
+              in (pinSize, and the tones on the marks below); the bars are the
+              rail's three belts, as journey.js deals them. "Lived" stands for
+              lived, studied or worked: every such place was also home for a
+              while, the caption above says the rest, and the long label cost
+              the phone a third row the drawing had to give up height for. */}
+          <div className="mt-5 space-y-1.5 text-muted">
+            {/* Two rows, one per kind of mark: the pins on the drawing, then
+                the bars on the rail. Wrapped as one line, the break fell
+                wherever the width ran out and split the rail's three apart. */}
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+            {[
+              ['now', 'bg-accent', 'Now'],
+              ['lived', 'bg-ink', 'Lived'],
+              ['visited', 'bg-soft', 'Visited'],
+            ].map(([kind, tone, label]) => (
+              <span key={kind} className={`${MONO} flex items-center gap-2`}>
+                <span
+                  aria-hidden="true"
+                  className={`block rounded-full ${tone}`}
+                  style={{ width: pinSize({ kind }), height: pinSize({ kind }) }}
+                />
+                {label}
+              </span>
+            ))}
+            </div>
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+            {[
+              ['green', 'Study'],
+              ['amber', 'Practice'],
+              ['blue', 'BIM'],
+            ].map(([belt, label]) => (
+              <span key={belt} className={`${MONO} flex items-center gap-2`}>
+                <span
+                  aria-hidden="true"
+                  className="block h-[3px] w-4 rounded-full"
+                  style={{ backgroundColor: `var(--color-${belt})` }}
+                />
+                {label}
+              </span>
+            ))}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1960,11 +1996,11 @@ export default function About() {
               )}
               {/* Somewhere to go, but only where there is somewhere to go: a
                   place he worked or studied in is on the CV, and a place he
-                  travelled to is not written up anywhere yet. Sending the second
-                  kind to the CV promised a record that does not mention it. */}
-              {active.kind === 'visited' ? (
-                <p className={`${MONO} mt-4 text-muted`}>Architecture blog in the works</p>
-              ) : (
+                  travelled to is not written up anywhere. Sending the second
+                  kind to the CV promised a record that does not mention it, and
+                  the line that stood in for it promised a blog that does not
+                  exist, so a visited place simply ends with its name. */}
+              {active.kind !== 'visited' && (
                 <Link
                   to="/cv"
                   className="control-label mt-4 inline-block text-soft transition-colors hover:text-accent"

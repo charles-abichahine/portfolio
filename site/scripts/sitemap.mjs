@@ -68,7 +68,6 @@ const PROJECTS_MOD = lastCommit(resolve(here, '../src/data/projects.js'))
 const PAGE_SOURCE = {
   '/': '../src/pages/Home.jsx',
   '/work': '../src/pages/Work.jsx',
-  '/traces': '../src/pages/AboutInProgress.jsx',
   '/cv': '../src/pages/CV.jsx',
   '/contact': '../src/pages/Contact.jsx',
 }
@@ -80,7 +79,6 @@ const STATIC_MOD = Object.fromEntries(
 const RANK = {
   '/': { priority: '1.0', changefreq: 'monthly' },
   '/work': { priority: '0.9', changefreq: 'monthly' },
-  '/traces': { priority: '0.7', changefreq: 'yearly' },
   '/cv': { priority: '0.7', changefreq: 'monthly' },
   '/contact': { priority: '0.6', changefreq: 'yearly' },
 }

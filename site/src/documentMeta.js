@@ -16,15 +16,16 @@ export const ORIGIN = 'https://charlesabichahine.com'
 // label followed by the name.
 export const HOME_TITLE = 'Charles Abi Chahine • Architect & Computational Designer'
 
-const PAGES = { '/work': 'Work', '/traces': 'Traces', '/cv': 'CV', '/contact': 'Contact' }
+const PAGES = { '/work': 'Work', '/cv': 'CV', '/contact': 'Contact' }
 
 /*
- * Pages that have moved, old path to new. /about became /traces when the page
- * was renamed; the old address still answers (routes.jsx redirects it, and
- * prerender.mjs gives it a file), but it names the new page as its title and
- * its canonical, so a crawler following an old link learns where it went.
+ * Retired paths, old to the page that now answers for them. /about became
+ * /traces, and Traces is off the site for now, so both go to /contact, the page
+ * about the person. The old addresses still answer (routes.jsx redirects them,
+ * and prerender.mjs gives each a file), but they name /contact as their title
+ * and canonical, so a crawler following an old link learns where it went.
  */
-export const MOVED = { '/about': '/traces' }
+export const MOVED = { '/about': '/contact', '/traces': '/contact' }
 const current = (path) => MOVED[path] ?? path
 
 // A trailing slash is the same page; without this /work/ would title as a 404.

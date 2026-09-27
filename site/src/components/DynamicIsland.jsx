@@ -24,7 +24,6 @@ import { normalize } from '../documentMeta.js'
 const links = [
   { to: '/work', label: 'Work' },
   { to: '/cv', label: 'CV' },
-  { to: '/traces', label: 'Traces' },
   { to: '/contact', label: 'Contact' },
 ]
 
