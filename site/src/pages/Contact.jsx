@@ -63,32 +63,41 @@ export default function Contact() {
   return (
     /* One screen where it fits and a page where it does not: the height floor
        is the viewport less the band, so the block centres on a laptop and
-       simply flows on a phone held sideways, with no lock to release. */
+       simply flows on a phone held sideways, with no lock to release.
+
+       Below md every gap is tighter, the photo smaller and the heading a step
+       down, for one reason: the downloads have to be on the first screen of a
+       phone. At the desktop spacing the page was 917px against a 664px
+       viewport and they were the one thing you had to scroll to find. */
     <div className="flex min-h-[calc(var(--app-h)_-_var(--footer-h,52px))] items-center">
-      <div className="mx-auto grid w-full max-w-5xl gap-12 px-6 pb-16 pt-28 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:gap-0 md:py-24">
+      <div className="mx-auto grid w-full max-w-5xl gap-7 px-6 pb-6 pt-[84px] md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:gap-0 md:py-24">
         {/* ── the words ─────────────────────────────────────────────────── */}
         {/* Who is writing first, then what he has to say. The name and the
             photo lead the column in place of a "Contact" label, which only
             repeated the nav; the heading and the sentence follow. */}
         <div className="min-w-0 md:border-r md:border-line md:pr-14">
-          <div className="flex items-center gap-5">
+          <div className="flex items-center gap-3.5 md:gap-5">
             <img
               src={`${base}headshot.webp`}
               alt=""
               width="332"
               height="534"
-              className="h-24 w-24 shrink-0 rounded-full border border-line object-cover object-[50%_18%]"
+              className="h-14 w-14 shrink-0 rounded-full border border-line object-cover object-[50%_18%] md:h-24 md:w-24"
             />
             <div className="min-w-0">
-              <p className="text-[1.15rem] font-medium leading-tight text-ink">Charles Abi Chahine</p>
-              <p className={`${MONO} mt-1 text-muted`}>{role}</p>
+              <p className="text-[1.05rem] font-medium leading-tight text-ink md:text-[1.15rem]">Charles Abi Chahine</p>
+              {/* The cover's and the CV's own setting of the role, lowercase and
+                  lightly tracked, a step down to the label floor on a phone so
+                  it holds one line beside the photo, and tracked tighter still
+                  below 375px, where 360px Android phones would wrap it. */}
+              <p className="mt-1 font-mono text-[0.6875rem] lowercase tracking-[0.08em] text-soft max-[374px]:tracking-[0.04em] md:text-[0.72rem]">{role}</p>
             </div>
           </div>
 
-          <h1 className="mt-10 max-w-[16ch] text-balance text-[clamp(2rem,3.6vw,2.7rem)] font-light leading-[1.05] tracking-[-0.024em] text-ink">
+          <h1 className="mt-6 max-w-[16ch] text-balance text-[1.75rem] font-light md:mt-10 md:text-[clamp(2rem,3.6vw,2.7rem)] leading-[1.05] tracking-[-0.024em] text-ink">
             {HEADING}
           </h1>
-          <p className="mt-6 max-w-[44ch] font-serif text-[1.05rem] leading-[1.7] text-soft">{TEXT}</p>
+          <p className="mt-3 max-w-[44ch] font-serif text-[1rem] leading-[1.6] text-soft md:mt-6 md:text-[1.05rem] md:leading-[1.7]">{TEXT}</p>
         </div>
 
         {/* ── the ways in ───────────────────────────────────────────────── */}
@@ -101,7 +110,7 @@ export default function Contact() {
                    address beside a 5.5rem label had 170px and was cut to
                    "charles.abichahi…", and an address is the one thing on this
                    page that must never be truncated. */
-                className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 border-b border-line py-4 first:border-t sm:grid-cols-[5.5rem_minmax(0,1fr)_auto]"
+                className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-0.5 border-b border-line py-2.5 first:border-t sm:grid-cols-[5.5rem_minmax(0,1fr)_auto] md:gap-y-1 md:py-4"
               >
                 <span className={`${MONO} col-span-2 text-muted sm:col-span-1`}>{r.label}</span>
                 <a
@@ -129,7 +138,7 @@ export default function Contact() {
             ))}
           </ul>
 
-          <p className={`${MONO} mb-3 mt-10 text-muted`}>Take it with you</p>
+          <p className={`${MONO} mb-2.5 mt-5 text-muted md:mb-3 md:mt-10`}>Take it with you</p>
           <div className="flex flex-wrap gap-3">
             <a href={`${base}portfolio.pdf`} download="Charles-Abi-Chahine-Portfolio.pdf" data-track="download/portfolio" className={PILL}>
               Portfolio (PDF) ↓

@@ -424,7 +424,7 @@ export default function ProjectCard({ project, onClose }) {
          * scrollbar is invisible until you are already scrolling, which is no
          * use to someone deciding whether there is anything down there.
          */}
-        <div className="relative lg:flex lg:min-h-0 lg:flex-1 lg:flex-col">
+        <div className="relative max-lg:order-2 lg:flex lg:min-h-0 lg:flex-1 lg:flex-col">
           <div
             ref={proseRef}
             className="min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1.5 [scrollbar-color:color-mix(in_srgb,var(--color-line)_60%,var(--color-ink))_transparent] [scrollbar-width:thin] max-lg:flex-none max-lg:overflow-visible wide-short:flex-none wide-short:overflow-visible [&::-webkit-scrollbar]:w-[5px] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[color-mix(in_srgb,var(--color-line)_60%,var(--color-ink))] [&::-webkit-scrollbar-track]:bg-transparent"
@@ -482,15 +482,17 @@ export default function ProjectCard({ project, onClose }) {
         </div>
 
         {/* Pinned to the foot of the rail where the rail has a foot: the writing
-            leads, the record is there to be scanned once. Below lg the card is
-            as tall as its content, so there is no foot to pin to and it simply
-            follows the writing.
+            leads, the record is there to be scanned once. Below lg the rail
+            scrolls as one column, and there the record comes first, straight
+            under the title (order-1, the prose order-2): at the foot it was the
+            last thing on a phone, found only after the whole write-up, and who
+            made it and with what is the first thing a reader there wants.
 
             Label beside value rather than over it. Stacked, in two columns, this
             was 224px on a 622px card, most of it labels and gaps, and it came out
             of the prose box above: the writing got 258px. Side by side it is
             the three rows' own lines and little else. */}
-        <dl className="mt-auto grid shrink-0 grid-cols-[4.25rem_minmax(0,1fr)] gap-x-3 gap-y-1.5 border-t border-rule pt-3 max-lg:mt-3.5 wide-short:mt-3 lg:mt-3">
+        <dl className="mt-auto grid shrink-0 grid-cols-[4.25rem_minmax(0,1fr)] gap-x-3 gap-y-1.5 border-t border-rule pt-3 max-lg:order-1 max-lg:mt-3.5 max-lg:border-b max-lg:pb-3 wide-short:mt-3 lg:mt-3">
           {record.map(([k, v]) => (
             <div key={k} className="contents">
               <dt className={MONO_LABEL}>{k}</dt>
