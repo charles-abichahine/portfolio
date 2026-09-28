@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import MediaFrame from './MediaFrame.jsx'
 import MediaLightbox from './MediaLightbox.jsx'
-import { imgSrcSet } from '../data/projects.js'
+import { imgSrcSet, partnersOf } from '../data/projects.js'
 import { beltFor } from '../data/belts.js'
 
 /*
@@ -89,6 +90,9 @@ export default function ProjectCard({ project, onClose }) {
   const color = beltFor(project).color
   const many = items.length > 1
   const item = items[at]
+  const partners = partnersOf(project)
+  // Carried into a partner's card so the index behind stays as it was.
+  const background = useLocation().state?.background
 
   // Moving prev/next between projects is gone, but the card is still reused if
   // the slug ever changes under it.
@@ -147,6 +151,38 @@ export default function ProjectCard({ project, onClose }) {
   ]
   const MONO_LABEL = 'font-mono text-[0.6875rem] font-medium uppercase tracking-[0.14em] text-muted'
 
+  /*
+   * The belt and the way out, which head the card on a portrait phone and the
+   * rail everywhere else.
+   *
+   * On a phone they used to sit under the gallery, at the top of the rail, so
+   * the first thing on the card was a picture with nothing to say whose it was
+   * or how to leave it. Heading the card puts them where a sheet puts its
+   * title block. Wide layouts keep them in the rail, beside the gallery rather
+   * than over it, where the rail is the card's own column of words.
+   *
+   * Drawn twice, and only ever shown once: the two places are in different
+   * columns of the grid, and display:none takes the hidden one out of the tab
+   * order and the accessibility tree as well as out of sight.
+   */
+  const masthead = (where) => (
+    <div className={`label-mono shrink-0 items-center gap-2.5 ${where}`}>
+      <span
+        aria-hidden="true"
+        className="h-[7px] w-[7px] shrink-0 rounded-[2px]"
+        style={{ backgroundColor: color }}
+      />
+      <span style={{ color }}>{beltFor(project).label}</span>
+      <button
+        type="button"
+        onClick={onClose}
+        className="control-label ml-auto rounded-[8px] border border-line px-2.5 py-1.5 text-soft transition-colors hover:border-accent hover:text-accent"
+      >
+        Close ✕
+      </button>
+    </div>
+  )
+
   return (
     <div
       /*
@@ -188,6 +224,8 @@ export default function ProjectCard({ project, onClose }) {
     >
       {/* ── the gallery ───────────────────────────────────────────────────── */}
       <div className="flex min-w-0 flex-col lg:min-h-0">
+        {masthead('mb-2.5 flex wide-short:hidden lg:hidden')}
+
         <div
           // The well takes whatever the card has left rather than setting the
           // height itself. That is what keeps every card the same size: a project
@@ -254,9 +292,16 @@ export default function ProjectCard({ project, onClose }) {
           )}
         </div>
 
-        {/* Two lines of caption, always reserved and never exceeded, so the card
-            is exactly as tall on item 11 as on item 1. A box that grew with the
-            caption would resize the whole card under the cursor as you step.
+        {/* Two lines of caption, always reserved, so the card is exactly as tall
+            on item 11 as on item 1. A box that grew with the caption would
+            resize the whole card under the cursor as you step.
+
+            Reserved, but no longer a limit. The caption was clamped to two
+            lines, which on a phone cut most of them off mid-sentence behind an
+            ellipsis: a 330px column fits about forty characters a line and the
+            captions run to two hundred. Nothing can open a clamped caption, so
+            the end of it was simply gone. It runs to its full length now, at
+            every size, for the reason the next paragraph gives.
 
             A floor, not a ceiling. It was a fixed 40 here and 52 at lg, and a
             two-line caption needs 55 — label 12.5, its own top margin 4, two
@@ -276,7 +321,7 @@ export default function ProjectCard({ project, onClose }) {
               {item.section}
             </p>
             {item.caption && (
-              <p className="mt-1 line-clamp-2 font-serif text-[0.86rem] leading-[1.4] text-soft">
+              <p className="mt-1 font-serif text-[0.86rem] leading-[1.4] text-soft">
                 {item.caption}
               </p>
             )}
@@ -365,25 +410,12 @@ export default function ProjectCard({ project, onClose }) {
           button. A classic bar takes its own column: nothing can sit on it, and
           it is there before the first scroll. Same 5px thumb as the prose box's
           from lg up, so it reads as one device at every size. */}
-      <div className="flex min-h-0 min-w-0 flex-col overflow-y-auto overscroll-contain pr-1.5 [scrollbar-color:color-mix(in_srgb,var(--color-line)_60%,var(--color-ink))_transparent] [scrollbar-width:thin] max-lg:mt-3.5 [&::-webkit-scrollbar]:w-[5px] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[color-mix(in_srgb,var(--color-line)_60%,var(--color-ink))] [&::-webkit-scrollbar-track]:bg-transparent wide-short:mt-0 lg:overflow-visible lg:pr-0">
+      <div className="flex min-h-0 min-w-0 flex-col overflow-y-auto overscroll-contain pr-1.5 [scrollbar-color:color-mix(in_srgb,var(--color-line)_60%,var(--color-ink))_transparent] [scrollbar-width:thin] max-lg:mt-1 [&::-webkit-scrollbar]:w-[5px] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[color-mix(in_srgb,var(--color-line)_60%,var(--color-ink))] [&::-webkit-scrollbar-track]:bg-transparent wide-short:mt-0 lg:overflow-visible lg:pr-0">
         {/* Sticky wherever the rail is the scroller, so the belt and the way out
             stay put while the writing moves under them. Static from lg up, where
-            the rail does not scroll and only the prose box inside it does. */}
-        <div className="label-mono sticky top-0 z-10 flex shrink-0 items-center gap-2.5 bg-paper pb-1.5 lg:static lg:pb-0">
-          <span
-            aria-hidden="true"
-            className="h-[7px] w-[7px] shrink-0 rounded-[2px]"
-            style={{ backgroundColor: color }}
-          />
-          <span style={{ color }}>{beltFor(project).label}</span>
-          <button
-            type="button"
-            onClick={onClose}
-            className="control-label ml-auto rounded-[8px] border border-line px-2.5 py-1.5 text-soft transition-colors hover:border-accent hover:text-accent"
-          >
-            Close ✕
-          </button>
-        </div>
+            the rail does not scroll and only the prose box inside it does. Not
+            here at all on a portrait phone, where it heads the card instead. */}
+        {masthead('sticky top-0 z-10 hidden bg-paper pb-1.5 wide-short:flex lg:static lg:flex lg:pb-0')}
 
         <h2 className="mt-3 shrink-0 text-[1.55rem] font-bold leading-[1.12] tracking-tight lg:mt-3.5 lg:text-[1.9rem]">
           {project.title}
@@ -393,7 +425,9 @@ export default function ProjectCard({ project, onClose }) {
             facts a reader wants before deciding to read on, so they sit with
             the title instead of at the foot of the rail. */}
         <p className="mt-2 shrink-0 font-mono text-[0.6875rem] uppercase leading-[1.5] tracking-[0.12em] text-muted">
-          <span className="tabular-nums">{project.year}</span> · {project.module}
+          <span className="tabular-nums">{project.year}</span> ·{' '}
+          {project.part && <>{project.part} · </>}
+          {project.module}
           {project.award && (
             <>
               {' '}· <span className="whitespace-nowrap text-accent">{project.award}</span>
@@ -499,6 +533,31 @@ export default function ProjectCard({ project, onClose }) {
               <dd className="font-mono text-[0.6875rem] leading-[1.45]">{v}</dd>
             </div>
           ))}
+
+          {/* The larger project this is a piece of, and the way to its other
+              pieces. Three courses at IAAC each took one side of the same
+              building, and on the index the three read as unrelated; this row
+              is what says they are one. */}
+          {partners.length > 0 && (
+            <div className="contents">
+              <dt className={MONO_LABEL}>Part of</dt>
+              <dd className="font-mono text-[0.6875rem] leading-[1.45]">
+                {project.part}, with{' '}
+                {partners.map((p, i) => (
+                  <Fragment key={p.slug}>
+                    {i > 0 && (i === partners.length - 1 ? ' and ' : ', ')}
+                    <Link
+                      to={`/work/${p.slug}`}
+                      state={background ? { background } : undefined}
+                      className="text-soft underline decoration-line underline-offset-[3px] transition-colors hover:text-accent hover:decoration-accent"
+                    >
+                      {p.title}
+                    </Link>
+                  </Fragment>
+                ))}
+              </dd>
+            </div>
+          )}
 
           {(project.links?.live || project.links?.github || project.links?.blog) && (
             <div className="contents">

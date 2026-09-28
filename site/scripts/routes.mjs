@@ -14,6 +14,7 @@
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, resolve } from 'node:path'
+import { MOVED } from '../src/documentMeta.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 
@@ -46,10 +47,9 @@ export const routes = [
   '/work',
   '/cv',
   '/contact',
-  // Retired, both now redirecting to /contact. Still prerendered so an old link
-  // answers 200 and redirects; the sitemap leaves them out (see MOVED in
-  // documentMeta.js).
-  '/about',
-  '/traces',
   ...projects.map((p) => `/work/${p.slug}`),
+  // Retired, each now redirecting to where it went. Still prerendered so an old
+  // link answers 200 and redirects; the sitemap leaves them out (see MOVED in
+  // documentMeta.js).
+  ...Object.keys(MOVED),
 ]

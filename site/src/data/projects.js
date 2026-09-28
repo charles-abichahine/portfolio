@@ -361,6 +361,9 @@ const _projects = [
     tagline: 'A tower that breathes for Santiago.',
     year: '2026',
     module: 'BIMSC Studio · MaCAD, IAAC',
+    // One building from three courses: this, Family Tree and Paper Trail. The
+    // card names it under the title and links the other two at its foot.
+    part: 'Hyperbuilding 01',
     team: ['Charles Abi Chahine', 'Ramy Ayoub', 'Hani Karime'],
     tools: ['Rhino', 'Grasshopper', 'Alpaca', 'Speckle'],
     tag: 'GH',
@@ -800,19 +803,20 @@ const _projects = [
     ],
   },
   {
-    slug: 'integrative-modeling',
+    slug: 'family-tree',
     date: '2026-03-17',
-    title: 'Three Towers, One Script',
+    title: 'Family Tree',
     subtitle:
       'A data-driven parametric skyscraper complex inspired by the lung: three towers shaped by a deterministic Grasshopper script, with a lattice core, plug-in volumes, and an adaptive facade of 67,218 panels, documented through Speckle and Revit.',
     tagline: 'A skyscraper complex the script decides, down to the last panel.',
     year: '2026',
     module: 'Integrative Modeling · MaCAD, IAAC',
+    part: 'Hyperbuilding 01',
     team: ['Ramy Ayoub', 'Charles Abi Chahine', 'Hani Karime'],
     tools: ['Grasshopper', 'Rhino.Inside', 'Speckle', 'Revit'],
     tag: 'BIM',
     toolsShort: 'GH · SPECKLE · REVIT',
-    cover: 'projects/integrative-modeling/cover.webp',
+    cover: 'projects/family-tree/cover.webp',
     category: 'BIM & Workflows',
     award: null,
     links: {
@@ -829,8 +833,8 @@ const _projects = [
           'Behind it is a deterministic engine rather than a shape: program requirements set the spaces and base masses, environmental pressures decide where the facade opens, closes or thickens, and the script negotiates between them. What comes out is published to Speckle with its data embedded, for the program and data teams.',
         ],
         media: [
-          { type: 'image', src: 'projects/integrative-modeling/lung-analogy.webp', caption: 'Four steps from the bronchioles to the building: biological inspiration, porous structural core, program massing, airflow system.' },
-          { type: 'image', src: 'projects/integrative-modeling/deterministic-engine.webp', caption: 'The script as negotiator between program requirements and environmental pressures, publishing to Speckle for the program and data teams.' },
+          { type: 'image', src: 'projects/family-tree/lung-analogy.webp', caption: 'Four steps from the bronchioles to the building: biological inspiration, porous structural core, program massing, airflow system.' },
+          { type: 'image', src: 'projects/family-tree/deterministic-engine.webp', caption: 'The script as negotiator between program requirements and environmental pressures, publishing to Speckle for the program and data teams.' },
         ],
       },
       {
@@ -840,8 +844,8 @@ const _projects = [
           'The core is not drawn either. Alpaca reads the stress where the core meets the volumes, the script strips material that is doing nothing, and the surviving voxels become the lattice.',
         ],
         media: [
-          { type: 'image', src: 'projects/integrative-modeling/parametric-engine.webp', caption: 'Constraints on the left: core dimensions, vertical stages, plate voltages and spacing, against inlet PM2.5 and PM10, air flow, temperature, humidity and wind; on the right, the skeleton at 600, 500 and 400 m.' },
-          { type: 'image', src: 'projects/integrative-modeling/performance-approach.webp', caption: 'The Alpaca loop: stress read at the points connecting core to volumes, then the surviving voxels turned into a lattice.' },
+          { type: 'image', src: 'projects/family-tree/parametric-engine.webp', caption: 'Constraints on the left: core dimensions, vertical stages, plate voltages and spacing, against inlet PM2.5 and PM10, air flow, temperature, humidity and wind; on the right, the skeleton at 600, 500 and 400 m.' },
+          { type: 'image', src: 'projects/family-tree/performance-approach.webp', caption: 'The Alpaca loop: stress read at the points connecting core to volumes, then the surviving voxels turned into a lattice.' },
         ],
       },
       {
@@ -850,8 +854,8 @@ const _projects = [
           'The HB01 script carries the geometry into Revit as real families, not dumb solids: plug-in volumes as masses with levels and a tower parameter, the core as structural framing, the facade as adaptive components carrying panel type and panel ID. Filters and view filters turn that into documentation, out to an RVT model and PDF sheets synchronised with the script.',
         ],
         media: [
-          { type: 'image', src: 'projects/integrative-modeling/revit-workflow.webp', caption: 'The HB01 script writing into Revit: levels, direct shapes, floors, structural beams, adaptive components, then filters and sheets.' },
-          { type: 'image', src: 'projects/integrative-modeling/axonometric.webp', caption: 'The axonometric in site, and the same tower pulled apart into mass, facade panels, floors and structural framing.' },
+          { type: 'image', src: 'projects/family-tree/revit-workflow.webp', caption: 'The HB01 script writing into Revit: levels, direct shapes, floors, structural beams, adaptive components, then filters and sheets.' },
+          { type: 'image', src: 'projects/family-tree/axonometric.webp', caption: 'The axonometric in site, and the same tower pulled apart into mass, facade panels, floors and structural framing.' },
         ],
       },
       {
@@ -861,28 +865,29 @@ const _projects = [
           'The schedule proves the two stayed one system: 57,408 fixed panels and 9,810 adaptive, 67,218 in total.',
         ],
         media: [
-          { type: 'image', src: 'projects/integrative-modeling/facade-logics.webp', caption: 'One geometry, two logics: the fixed facade, the adaptive facade, and the four parameters both share.' },
-          { type: 'image', src: 'projects/integrative-modeling/panel-schedule.webp', caption: 'The Revit panel schedule: 57,408 fixed panels and 9,810 adaptive, 67,218 in total.' },
-          { type: 'image', src: 'projects/integrative-modeling/detail.webp', caption: 'The plug-in volumes at the facade, the lattice core visible behind the diamond panels.' },
-          { type: 'image', src: 'projects/integrative-modeling/aerial-night.webp', caption: 'The three towers, the bridge and the podium at night, seen from above in the site model.' },
+          { type: 'image', src: 'projects/family-tree/facade-logics.webp', caption: 'One geometry, two logics: the fixed facade, the adaptive facade, and the four parameters both share.' },
+          { type: 'image', src: 'projects/family-tree/panel-schedule.webp', caption: 'The Revit panel schedule: 57,408 fixed panels and 9,810 adaptive, 67,218 in total.' },
+          { type: 'image', src: 'projects/family-tree/detail.webp', caption: 'The plug-in volumes at the facade, the lattice core visible behind the diamond panels.' },
+          { type: 'image', src: 'projects/family-tree/aerial-night.webp', caption: 'The three towers, the bridge and the podium at night, seen from above in the site model.' },
         ],
       },
     ],
   },
   {
-    slug: 'collaborative-workflow',
+    slug: 'paper-trail',
     date: '2026-03-14',
-    title: 'Push to Sheet',
+    title: 'Paper Trail',
     subtitle:
       'An automated Speckle pipeline that fires on every model push: traversing Grasshopper and Rhino geometry, extracting structured properties, and exporting to Excel and Google Sheets, so architectural analytics become repeatable instead of manual.',
     tagline: 'Model data shipped on every push.',
     year: '2026',
     module: 'Collaborative Workflows · MaCAD, IAAC',
+    part: 'Hyperbuilding 01',
     team: ['Ramy Ayoub', 'Hani Karime', 'Charles Abi Chahine'],
     tools: ['Speckle Automate', 'Grasshopper', 'Python'],
     tag: 'BIM',
     toolsShort: 'SPECKLE · GH · PYTHON',
-    cover: 'projects/collaborative-workflow/cover.webm',
+    cover: 'projects/paper-trail/cover.webm',
     category: 'BIM & Workflows',
     award: null,
     links: {
@@ -900,8 +905,8 @@ const _projects = [
           'The two parties are the structure/facade team and the data team, on the Hyperbuilding model in the mid-to-late design phase, when the model is live and decisions across disciplines depend on current data.',
         ],
         media: [
-          { type: 'image', src: 'projects/collaborative-workflow/problem.webp', caption: 'The problem stated: manual extraction on every push, and one outdated file able to corrupt decisions across the team.' },
-          { type: 'image', src: 'projects/collaborative-workflow/who-when.webp', caption: 'Who and when: the structure/facade and data teams, in the mid-to-late design phase, with the web app at the end of the chain.' },
+          { type: 'image', src: 'projects/paper-trail/problem.webp', caption: 'The problem stated: manual extraction on every push, and one outdated file able to corrupt decisions across the team.' },
+          { type: 'image', src: 'projects/paper-trail/who-when.webp', caption: 'Who and when: the structure/facade and data teams, in the mid-to-late design phase, with the web app at the end of the chain.' },
         ],
       },
       {
@@ -910,8 +915,8 @@ const _projects = [
           'The pipeline runs on Speckle Automate and fires on the commit, the moment a new model version is pushed from Grasshopper and Rhino. It walks the nested geometry collections, extracts the structural, environmental and facade properties, and writes them out twice: openpyxl builds and formats the Excel file, gspread writes the same data into Google Sheets through the API, google-auth carries the service account. It needs an output format, a target sheet ID and a service-account JSON file, and emails the team links to the sheet and the model when the run finishes.',
         ],
         media: [
-          { type: 'video', src: 'projects/collaborative-workflow/demo.mp4', caption: 'The automation end to end: the run triggered in Speckle Automate, the completion email, and the data landing in Google Sheets.' },
-          { type: 'image', src: 'projects/collaborative-workflow/pipeline.webp', caption: 'The pipeline: a commit from Grasshopper and Rhino into the automation, then live sync out to Google Sheets and Excel.' },
+          { type: 'video', src: 'projects/paper-trail/demo.mp4', caption: 'The automation end to end: the run triggered in Speckle Automate, the completion email, and the data landing in Google Sheets.' },
+          { type: 'image', src: 'projects/paper-trail/pipeline.webp', caption: 'The pipeline: a commit from Grasshopper and Rhino into the automation, then live sync out to Google Sheets and Excel.' },
         ],
       },
       {
@@ -920,7 +925,7 @@ const _projects = [
           'Before, sharing updated data took 15 to 30 minutes and 7 to 15 manual steps per model, the team heard hours later if anyone remembered, and the risk of circulating the wrong version was high. After: a 1 minute 16 second run, no manual steps, instant notification, that risk eliminated. The data stopped living in local files, and the person modelling spends the time on design.',
         ],
         media: [
-          { type: 'image', src: 'projects/collaborative-workflow/before-after.webp', caption: 'Before and after: 15–30 minutes down to a 1 min 16 s run, and 7–15 manual steps down to none.' },
+          { type: 'image', src: 'projects/paper-trail/before-after.webp', caption: 'Before and after: 15–30 minutes down to a 1 min 16 s run, and 7–15 manual steps down to none.' },
         ],
       },
     ],
@@ -1248,7 +1253,7 @@ const _projects = [
     ],
   },
   {
-    slug: 'marception',
+    slug: 'rings-of-mars',
     date: '2024-05-12',
     title: 'Rings of Mars: Ring 4000',
     subtitle:
@@ -1260,7 +1265,7 @@ const _projects = [
     tools: ['Rhino', 'SubD', 'AI workflows', 'V-Ray'],
     tag: 'COMP',
     toolsShort: 'COMPETITION',
-    cover: 'projects/marception/cover.webp',
+    cover: 'projects/rings-of-mars/cover.webp',
     category: 'Design & Research',
     award: 'Top 50 · Volume Zero',
     links: {},
@@ -1276,9 +1281,9 @@ const _projects = [
           'Three concentric circles. The inner one is a controlled farm under a glass facade, visible from every room so the researchers far from home keep a piece of Earth’s green in view. The middle circle is transportation. The outer circle is living and working space, and on the lowest level five sleeping pods give the crew comfort and protection against the Martian environment. The shell is 3D-printed regolith on the outside, high-density polyethylene on the inside for an air-tight seal, and BIPV solar panels over the facade; the canyon walls of Valles Marineris do the rest of the radiation shielding.',
         ],
         media: [
-          { type: 'image', src: 'projects/marception/render.webp', caption: 'Ring 4000 on its crater rim inside Valles Marineris.' },
-          { type: 'image', src: 'projects/marception/levels-and-plan.webp', caption: 'The ring by level, the shell to the base, with the transfer box, the sleeping pods and the plan of the outer circle at R30m.' },
-          { type: 'image', src: 'projects/marception/section.webp', caption: 'The long section through the crater pit: laboratory and farming on one side, gym, rail and the vehicle gate on the other, the sleeping pods and technical floors below.' },
+          { type: 'image', src: 'projects/rings-of-mars/render.webp', caption: 'Ring 4000 on its crater rim inside Valles Marineris.' },
+          { type: 'image', src: 'projects/rings-of-mars/levels-and-plan.webp', caption: 'The ring by level, the shell to the base, with the transfer box, the sleeping pods and the plan of the outer circle at R30m.' },
+          { type: 'image', src: 'projects/rings-of-mars/section.webp', caption: 'The long section through the crater pit: laboratory and farming on one side, gym, rail and the vehicle gate on the other, the sleeping pods and technical floors below.' },
         ],
       },
       {
@@ -1298,7 +1303,7 @@ const _projects = [
           'First the research: regolith melted into a paste and printed by drone robotics, and every surface shaped to stand at an angle that needs no support, because support structures are the thing nobody wants to print on Mars. Then the model, in Rhino with SubD, from the massing of the ring down to the sleeping pods. Then the part that was new at the time: feeding the geometry to generative image tools, when image generation was only just becoming a thing, to render concepts straight from the model, and finishing them in V-Ray.',
         ],
         media: [
-          { type: 'image', src: 'projects/marception/board.webp', caption: 'The competition board: the ring exploded by level, the plan, the closed loops of water, oxygen, food, HDPE and fuel, the pods and the transportation ring, and the long section through the crater pit.' },
+          { type: 'image', src: 'projects/rings-of-mars/board.webp', caption: 'The competition board: the ring exploded by level, the plan, the closed loops of water, oxygen, food, HDPE and fuel, the pods and the transportation ring, and the long section through the crater pit.' },
         ],
       },
       {
@@ -1313,10 +1318,10 @@ const _projects = [
     ],
   },
   {
-    slug: 'lincoln-booth',
+    slug: 'tideline',
     // Built in 2025 at Dynamic Solution Co.; the month is not recorded.
     date: '2025-06-01',
-    title: 'Lincoln Booth',
+    title: 'Tideline',
     subtitle:
       'A reveal booth for Lincoln in Kuwait: sixty mirrored panels hung between two rings, shaped by a sea-wave curve in Grasshopper, keep the car to glimpses and reflections until the whole enclosure lifts away.',
     tagline: 'A mirrored wave that hides a car, then lifts.',
@@ -1326,7 +1331,7 @@ const _projects = [
     tools: ['Rhino', 'Grasshopper', '3D printing', 'Laser / CNC cutting'],
     tag: 'GH',
     toolsShort: 'PRACTICE',
-    cover: 'projects/lincoln-booth/cover.webp',
+    cover: 'projects/tideline/cover.webp',
     category: 'Design & Research',
     award: null,
     links: {},
@@ -1341,9 +1346,9 @@ const _projects = [
           'How much of the car shows was studied from where people actually stand, at an eye height of 1.60 m, with the sight lines drawn in plan for each viewpoint.',
         ],
         media: [
-          { type: 'image', src: 'projects/lincoln-booth/concept.webp', caption: 'Sea waves become a spatial rule: abstract the rhythm into an attractor curve, then repeat it into an enclosure that teases.' },
-          { type: 'image', src: 'projects/lincoln-booth/visitor-sequence.webp', caption: 'Draw attention, offer a glimpse, reveal the car: the visitor, the enclosure and the hidden car in sequence.' },
-          { type: 'video', src: 'projects/lincoln-booth/key-plan-visibility.mp4', caption: 'Move around, catch a glimpse: the sight fan from each viewpoint in plan, and what it lets you see of the car.' },
+          { type: 'image', src: 'projects/tideline/concept.webp', caption: 'Sea waves become a spatial rule: abstract the rhythm into an attractor curve, then repeat it into an enclosure that teases.' },
+          { type: 'image', src: 'projects/tideline/visitor-sequence.webp', caption: 'Draw attention, offer a glimpse, reveal the car: the visitor, the enclosure and the hidden car in sequence.' },
+          { type: 'video', src: 'projects/tideline/key-plan-visibility.mp4', caption: 'Move around, catch a glimpse: the sight fan from each viewpoint in plan, and what it lets you see of the car.' },
         ],
       },
       {
@@ -1353,10 +1358,10 @@ const _projects = [
           'In Grasshopper the chain runs from the saved curve through divide, loft, pull and intersect, to the profiles (move, shift, connect), to the parts (extrude, cap, rotate, with thickness and angle as controls), and on to the kit. The base definition sets 60 divisions, a 170 cm height and a 40 cm normal move.',
         ],
         media: [
-          { type: 'image', src: 'projects/lincoln-booth/attractor.webp', caption: 'The sea became a rule for the panels: draw the attractor, pull and intersect, then move, shift and connect.' },
-          { type: 'video', src: 'projects/lincoln-booth/wave-study.mp4', caption: 'The saved attractor against two explanatory variations: a lower wave and a shifted rhythm.' },
-          { type: 'image', src: 'projects/lincoln-booth/grasshopper.webp', caption: 'Inside the Grasshopper definition: the wave attractor, the carrier, the crest, the profiles, the parts and the numbered kit.' },
-          { type: 'video', src: 'projects/lincoln-booth/panel-rotation.mp4', caption: 'How much should the panels reveal? The wave and the visitor stay fixed while the fins rotate.' },
+          { type: 'image', src: 'projects/tideline/attractor.webp', caption: 'The sea became a rule for the panels: draw the attractor, pull and intersect, then move, shift and connect.' },
+          { type: 'video', src: 'projects/tideline/wave-study.mp4', caption: 'The saved attractor against two explanatory variations: a lower wave and a shifted rhythm.' },
+          { type: 'image', src: 'projects/tideline/grasshopper.webp', caption: 'Inside the Grasshopper definition: the wave attractor, the carrier, the crest, the profiles, the parts and the numbered kit.' },
+          { type: 'video', src: 'projects/tideline/panel-rotation.mp4', caption: 'How much should the panels reveal? The wave and the visitor stay fixed while the fins rotate.' },
         ],
       },
       {
@@ -1366,9 +1371,9 @@ const _projects = [
           'Two ways of making the wave were printed as physical models: a complex source and a simplified one, compared under the same camera and the same light before the geometry was committed to.',
         ],
         media: [
-          { type: 'video', src: 'projects/lincoln-booth/curves-and-seeds.mp4', caption: 'A wave becomes a family of enclosures: follow the height curve from input to panel rhythm.' },
-          { type: 'video', src: 'projects/lincoln-booth/revised-matrix.mp4', caption: 'The revised option matrix: rows change the wave, columns change one panel control from the baseline.' },
-          { type: 'image', src: 'projects/lincoln-booth/archived-variants.webp', caption: 'Two archived ways of making the wave, the complex and the simplified source: same camera, same light.' },
+          { type: 'video', src: 'projects/tideline/curves-and-seeds.mp4', caption: 'A wave becomes a family of enclosures: follow the height curve from input to panel rhythm.' },
+          { type: 'video', src: 'projects/tideline/revised-matrix.mp4', caption: 'The revised option matrix: rows change the wave, columns change one panel control from the baseline.' },
+          { type: 'image', src: 'projects/tideline/archived-variants.webp', caption: 'Two archived ways of making the wave, the complex and the simplified source: same camera, same light.' },
         ],
       },
       {
@@ -1377,21 +1382,21 @@ const _projects = [
           'The enclosure is sixty shaped panels between two rings. Every panel belongs to a ring, a number and a sheet: the parts are unrolled, nested and cut, then located by their IDs, connected and suspended from the overhead frame. The ring was 3D-printed first, then built at full size in mirror panels, and at the event it lifted to show the car.',
         ],
         media: [
-          { type: 'image', src: 'projects/lincoln-booth/enclosure.webp', caption: 'Sixty shaped panels, two rings, one repeated rule.' },
-          { type: 'image', src: 'projects/lincoln-booth/exploded-kit.webp', caption: 'The exploded kit: the top ring, the base ring, and one panel followed from part to profile to sheet.' },
-          { type: 'video', src: 'projects/lincoln-booth/assembly-reveal.mp4', caption: 'Build the enclosure, then release the view: the kit, the overhead frame, the suspension, and the lift.' },
-          { type: 'image', src: 'projects/lincoln-booth/behind-the-scenes.webp', caption: 'Behind the scenes: a mirror panel in hand, the two printed test rings, and the enclosure hanging in the workshop.' },
-          { type: 'image', src: 'projects/lincoln-booth/lift.webp', caption: 'The reveal: the enclosure lifted over the car.' },
+          { type: 'image', src: 'projects/tideline/enclosure.webp', caption: 'Sixty shaped panels, two rings, one repeated rule.' },
+          { type: 'image', src: 'projects/tideline/exploded-kit.webp', caption: 'The exploded kit: the top ring, the base ring, and one panel followed from part to profile to sheet.' },
+          { type: 'video', src: 'projects/tideline/assembly-reveal.mp4', caption: 'Build the enclosure, then release the view: the kit, the overhead frame, the suspension, and the lift.' },
+          { type: 'image', src: 'projects/tideline/behind-the-scenes.webp', caption: 'Behind the scenes: a mirror panel in hand, the two printed test rings, and the enclosure hanging in the workshop.' },
+          { type: 'image', src: 'projects/tideline/lift.webp', caption: 'The reveal: the enclosure lifted over the car.' },
         ],
       },
     ],
   },
   {
-    slug: 'nexus-booth',
+    slug: 'codependent',
     // Built in 2024 at Dynamic Solution Co.; the month is not recorded, so this
     // sits after the Aug 24 start the CV gives for the role.
     date: '2024-10-01',
-    title: 'Nexus Booth',
+    title: 'Codependent',
     subtitle:
       'A modular exhibition booth grown from two slotted puzzle panels: a Grasshopper tool finds the assemblies within the rules, turns the chosen one into a numbered kit of parts, and the pieces slot together with no glue or screws.',
     tagline: 'A booth grown from two puzzle pieces.',
@@ -1401,12 +1406,12 @@ const _projects = [
     tools: ['Rhino', 'Grasshopper', 'CNC'],
     tag: 'GH',
     toolsShort: 'PRACTICE',
-    cover: 'projects/nexus-booth/cover.webp',
+    cover: 'projects/codependent/cover.webp',
     category: 'Design & Research',
     award: null,
     links: {},
     intro: [
-      'Nexus is an exhibition booth made from only two pieces: a white panel that always stands and a black one that always lies flat, each cut with slots that let it lock into the other. Rather than drawing the booth, we grew it. A form-finding tool in Grasshopper builds assemblies out of compatible joints inside a set of rules, lays the options out side by side, and turns the one we chose into a numbered kit of parts cut on a CNC.',
+      'Codependent is an exhibition booth made from only two pieces: a white panel that always stands and a black one that always lies flat, each cut with slots that let it lock into the other. Rather than drawing the booth, we grew it. A form-finding tool in Grasshopper builds assemblies out of compatible joints inside a set of rules, lays the options out side by side, and turns the one we chose into a numbered kit of parts cut on a CNC.',
     ],
     sections: [
       {
@@ -1415,8 +1420,8 @@ const _projects = [
           'Both master pieces are 780 × 780 mm and 36 mm thick, with 120 mm slots and 50 mm corner radii. The joint is cut into the panel itself, so nothing is glued or screwed: the vertical pieces carry the horizontal ones and the crossing slots restrain the assembly. The same two pieces make the connection, the support and the furniture. A black panel low down becomes a seat, one higher up becomes a counter.',
         ],
         media: [
-          { type: 'image', src: 'projects/nexus-booth/two-pieces.webp', caption: 'Slot together, support one another, make room to gather: the same two pieces at every step.' },
-          { type: 'image', src: 'projects/nexus-booth/on-site.webp', caption: 'The real joints: the white and black masters in the workshop, the slots meeting on site.' },
+          { type: 'image', src: 'projects/codependent/two-pieces.webp', caption: 'Slot together, support one another, make room to gather: the same two pieces at every step.' },
+          { type: 'image', src: 'projects/codependent/on-site.webp', caption: 'The real joints: the white and black masters in the workshop, the slots meeting on site.' },
         ],
       },
       {
@@ -1426,9 +1431,9 @@ const _projects = [
           'Once the assembly has grown, the whole of it is checked against the rules, its joints and its support paths. A piece that breaks one is flagged by its ID and the problem explained, so it can be removed and the rest rechecked.',
         ],
         media: [
-          { type: 'video', src: 'projects/nexus-booth/growth.mp4', caption: 'An assembly growing one valid connection at a time.' },
-          { type: 'image', src: 'projects/nexus-booth/growth-logic.webp', caption: 'The growth logic: start with one white, try a direction, add the support with it, then check the space, the clearance and the mass.' },
-          { type: 'image', src: 'projects/nexus-booth/flow.webp', caption: 'The full flow: the two master pieces, the design controls, the form-finding core, the checks, and the kit of parts.' },
+          { type: 'video', src: 'projects/codependent/growth.mp4', caption: 'An assembly growing one valid connection at a time.' },
+          { type: 'image', src: 'projects/codependent/growth-logic.webp', caption: 'The growth logic: start with one white, try a direction, add the support with it, then check the space, the clearance and the mass.' },
+          { type: 'image', src: 'projects/codependent/flow.webp', caption: 'The full flow: the two master pieces, the design controls, the form-finding core, the checks, and the kit of parts.' },
         ],
       },
       {
@@ -1438,10 +1443,10 @@ const _projects = [
           'Option 29 was chosen: 34 connected panels on a 2940 × 3480 mm footprint, with a counter at 948 mm to stand and talk at and a seat at 408 mm to stay a little longer, and open edges that let people walk in.',
         ],
         media: [
-          { type: 'video', src: 'projects/nexus-booth/design-space.mp4', caption: 'The design space: thirty candidates, ten compared, one chosen.' },
-          { type: 'image', src: 'projects/nexus-booth/options.webp', caption: 'Ten options at one camera and scale, with dimensions, density, panel counts and the white and black split.' },
-          { type: 'image', src: 'projects/nexus-booth/height-limit.webp', caption: 'One input changes and the connection rules stay the same: a lower height limit, fewer levels, 21 panels instead of 34.' },
-          { type: 'image', src: 'projects/nexus-booth/option-29.webp', caption: 'Option 29: counters at 948 mm, seats at 408 mm, 34 connected panels.' },
+          { type: 'video', src: 'projects/codependent/design-space.mp4', caption: 'The design space: thirty candidates, ten compared, one chosen.' },
+          { type: 'image', src: 'projects/codependent/options.webp', caption: 'Ten options at one camera and scale, with dimensions, density, panel counts and the white and black split.' },
+          { type: 'image', src: 'projects/codependent/height-limit.webp', caption: 'One input changes and the connection rules stay the same: a lower height limit, fewer levels, 21 panels instead of 34.' },
+          { type: 'image', src: 'projects/codependent/option-29.webp', caption: 'Option 29: counters at 948 mm, seats at 408 mm, 34 connected panels.' },
         ],
       },
       {
@@ -1450,8 +1455,8 @@ const _projects = [
           'The chosen booth becomes a kit: 34 unique IDs, 23 white and 11 black, in one connected assembly of seven groups. Every part carries its axis, its level, its group, its position, its area and its mass, the IDs it mates with, and the stock sheet it is cut from. The flat profiles are nested onto twelve sheets and cut on a CNC.',
         ],
         media: [
-          { type: 'video', src: 'projects/nexus-booth/model-to-cuts.mp4', caption: 'From the model to the cuts: every panel flattened, numbered and nested onto its sheet.' },
-          { type: 'image', src: 'projects/nexus-booth/part-data.webp', caption: 'The part data: every panel labelled on the model, with its axis, level, group, position, mass and sheet.' },
+          { type: 'video', src: 'projects/codependent/model-to-cuts.mp4', caption: 'From the model to the cuts: every panel flattened, numbered and nested onto its sheet.' },
+          { type: 'image', src: 'projects/codependent/part-data.webp', caption: 'The part data: every panel labelled on the model, with its axis, level, group, position, mass and sheet.' },
         ],
       },
       {
@@ -1460,7 +1465,7 @@ const _projects = [
           'Then it had to stand up. The panels were pre-assembled group by group and slotted together on site. Some of the pieces went missing, and there were no spares, so we worked out new connections with the pieces we had: what could move, what could still fit, and how to keep the seats and the counters useful.',
         ],
         media: [
-          { type: 'video', src: 'projects/nexus-booth/preassembly.mp4', caption: 'Pre-assembly: the groups coming together before they meet on site.' },
+          { type: 'video', src: 'projects/codependent/preassembly.mp4', caption: 'Pre-assembly: the groups coming together before they meet on site.' },
         ],
       },
     ],
@@ -1545,7 +1550,7 @@ const _projects = [
     ],
   },
   {
-    slug: 'lau-anfeh',
+    slug: 'point-nought',
     date: '2023-05-22',
     title: 'Point Nought',
     subtitle:
@@ -1557,7 +1562,7 @@ const _projects = [
     tools: ['Architecture', 'Urban design'],
     tag: 'ARCH',
     toolsShort: 'ARCHITECTURE',
-    cover: 'projects/lau-anfeh/cover.webp',
+    cover: 'projects/point-nought/cover.webp',
     category: 'Design & Research',
     award: null,
     links: {},
@@ -1571,7 +1576,7 @@ const _projects = [
           'Anfeh lives off three traditions: salt from the coastal salinas, fishing, and olive groves inland. Between 1950 and 2020 all three declined, salt from 25% of the town’s land use to 5%, fishing from 25% to 10%, olives from 50% to 35%, and the municipality’s Vision 2030 asks for the golden age back. The thesis is an answer to that call.',
         ],
         media: [
-          { type: 'image', src: 'projects/lau-anfeh/vision.webp', caption: 'Anfeh’s land use in 1950 and 2020, salt 25% to 5%, fish 25% to 10%, olive 50% to 35%, and the Vision 2030 the thesis answers.' },
+          { type: 'image', src: 'projects/point-nought/vision.webp', caption: 'Anfeh’s land use in 1950 and 2020, salt 25% to 5%, fish 25% to 10%, olive 50% to 35%, and the Vision 2030 the thesis answers.' },
         ],
       },
       {
@@ -1580,8 +1585,8 @@ const _projects = [
           'The site is Plot C, 7,500 m² beside the salinas: close to the seaside road, on quiet streets, and carrying the salt-farm history the project is about. The name is the strategy: taking a step back to aleph null, point zero, to reacquaint Anfeh’s residents with their own history. On that ground sits an urban village of shopping, food, craft, culture and learning, with a public plaza extending the historic footpath through the site, bringing people in from all over the town and making breakout space for the young and the old.',
         ],
         media: [
-          { type: 'image', src: 'projects/lau-anfeh/hero.webp', caption: 'Point Nought at dusk: the wind wheel over the restored ponds, bathers on the salt terraces.' },
-          { type: 'image', src: 'projects/lau-anfeh/masterplan.webp', caption: 'The masterplan and its aerial: the village grid stepping down to the ponds along the extended footpath.' },
+          { type: 'image', src: 'projects/point-nought/hero.webp', caption: 'Point Nought at dusk: the wind wheel over the restored ponds, bathers on the salt terraces.' },
+          { type: 'image', src: 'projects/point-nought/masterplan.webp', caption: 'The masterplan and its aerial: the village grid stepping down to the ponds along the extended footpath.' },
         ],
       },
       {
@@ -1590,10 +1595,10 @@ const _projects = [
           'Three pavilions carry the three traditions. The Salt Pavilion sits directly on the working ponds, part exhibit and part salt store, with the ponds around it open to bathers. The Fish Pavilion is organised the way the catch moves, auction, washing, salting, packing, then the market and a restaurant, all under planted roofs. The Olive Pavilion steps its terraces through the grove.',
         ],
         media: [
-          { type: 'image', src: 'projects/lau-anfeh/salt-fish-olive.webp', caption: 'Salt, fish and olive: the objectives for each tradition, and the tile grammar drawn from the salt-pond grid.' },
-          { type: 'image', src: 'projects/lau-anfeh/salt-pavilion.webp', caption: 'The Salt Pavilion on the ponds; at left, the plan layered into groves, salinas, footpath and market.' },
-          { type: 'image', src: 'projects/lau-anfeh/fish-pavilion.webp', caption: 'The Fish Pavilion, exploded: auction, washing, salting and packing below, market and restaurant above, planted roofs over all of it.' },
-          { type: 'image', src: 'projects/lau-anfeh/olive-pavilion.webp', caption: 'The Olive Pavilion: the programme diagrammed and the terraces stepping through the grove.' },
+          { type: 'image', src: 'projects/point-nought/salt-fish-olive.webp', caption: 'Salt, fish and olive: the objectives for each tradition, and the tile grammar drawn from the salt-pond grid.' },
+          { type: 'image', src: 'projects/point-nought/salt-pavilion.webp', caption: 'The Salt Pavilion on the ponds; at left, the plan layered into groves, salinas, footpath and market.' },
+          { type: 'image', src: 'projects/point-nought/fish-pavilion.webp', caption: 'The Fish Pavilion, exploded: auction, washing, salting and packing below, market and restaurant above, planted roofs over all of it.' },
+          { type: 'image', src: 'projects/point-nought/olive-pavilion.webp', caption: 'The Olive Pavilion: the programme diagrammed and the terraces stepping through the grove.' },
         ],
       },
       {
@@ -1602,9 +1607,9 @@ const _projects = [
           'The set closes with the technical record and the models: the plan with its long sections through the windmill and the ponds, the wall section detailing the pavilion structure, and the physical models: the salt ponds cast in resin over cork, the town in white against the brown of its context, test casts in terracotta and in salt itself, and the salts of Anfeh bottled in a row.',
         ],
         media: [
-          { type: 'image', src: 'projects/lau-anfeh/plans-sections.webp', caption: 'Plan and long sections: the windmill, the ponds and the bathing steps.' },
-          { type: 'image', src: 'projects/lau-anfeh/sections-details.webp', caption: 'Long sections and the wall section, detailed through the pavilion structure.' },
-          { type: 'image', src: 'projects/lau-anfeh/model.webp', caption: 'The models: resin and cork salt ponds, the white town on its brown coast, casts in terracotta and salt, and the salts bottled.' },
+          { type: 'image', src: 'projects/point-nought/plans-sections.webp', caption: 'Plan and long sections: the windmill, the ponds and the bathing steps.' },
+          { type: 'image', src: 'projects/point-nought/sections-details.webp', caption: 'Long sections and the wall section, detailed through the pavilion structure.' },
+          { type: 'image', src: 'projects/point-nought/model.webp', caption: 'The models: resin and cork salt ponds, the white town on its brown coast, casts in terracotta and salt, and the salts bottled.' },
         ],
       },
     ],
@@ -1615,3 +1620,7 @@ const _projects = [
 export const projects = _projects.slice().sort((a, b) => b.date.localeCompare(a.date))
 
 export const getProject = (slug) => projects.find((p) => p.slug === slug)
+
+// The other projects that are pieces of the same larger one, newest first.
+export const partnersOf = (project) =>
+  project.part ? projects.filter((p) => p.part === project.part && p.slug !== project.slug) : []

@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { matchPath, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import App from './App.jsx'
-import { canonicalFor, titleFor } from './documentMeta.js'
+import { canonicalFor, MOVED, normalize, titleFor } from './documentMeta.js'
 import { useAnalytics } from './analytics.js'
 import ProjectOverlay from './components/ProjectOverlay.jsx'
 import { getProject } from './data/projects.js'
@@ -30,10 +30,19 @@ import NotFound from './pages/NotFound.jsx'
 export default function AppRoutes() {
   const location = useLocation()
 
+  /*
+   * A retired address: /about and /traces (the exhibit itself is kept,
+   * unrouted, in pages/About.jsx), and the six projects that went by
+   * working names before they had titles. It redirects below, once the hooks
+   * have run; resolving the project against where it went means the title
+   * the redirect passes through is the page's, not a 404's.
+   */
+  const moved = MOVED[normalize(location.pathname)]
+
   // Only for a slug that resolves. An unknown one has no card to open, so it
   // must fall through to the tree below and get a 404 rather than a blurred
   // index with an empty dialog on it.
-  const match = matchPath('/work/:slug', location.pathname)
+  const match = matchPath('/work/:slug', moved ?? location.pathname)
   const known = match && getProject(match.params.slug)
   const background =
     location.state?.background ??
@@ -63,18 +72,14 @@ export default function AppRoutes() {
     link.href = canonical
   }, [title, canonical])
 
+  if (moved) return <Navigate to={moved} replace />
+
   return (
     <>
       <Routes location={background || location}>
         <Route path="/" element={<App />}>
           <Route index element={<Home />} />
           <Route path="work" element={<Work />} />
-          {/* Retired pages, kept as addresses so old links still land. About
-              became Traces, and Traces is off the site for now; both send a
-              visitor to the page about the person. The exhibit itself is
-              kept, unrouted, in pages/About.jsx. */}
-          <Route path="about" element={<Navigate to="/contact" replace />} />
-          <Route path="traces" element={<Navigate to="/contact" replace />} />
           <Route path="contact" element={<Contact />} />
           <Route path="cv" element={<CV />} />
           <Route path="*" element={<NotFound />} />

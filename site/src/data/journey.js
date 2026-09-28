@@ -110,13 +110,13 @@ export const deskName = (from) =>
   DESKS.find(([at]) => at[0] === from[0] && at[1] === from[1])?.[1] ?? 'the desk'
 
 export const SITES = [
-  { slug: 'lau-anfeh', name: 'Point Nought', yr: 2023, from: BYBLOS, at: [35.73, 34.35], belt: 'amber' },
+  { slug: 'point-nought', name: 'Point Nought', yr: 2023, from: BYBLOS, at: [35.73, 34.35], belt: 'amber' },
   // Made at Kent State during the semester abroad, about a site in Chicago. It
   // has no page on the site yet, which the map does not mind: a site mark is a
   // label on a strand rather than a link.
   { slug: 'pilsen-v', name: 'The Pilsen V', yr: 2022, from: KENT, at: [-87.66, 41.85], belt: 'green' },
   { slug: 'saria', name: 'Saria', yr: 2024, from: DUBAI, at: [55.3, 25.2], belt: 'amber' },
-  { slug: 'marception', name: 'Rings of Mars', yr: 2024, from: BEIRUT, at: null, belt: 'green' },
+  { slug: 'rings-of-mars', name: 'Rings of Mars', yr: 2024, from: BEIRUT, at: null, belt: 'green' },
   { slug: 'tsukiji', name: 'Tsukiji', yr: 2025, from: BARCELONA, at: [139.7, 35.7], belt: 'green' },
   { slug: 'huddle', name: 'The Huddle', yr: 2025, from: BARCELONA, at: [-70.9, -53.16], belt: 'green' },
   { slug: 'urban-risk', name: 'Encoding Urban Risk', yr: 2026, from: BARCELONA, at: [-0.13, 51.5], belt: 'accent' },

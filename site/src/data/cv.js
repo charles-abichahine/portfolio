@@ -103,7 +103,7 @@ export const education = [
     notes: 'Dean’s Distinction List, 3.7/4.0. Honor scholarship every consecutive term.',
     work: [
       {
-        slug: 'lau-anfeh',
+        slug: 'point-nought',
         name: 'Point Nought',
         /* The title is the project's; the town is not, so Anfeh moves into the
            sentence. Losing it entirely would strand the only place name the

@@ -14,10 +14,10 @@ import { projects } from './projects.js'
  * index show the same four groups drawn from the same definitions, and adding a
  * belt adds a filter without touching either page.
  *
- * Rings of Mars (`marception`) is an international competition, not professional
+ * Rings of Mars (`rings-of-mars`) is an international competition, not professional
  * practice, so it stays in Design & Research.
  */
-const PRACTICE = ['lincoln-booth', 'nexus-booth', 'saria', 'lau-anfeh']
+const PRACTICE = ['tideline', 'codependent', 'saria', 'point-nought']
 
 export const BELTS = [
   {

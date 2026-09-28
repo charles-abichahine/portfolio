@@ -18,7 +18,7 @@ import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, resolve, join } from 'node:path'
 import { projects, routes } from './routes.mjs'
-import { titleFor, canonicalFor } from '../src/documentMeta.js'
+import { titleFor, canonicalFor, MOVED } from '../src/documentMeta.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const DIST = resolve(here, '../dist')
@@ -39,7 +39,7 @@ for (const route of routes) {
   // "/" is dist/index.html itself, which already carries both.
   if (route === '/') continue
   const html = index
-    .replace(TITLE, `<title>${esc(titleFor(route, titleOf.get(route)))}</title>`)
+    .replace(TITLE, `<title>${esc(titleFor(route, titleOf.get(MOVED[route] ?? route)))}</title>`)
     .replace(CANONICAL, `<link rel="canonical" href="${canonicalFor(route)}" />`)
   mkdirSync(join(DIST, route), { recursive: true })
   writeFileSync(join(DIST, route, 'index.html'), html)

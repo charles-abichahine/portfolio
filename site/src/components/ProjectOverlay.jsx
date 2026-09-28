@@ -100,7 +100,10 @@ export default function ProjectOverlay() {
           tabIndex={-1}
           className="pointer-events-auto relative flex max-h-full w-full max-w-[1280px] justify-center outline-none"
         >
-          {project && <ProjectCard project={project} onClose={close} />}
+          {/* Keyed, because a card can now open another: the Part of row links
+              a project's partners, and without a fresh card the rail kept the
+              last one's scroll and opened the next project halfway down. */}
+          {project && <ProjectCard key={project.slug} project={project} onClose={close} />}
         </div>
       </div>
     </div>

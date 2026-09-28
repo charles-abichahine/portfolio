@@ -21,11 +21,23 @@ const PAGES = { '/work': 'Work', '/cv': 'CV', '/contact': 'Contact' }
 /*
  * Retired paths, old to the page that now answers for them. /about became
  * /traces, and Traces is off the site for now, so both go to /contact, the page
- * about the person. The old addresses still answer (routes.jsx redirects them,
- * and prerender.mjs gives each a file), but they name /contact as their title
- * and canonical, so a crawler following an old link learns where it went.
+ * about the person. Six projects were first addressed by the names they were
+ * filed under (the thesis by its school and town, the booths as booths, the
+ * rest by course or competition) and now go by their titles. The old addresses
+ * still answer (routes.jsx redirects them, and prerender.mjs gives each a
+ * file), but they name the new page as their title and canonical, so a crawler
+ * following an old link learns where it went.
  */
-export const MOVED = { '/about': '/contact', '/traces': '/contact' }
+export const MOVED = {
+  '/about': '/contact',
+  '/traces': '/contact',
+  '/work/lau-anfeh': '/work/point-nought',
+  '/work/lincoln-booth': '/work/tideline',
+  '/work/nexus-booth': '/work/codependent',
+  '/work/integrative-modeling': '/work/family-tree',
+  '/work/collaborative-workflow': '/work/paper-trail',
+  '/work/marception': '/work/rings-of-mars',
+}
 const current = (path) => MOVED[path] ?? path
 
 // A trailing slash is the same page; without this /work/ would title as a 404.

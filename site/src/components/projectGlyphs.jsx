@@ -80,7 +80,7 @@ const GLYPHS = {
   ),
   // Three towers off one podium, the bridge threading them — the podium and
   // the bridge are what keep three uprights from reading as a bar chart.
-  'integrative-modeling': (
+  'family-tree': (
     <>
       <path d="M4 20.5V18h16v2.5" />
       <path d="M5.5 18V9.5h3V18" />
@@ -90,7 +90,7 @@ const GLYPHS = {
     </>
   ),
   // The pipeline: a model, a push, a sheet.
-  'collaborative-workflow': (
+  'paper-trail': (
     <>
       <circle cx="5.5" cy="12" r="2.3" />
       <path d="M8.6 12h4.8M11.6 10.2l1.8 1.8-1.8 1.8" />
@@ -149,7 +149,7 @@ const GLYPHS = {
   ),
   // The ring over its crater: an annulus in perspective, because a single
   // circle over an arc read as an eye.
-  marception: (
+  'rings-of-mars': (
     <>
       <ellipse cx="12" cy="10" rx="6.8" ry="2.8" />
       <ellipse cx="12" cy="10" rx="3.8" ry="1.5" />
@@ -167,7 +167,7 @@ const GLYPHS = {
   // The salt-pond grid, on the shore it works. Unequal cells, because a window
   // is even and a salt pan is not.
   // The mirrored ring: fins folded to the wave's crest, hung between two rings.
-  'lincoln-booth': (
+  'tideline': (
     <>
       <ellipse cx="12" cy="5.5" rx="8.5" ry="2.5" />
       <ellipse cx="12" cy="18.5" rx="8.5" ry="2.5" />
@@ -178,12 +178,12 @@ const GLYPHS = {
   ),
   // The master panel: a square with a slot cut into each side, the joint that
   // lets two of them lock without glue or screws.
-  'nexus-booth': (
+  'codependent': (
     <>
       <path d="M4 4H11.2V8.5H12.8V4H20V11.2H15.5V12.8H20V20H12.8V15.5H11.2V20H4V12.8H8.5V11.2H4Z" />
     </>
   ),
-  'lau-anfeh': (
+  'point-nought': (
     <>
       <path d="M6.5 3.5C4.2 7.5 6.2 11 5.2 14.5 4.5 17 3.6 18.7 3.6 20.5" />
       <rect x="9.5" y="4.5" width="11" height="13.5" />

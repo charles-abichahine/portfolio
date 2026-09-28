@@ -96,7 +96,7 @@ const SELECTION = [
   'breathing-mass',
   'huddle',
   'luminous-stratum',
-  'marception',
+  'rings-of-mars',
   'saria',
 ]
 
@@ -624,7 +624,7 @@ const VERSO_PLAN = {
    * at 300dpi with the neighbouring drawings painted out of each crop. The
    * systems diagram and the generated views stay on the site; at 177mm the
    * diagram's type would be under three points. */
-  marception: {
+  'rings-of-mars': {
     /* The crater render fills the plate box: the ring keeps its place and
      * the canyon flanks give up a fifth of their width, which beats paper
      * above and below. No taller source exists; the board's copy has the
@@ -633,15 +633,15 @@ const VERSO_PLAN = {
      * cover: a 16:9 frame gives the box's crop room to sit where the ring is
      * whole with ground on either side. The award mark is drawn on the page
      * at the plate's bottom-left, so no crop can take it. */
-    cover: 'projects/marception/render.webp',
+    cover: 'projects/rings-of-mars/render.webp',
     coverFit: 'cover',
     coverPos: 'right center',
-    badge: { src: 'projects/marception/top-50.png', w: 26 },
-    band: 'projects/marception/levels-and-plan.webp',
+    badge: { src: 'projects/rings-of-mars/top-50.png', w: 26 },
+    band: 'projects/rings-of-mars/levels-and-plan.webp',
     /* The section runs the whole page as the foot, the one plate in the
      * book that does: a long section wants length. It costs the columns
      * above it 57mm, which is why the briefs here are the shortest set. */
-    foot: 'projects/marception/section.webp',
+    foot: 'projects/rings-of-mars/section.webp',
   },
   /* The step-by-step opens the page, the exploded system answers it beneath,
    * and the three tonal references close the text column as a quiet strip.
