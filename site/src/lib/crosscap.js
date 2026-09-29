@@ -21,13 +21,13 @@
  * Every point carries its index in the grid, the way a survey drawing numbers
  * its stations. That id is a real property of the drawing, not a decoration:
  * the numbers are what say this is a computed surface rather than a texture. It
- * also carries its u-row index, because the row is the order the site sweeps the
+ * also carries its u-row index, because the row is the order the site numbers the
  * survey in as the visitor scrolls.
  */
 export const CC = { U: 112, V: 46, a: 60, b: 1, c: 1, d: 0.5, e: 2 }
 
 // The point cloud, U rows of V. Each point keeps `row` (its u index, 0..U-1, the
-// sweep order) and `id` (its station number, the grid index a survey stamps on
+// numbering order) and `id` (its station number, the grid index a survey stamps on
 // it) alongside the surface coordinates.
 export function crossCap() {
   const pts = []

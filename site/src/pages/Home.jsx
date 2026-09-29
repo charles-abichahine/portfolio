@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { projects } from '../data/projects.js'
 import { summary } from '../data/cv.js'
 import { markHandoff } from '../handoff.js'
-import { CC, crossCap, makeProjector } from '../lib/crosscap.js'
+import { crossCap, makeProjector } from '../lib/crosscap.js'
 
 /*
  * The cover.
@@ -18,9 +18,10 @@ import { CC, crossCap, makeProjector } from '../lib/crosscap.js'
  * A scroll builds toward that departure rather than tripping it, so the gesture
  * is answered while it accumulates. One progress value p, the gesture's fraction
  * of its threshold, drives two things: the whole block gives a little in the
- * direction it is about to leave, and the cross-cap survey in the corner sweeps
- * itself in u-row by u-row, the same drawing the printed portfolio's cover
- * carries, off the same equations (src/lib/crosscap.js). A wheel meters p, and so
+ * direction it is about to leave, and the cross-cap survey in the corner, whole
+ * from the start, has its station numbers written in, the same drawing the
+ * printed portfolio's cover carries, off the same equations
+ * (src/lib/crosscap.js). A wheel meters p, and so
  * does a finger; the keyboard and the cue have no gesture to meter, so they go
  * straight to the leave.
  *
@@ -134,25 +135,19 @@ const DESKTOP_MIN = 1024
 // their place. Everything downstream of p — the give, the sweep, the caption —
 // is the same on both sides of this line.
 const SHORT_LAND = '(max-width: 1023.98px) and (orientation: landscape)'
-// What is drawn at rest, and what the gesture opens toward whole. On the laptop
-// it is a fraction of the u-rows, drawn in order — the fan grows out of the
-// corner as the wheel turns. A third, not the eighth it used to be: at 0.12 the
-// resting cover was thirteen rows of loose single dots, a scatter rather than a
-// drawing, and the surface only became legible partway through the gesture that
-// leaves the page, which most visitors never stop in. At a third the rest state
-// is already a form, an oval framing the name with the pinch on the right, and
-// the sweep still has the loops round the pinch left to draw. On a phone it is a fraction of the field's RADIUS:
-// at rest a bloom sits behind the name, and the gesture pushes the frontier
-// outward to the edges, so the field visibly grows the way the laptop's does,
-// only from the centre rather than a corner — and symmetric, so it never sits
-// lopsided. Area goes as the square of the radius, so 0.72 → 1 about doubles
-// what is drawn. It rested at 0.55, which tripled it, but the cross-cap's arches
-// sit above its eye, so at 0.55 the bloom was all over the name and the lower
-// 40% of a phone screen was bare. At 0.72 the lower band reaches in under the
-// cue and the field frames the name on both sides, and the gesture still has
-// the outer arches and the edges to grow into.
-const REST_ROWS = 0.34
-const REST_RADIUS_MOBILE = 0.72
+// What the gesture writes in. The points are all there at rest, the whole
+// surface, bare; the scroll is what annotates it, the station numbers arriving
+// in the order the field used to be swept in — u-row by u-row out of the corner
+// on the laptop, outward from behind the name on a phone. Ranked rather than
+// read off the raw row or radius, so they arrive at an even rate: the laptop's
+// fragment only has some of the rows on screen, and a sweep through the ones it
+// cannot see would read as a scroll that did nothing. They are all in by
+// LABEL_FULL_AT, short of the commit, so the fully annotated survey is a place
+// you can stop in rather than something glimpsed on the way out. Each one fades
+// up over LABEL_FADE of that range, so the frontier is soft, not a line.
+const LABEL_FULL_AT = 0.8
+const LABEL_FADE = 0.08
+const LABEL_ALPHA = 0.65
 // The radial reveal, taken bare, grows as a perfect circle — a compass arc that
 // reads as mechanical against a hand-plotted survey. So the frontier each point
 // is measured against is bent: a smooth low-frequency wobble in the angle turns
@@ -436,9 +431,10 @@ export default function Home() {
    *
    * The projection is computed once, on mount and on resize, into a flat list of
    * canvas-space points — this is a static drawing redrawn on demand, not a
-   * per-frame loop. The gesture sweeps it: `sweep` runs 0..1, drawing u-rows from
-   * the rest fraction to whole, and a short tween carries it between targets so a
-   * reversed scroll draws back down and completion snaps shut. The palette and
+   * per-frame loop. The points are drawn whole throughout; the gesture sweeps the
+   * numbers: `sweep` runs 0..1, writing station numbers in from none to all, and
+   * a short tween carries it between targets so a reversed scroll takes them back
+   * out and completion snaps shut. The palette and
    * the mono face are read from the tokens, so the drawing flips with the theme.
    */
   useEffect(() => {
@@ -463,11 +459,13 @@ export default function Home() {
       }
     }
 
-    // The phone and the laptop frame the same maths differently, and read the
-    // gesture differently: the laptop sweeps rows in order, the phone grows the
-    // field out by radius. Each is chosen here off the viewport's size and shape.
-    let restFrac = REST_ROWS
+    // The phone and the laptop frame the same maths differently, and annotate it
+    // in a different order: the laptop numbers rows in order, the phone numbers
+    // outward by radius. Each is chosen here off the viewport's size and shape.
     let fullField = false
+    // The labelled points, sorted into the order they are written in, each with
+    // its rank in that order as `key`, 0..1.
+    let labelled = []
     const compute = () => {
       const { w, h } = size
       if (!w || !h) return
@@ -476,7 +474,6 @@ export default function Home() {
       // corner fragment; only an upright phone or tablet gets the centred field.
       fullField = w < DESKTOP_MIN && h >= w
       const view = fullField ? CC_HOME_VIEW_MOBILE : CC_HOME_VIEW
-      restFrac = fullField ? REST_RADIUS_MOBILE : REST_ROWS
       const project = makeProjector(view.yaw, view.pitch)
       const flat = crossCap().map(project)
       const xs = flat.map((q) => q.px)
@@ -526,17 +523,21 @@ export default function Home() {
         q.rev = q.rad / (1 + wobble) + (hash01(q.id) - 0.5) * CC_EDGE_JITTER
       }
       field = placed
+      labelled = placed
+        .filter((q) => q.label)
+        .sort((a, b) => (fullField ? a.rev - b.rev : a.row - b.row || a.id - b.id))
+      labelled.forEach((q, i) => {
+        q.key = i / Math.max(1, labelled.length)
+      })
     }
 
     const draw = () => {
       if (!field || !pal) return
       const { w, h } = size
       ctx.clearRect(0, 0, w, h)
-      // How far the reveal has opened now: the rest fraction, carried toward
-      // whole by the sweep. The laptop reads it as a row count, the full-bleed
-      // field as a radius (see the per-point test below).
-      const frac = motionOkRef.current ? restFrac + (1 - restFrac) * sweep : 1
-      const revealed = Math.round(frac * CC.U)
+      // How far the numbering has got: none at rest, all of it by LABEL_FULL_AT.
+      // Reduced motion has no gesture to wait on, so the survey is simply whole.
+      const lfrac = motionOkRef.current ? Math.min(1, sweep / LABEL_FULL_AT) : 1
 
       // The name's box, in the canvas's own pixels, so the probe (and the eye)
       // can confirm the survey stays off the type. Both rects carry the same
@@ -552,47 +553,51 @@ export default function Home() {
       ctx.fillStyle = pal.point
       ctx.globalAlpha = 0.9
       let drawn = 0
-      const labels = []
+      const hidden = new Set()
       for (const q of field) {
-        // The full-bleed field grows by radius from the centre; the laptop's
-        // fragment fills row by row from its corner.
-        const shown = fullField ? q.rev <= frac : q.row < revealed
-        if (!shown) continue
         // The name is the one thing the survey may not cross. The framing keeps
         // the field in the corner; this is the guarantee the sparse tail never
         // lands on the type, at any size.
         if (box && q.X > box.l && q.X < box.r && q.Y > box.t && q.Y < box.b) {
           hits++
+          hidden.add(q)
           continue
         }
         drawn++
         ctx.beginPath()
         ctx.arc(q.X, q.Y, POINT_R, 0, TAU)
         ctx.fill()
-        if (q.label) labels.push(q)
       }
-      if (labels.length) {
+      let numbered = 0
+      if (lfrac > 0) {
         ctx.font = `${LABEL_PX}px ${pal.mono}`
-        ctx.globalAlpha = 0.65
         ctx.textBaseline = 'alphabetic'
         // Every number is four digits in a monospace, so one width serves all.
         const lw = ctx.measureText('0000').width
         const taken = []
-        for (const q of labels) {
+        // Walked in the order they are written in, so the clear-space test is
+        // decided first-come: a number already on the page is never displaced by
+        // one that arrives after it, and scrolling on only ever adds.
+        for (const q of labelled) {
+          // Stretched so the last one is fully up at lfrac 1, not still fading.
+          const a = (lfrac * (1 + LABEL_FADE) - q.key) / LABEL_FADE
+          if (a <= 0) break
+          if (hidden.has(q)) continue
           const l = q.X + 2.5 - LABEL_GAP
           const t = q.Y + 2 - LABEL_PX - LABEL_GAP
           const r = q.X + 2.5 + lw + LABEL_GAP
           const b = q.Y + 2 + LABEL_GAP
           if (taken.some((o) => l < o.r && r > o.l && t < o.b && b > o.t)) continue
           taken.push({ l, t, r, b })
+          numbered++
+          ctx.globalAlpha = LABEL_ALPHA * Math.min(1, a)
           ctx.fillText(String(q.id).padStart(4, '0'), q.X + 2.5, q.Y + 2)
         }
       }
       ctx.globalAlpha = 1
 
       if (import.meta.env.DEV) {
-        cv.dataset.ccRows = String(revealed)
-        cv.dataset.ccTotal = String(CC.U)
+        cv.dataset.ccNumbered = String(numbered)
         cv.dataset.ccDrawn = String(drawn)
         cv.dataset.ccNamehits = String(hits)
       }
