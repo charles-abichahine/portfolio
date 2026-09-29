@@ -82,8 +82,11 @@ const SOURCES = [
  * All four awarded projects travel now: Sensi and lEgoarCh out of Computation
  * & AI, The Huddle and Rings of Mars out of Design & Research. Three from
  * Computation & AI because that is the positioning and the strongest work,
- * one BIM, three Design & Research, and Saria from practice so the book does
- * not read as though the architecture started at the master's.
+ * three Design & Research, and two from practice so the book does not read as
+ * though the architecture started at the master's: Codependent, the one
+ * built piece in the book, and Saria, which is under construction. Breathing
+ * Mass stepped out for Codependent; its VERSO_PLAN is kept below, so it can
+ * come back without the art direction being redone.
  *
  * An order, not a set. It is deliberately NOT the belt grouping /work shows:
  * a booklet is read front to back and this is the sequence to read it in, so
@@ -93,10 +96,10 @@ const SELECTION = [
   'sensi',
   'urban-risk',
   'legoarch',
-  'breathing-mass',
   'huddle',
   'luminous-stratum',
   'rings-of-mars',
+  'codependent',
   'saria',
 ]
 
@@ -277,8 +280,14 @@ function pipelineHtml(p, widthMm) {
   return `<div class="pipe" style="width:${mm(widthMm)}">${halves.join('<span class="psplit"></span>')}</div>`
 }
 
+/* Spectral has no subscript two, so a CO₂ in the writing fell back to
+ * Georgia for one glyph. It is set as a lowered 2 in the running face. */
 const esc = (s) =>
-  String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/₂/g, '<span class="sub">2</span>')
 const pad = (n) => String(n).padStart(2, '0')
 // An address for print: no protocol, no www, no trailing slash.
 const bare = (url) => url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/+$/, '')
@@ -298,6 +307,104 @@ const FONTS = [
   font('../public/fonts/ibm-plex-mono-400.woff2', 'IBM Plex Mono', 400),
 ].join('\n')
 
+// The sans alone, for the SVG plates that carry their own type (see img()).
+const SVG_FONTS = [
+  font('./fonts/space-grotesk-400.woff2', 'Space Grotesk', 400),
+  font('./fonts/space-grotesk-700.woff2', 'Space Grotesk', 700),
+].join('')
+
+/*
+ * Print cuts: a site image recut for the page, at embed time. The key must be
+ * a src already in the project's media, so this can crop a picture the site
+ * shows but never bring in one it does not; the site keeps the whole image.
+ * `from` is one crop [x, y, w, h] in source pixels. `parts` recomposes
+ * several crops onto a `size` canvas of `bg`, each placed `at` [x, y]; a
+ * `text` part is levelled to white and multiplied on, so type lifted off a
+ * lighter ground sits on the canvas without a box around it. `caption`
+ * replaces the site's caption when the cut no longer shows what it says.
+ */
+const PRINT_CUTS = {
+  /* The rule as its three steps and its three checks: the numbers, the
+   * titles, the pieces, and under the rule the questions every move has to
+   * pass. The sublines and the closing line are brief 02 in words, and at
+   * the width of the text column they were grey texture. The steps are
+   * drawn closer together than the source's slide spacing, and each check
+   * sits under its step's title. */
+  'projects/codependent/growth-logic.webp': {
+    size: [1320, 620],
+    bg: '#ffffff',
+    parts: [
+      // the numbers and titles, each kept over its own step
+      { from: [50, 70, 420, 90], at: [0, 15] },
+      { from: [570, 70, 400, 90], at: [400, 15] },
+      { from: [1235, 70, 420, 90], at: [810, 15] },
+      // step 1 and the first arrow, step 2, the second arrow, step 3
+      { from: [50, 370, 520, 315], at: [0, 190] },
+      { from: [690, 370, 255, 315], at: [520, 190] },
+      { from: [1150, 370, 110, 315], at: [825, 190] },
+      { from: [1400, 370, 330, 315], at: [975, 190] },
+      // the hairline, then the three checks
+      { from: [50, 807, 1320, 10], at: [0, 525] },
+      { from: [65, 865, 260, 45], at: [14, 560] },
+      { from: [703, 865, 345, 45], at: [406, 560] },
+      { from: [1340, 865, 390, 45], at: [814, 560] },
+    ],
+    caption: 'The growth rule: start with one white, try a direction, add the support with it, then check the space, the clearance and the mass.',
+  },
+  /* Sensi's report screens, cut to what prints: the before and after pair
+   * alone for the sheet, and the kitchen's card (scores, prompt, image) at
+   * the checkpoints plate's own proportion so the two share a height. */
+  'projects/sensi/report-vision.webp': { from: [313, 163, 753, 273] },
+  'projects/sensi/report-02.webp': { from: [282, 198, 826, 442] },
+  // Trimmed to the drawing and its callouts, so the plate is all figure.
+  'projects/codependent/option-29.webp': { from: [56, 56, 1644, 1164] },
+  /* The ten tiles with the empty bands inside them closed (above and below
+   * each row's models) and the notes line dropped: brief 01 carries the
+   * masters. 2.2:1 is what lets the band run the art column's full width. */
+  'projects/codependent/options.webp': {
+    size: [1942, 886],
+    bg: '#ffffff',
+    parts: [
+      { from: [30, 42, 1942, 56], at: [0, 0] },
+      { from: [30, 147, 1942, 221], at: [0, 56] },
+      { from: [30, 421, 1942, 220], at: [0, 277] },
+      { from: [30, 682, 1942, 236], at: [0, 497] },
+      { from: [30, 965, 1942, 153], at: [0, 733] },
+    ],
+    caption: 'Ten of the thirty candidates at one camera and scale; the chosen one outlined in red.',
+  },
+  /* The labelled model and its four counts, without the table: at plate size
+   * the table is grey texture, and the counts say what it proves. The counts
+   * move under the model's open left side, which sets the 3:2 that lets the
+   * kit and Option 29 fill the art column at one height. */
+  'projects/codependent/part-data.webp': {
+    size: [1050, 700],
+    bg: '#eeeeee',
+    parts: [
+      { from: [150, 335, 815, 660], at: [225, 20] },
+      { from: [62, 1050, 260, 145], at: [20, 540], text: true },
+    ],
+    caption: 'The kit: every panel labelled on the model by its ID, thirty-four parts nested onto twelve sheets.',
+  },
+}
+
+async function cutBuffer(relPath) {
+  const cut = PRINT_CUTS[relPath]
+  const src = readFileSync(join(PUBLIC, relPath))
+  const crop = ([left, top, width, height]) => sharp(src).extract({ left, top, width, height })
+  if (cut.from) return crop(cut.from).png().toBuffer()
+  const [width, height] = cut.size
+  const layers = []
+  for (const part of cut.parts) {
+    // Level the ground to white (238 is the panel grey), keep the type dark.
+    const piece = part.text ? crop(part.from).linear(1.0955, -5.7) : crop(part.from)
+    layers.push({ input: await piece.png().toBuffer(), left: part.at[0], top: part.at[1], blend: part.text ? 'multiply' : 'over' })
+  }
+  return sharp({ create: { width, height, channels: 3, background: cut.bg } }).composite(layers).png().toBuffer()
+}
+
+const cutAspect = (cut) => (cut.from ? cut.from[2] / cut.from[3] : cut.size[0] / cut.size[1])
+
 /* Placed at the size it is used, then embedded. Widths are the print slot in
  * millimetres times roughly 200dpi, which is past what anyone can resolve on
  * paper and far short of shipping the 2000px original forty times. Flattened
@@ -314,13 +421,23 @@ async function img(relPath, width) {
    * hairline becomes a smudge, and the file is smaller than any raster of
    * itself would be. */
   if (relPath.endsWith('.svg')) {
-    const buf = readFileSync(file)
+    /* An SVG placed as an image cannot see the document's fonts, so one that
+     * names Arial prints in Arial. The site's copy is left alone; the printed
+     * one is set in the booklet's sans, embedded inside the drawing. */
+    const svg = readFileSync(file, 'utf8')
+    const buf = Buffer.from(
+      /font-family="Arial/.test(svg)
+        ? svg
+            .replace(/font-family="Arial[^"]*"/g, 'font-family="Space Grotesk"')
+            .replace(/(<svg[^>]*>)/, (tag) => `${tag}<style>${SVG_FONTS}</style>`)
+        : svg,
+    )
     imageBytes += buf.length
     const uri = `data:image/svg+xml;base64,${buf.toString('base64')}`
     cache.set(key, uri)
     return uri
   }
-  const buf = await sharp(file, { density: 150 })
+  const buf = await sharp(PRINT_CUTS[relPath] ? await cutBuffer(relPath) : file, { density: 150 })
     .resize({ width, withoutEnlargement: true })
     .flatten({ background: '#ffffff' })
     .jpeg({ quality: 82, mozjpeg: true })
@@ -337,8 +454,9 @@ async function aspectOf(relPath) {
   if (aspectCache.has(relPath)) return aspectCache.get(relPath)
   const file = join(PUBLIC, relPath)
   if (!existsSync(file)) throw new Error(`portfolio-pdf: missing image ${relPath}`)
-  const meta = await sharp(file).metadata()
-  const a = meta.width / meta.height
+  const a = PRINT_CUTS[relPath]
+    ? cutAspect(PRINT_CUTS[relPath])
+    : await sharp(file).metadata().then((meta) => meta.width / meta.height)
   aspectCache.set(relPath, a)
   return a
 }
@@ -362,7 +480,8 @@ async function figPool(p, cover = posterFor(p)) {
   for (const m of p.sections.flatMap((s) => s.media)) {
     const src = stillOf(m)
     if (src === cover || src === drawn) continue
-    pool.push({ m, src, a: await aspectOf(src) })
+    const cut = PRINT_CUTS[src]
+    pool.push({ m: cut?.caption ? { ...m, caption: cut.caption } : m, src, a: await aspectOf(src) })
   }
   return pool
 }
@@ -530,7 +649,9 @@ function versoLayout(p, plates, sheetIndex) {
 const VERSO_PLAN = {
   sensi: {
     band: 'projects/sensi/shape-analysis.webp',
-    row: ['projects/sensi/checkpoints.webp', 'projects/sensi/report-vision.webp'],
+    /* The kitchen's report card closes the rank: its scores become a prompt
+     * and the prompt an image, Act 3 in one plate. */
+    row: ['projects/sensi/checkpoints.webp', 'projects/sensi/report-02.webp'],
     /* The aside prints at the row's own cell width, so the three bottom
      * plates read as one rank; the briefs above were shortened to leave it
      * the room. */
@@ -538,8 +659,10 @@ const VERSO_PLAN = {
     asideW: 83,
     /* The sheet's figure is part of the same decision: without it the pick
      * falls to whatever fills best of what the plan released, which is not
-     * the same thing as what belongs under the cover. */
-    sheet: 'projects/sensi/galaxy.webp',
+     * the same thing as what belongs under the cover. The galaxy is the
+     * cover already, so the sheet prints what Sensi makes: the kitchen
+     * before and after, cut from the report without its prompts. */
+    sheet: 'projects/sensi/report-vision.webp',
   },
   /* The sheet is pinned so the seven-feature lineage prints under the cover;
    * the verso holds the arc in two stacked plates, the failure above and the
@@ -662,6 +785,27 @@ const VERSO_PLAN = {
     /* Pinned to what a one-line caption on the derivation leaves: the
      * diagram keeps its full width and the solver and the skin gain 3mm. */
     rowH: 89,
+  },
+  /* The one built piece in the book, so the sheet proves it: the render
+   * above, stopped short so the site photos close the box beneath it (the
+   * panel carried in, the slots meeting, the booth from below). The verso
+   * leads with the ten options the tool grew, across the whole art column,
+   * over Option 29 and the labelled kit at one height, filling it too; the
+   * growth rule, cut to its three steps, closes the text column. The cuts
+   * that make those widths work are in PRINT_CUTS. */
+  codependent: {
+    sheet: 'projects/codependent/on-site.webp',
+    coverFit: 'cover',
+    coverH: 129,
+    band: 'projects/codependent/options.webp',
+    row: ['projects/codependent/option-29.webp', 'projects/codependent/part-data.webp'],
+    rowFit: 'height',
+    rowH: 57,
+    aside: 'projects/codependent/growth-logic.webp',
+    asideW: 83,
+    /* Lifted off the foot line: the rule reads as the last word of the
+     * writing above it rather than as a fourth plate in the rank. */
+    asideLift: 12,
   },
   /* The sheet is the dusk render and there is no room under it, so the
    * verso is the drawing set. A practice project's evidence is its
@@ -968,7 +1112,10 @@ const site = siteUrl.replace(/^https?:\/\//, '')
 const cardUrl = (p) => `${siteUrl}/work/${p.slug}`
 const cardLabel = (p) => `${site}/work/${p.slug}`
 const years = projects.map((p) => p.date.slice(0, 4))
-const span = `${years.reduce((a, b) => (b < a ? b : a))}–${years.reduce((a, b) => (b > a ? b : a))}`
+/* The cover's range is the selection's, not the index's: it heads eight
+ * projects, and a year none of them carries is a claim the book never backs. */
+const chosenYears = chosen.map((p) => p.date.slice(0, 4))
+const span = `${chosenYears.reduce((a, b) => (b < a ? b : a))}–${chosenYears.reduce((a, b) => (b > a ? b : a))}`
 const inBook = (p) => chosen.includes(p)
 
 /* The index strip, translated: every project's glyph on a hairline rule, the
@@ -1067,7 +1214,7 @@ const cover = `
  * of the index needs before the list. Kept here rather than in cv.js because
  * it is written for this page's width and no other surface prints it. */
 const ABOUT =
-  'Architect and computational designer, finishing the MaCAD at IAAC. I build the tools I used to ask other people for: Rhino, Grasshopper and Python, wired to Rhino Compute, BIM pipelines and generative AI, so a design can be scored, priced or proven while it is still on the screen. The machine generates; I curate, steer, and shape the output into architecture.'
+  'Architect and computational designer, Master in Advanced Computation for Architecture and Design (MaCAD) at IAAC. I build the tools I used to ask other people for: Rhino, Grasshopper and Python, wired to Rhino Compute, BIM pipelines and generative AI, so a design can be scored, priced or proven while it is still on the screen. The machine generates; I curate, steer, and shape the output into architecture.'
 
 const index = `
 <section class="page sidx">
@@ -1128,7 +1275,7 @@ async function sheet(p, i, lay) {
   <div class="tb">
     <p class="sno"><a href="${cardUrl(p)}">${esc(cardLabel(p))}</a></p>
     <span class="g" style="color:${b.color}">${glyph(p.slug, 12)}</span>
-    <h2>${esc(p.title)}</h2>
+    <h2>${esc(p.title).replace(/ (\d+)$/, '&nbsp;$1')}</h2>
     <p class="yr">${esc(p.year)}</p>
     <p class="bl" style="color:${b.color}">${esc(b.label)}</p>
     <p class="award">${p.award ? esc(p.award) : ''}</p>
@@ -1209,7 +1356,7 @@ async function verso(p, i, lay) {
     const asideFigs = lay.plan.asideRank ?? (lay.plan.aside ? [lay.plan.aside] : [])
     const rowStart = bandFigs.length + asideFigs.length + 1
     const asideHtml = asideFigs.length
-      ? `<div class="vaside">${lay.plan.asideRank ? `<div class="vrow" style="gap:${mm(ASIDE_GAP)};justify-content:flex-start">` : ''}${(await Promise.all(asideFigs.map((c, ai) => vfig(c, bandFigs.length + ai + 1, 'vbot')))).join('')}${lay.plan.asideRank ? '</div>' : ''}</div>`
+      ? `<div class="vaside"${VERSO_PLAN[p.slug]?.asideLift ? ` style="margin-bottom:${mm(VERSO_PLAN[p.slug].asideLift)}"` : ''}>${lay.plan.asideRank ? `<div class="vrow" style="gap:${mm(ASIDE_GAP)};justify-content:flex-start">` : ''}${(await Promise.all(asideFigs.map((c, ai) => vfig(c, bandFigs.length + ai + 1, 'vbot')))).join('')}${lay.plan.asideRank ? '</div>' : ''}</div>`
       : ''
     const bandHtml = lay.plan.bandRank
       ? `<div class="vrow"${VERSO_PLAN[p.slug]?.bandAlign === 'left' ? ' style="justify-content:flex-start"' : ''}>${(await Promise.all(bandFigs.map((c, bi) => vfig(c, bi + 1, 'vbot')))).join('')}</div>`
@@ -1524,6 +1671,7 @@ figure { margin: 0; }
 .tb .sno { font-family: "IBM Plex Mono", monospace; font-size: 6pt; letter-spacing: 0;
            color: var(--muted); overflow-wrap: anywhere; }
 .tb .g { margin: 5mm 0 4mm; }
+.sub { font-size: 0.7em; vertical-align: -0.25em; line-height: 0; }
 .tb h2 { font-size: 16.5pt; font-weight: 700; letter-spacing: -0.02em; line-height: 1.12; }
 .tb .yr { font-family: "IBM Plex Mono", monospace; font-size: 7.5pt; color: var(--muted); margin-top: 2mm; }
 .tb .bl { font-family: "IBM Plex Mono", monospace; font-size: 6.6pt; letter-spacing: 0.14em;
@@ -1644,6 +1792,42 @@ execFileSync(
   { stdio: 'ignore' },
 )
 if (!process.argv.includes('--keep-html')) unlinkSync(tmpHtml)
+
+/*
+ * Chrome writes the title from <title> and nothing else, so the file opens
+ * with an empty author in every viewer's properties. The fix is a standard
+ * incremental update: a new Info object and a one-entry xref section
+ * appended after %%EOF, chained to the original by /Prev. Nothing Chrome
+ * wrote is rewritten.
+ */
+{
+  const buf = readFileSync(PDF)
+  const txt = buf.toString('latin1')
+  const sx = txt.lastIndexOf('startxref')
+  const prev = parseInt(txt.slice(sx + 9), 10)
+  const trailer = txt.slice(txt.lastIndexOf('trailer'), sx)
+  const size = Number(trailer.match(/\/Size (\d+)/)[1])
+  const root = trailer.match(/\/Root (\d+ \d+ R)/)[1]
+  const infoNo = trailer.match(/\/Info (\d+) \d+ R/)[1]
+  const infoAt = txt.search(new RegExp(`(^|\\n)${infoNo} 0 obj`))
+  const old = txt.slice(txt.indexOf('<<', infoAt), txt.indexOf('endobj', infoAt)).trim()
+  // Plain ASCII as a literal; anything else (the span's en dash) as UTF-16BE hex.
+  const pdfStr = (v) =>
+    /^[\x20-\x7e]*$/.test(v)
+      ? `(${v.replace(/[\\()]/g, (c) => `\\${c}`)})`
+      : `<FEFF${[...v].map((ch) => ch.charCodeAt(0).toString(16).padStart(4, '0')).join('').toUpperCase()}>`
+  const dict = old.replace(
+    /^<</,
+    () => `<</Author ${pdfStr('Charles Abi Chahine')}\n/Subject ${pdfStr(`Selected work, ${span}`)}\n`,
+  )
+  const obj = `\n${size} 0 obj\n${dict}\nendobj\n`
+  const objAt = buf.length + 1
+  const xrefAt = buf.length + Buffer.byteLength(obj, 'latin1')
+  const tail =
+    `xref\n${size} 1\n${String(objAt).padStart(10, '0')} 00000 n \n` +
+    `trailer\n<</Size ${size + 1}\n/Root ${root}\n/Info ${size} 0 R\n/Prev ${prev}>>\nstartxref\n${xrefAt}\n%%EOF\n`
+  writeFileSync(PDF, Buffer.concat([buf, Buffer.from(obj + tail, 'latin1')]))
+}
 
 writeFileSync(STAMP, `${hashOf()}\n`)
 

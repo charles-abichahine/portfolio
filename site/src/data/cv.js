@@ -153,7 +153,7 @@ export const experience = [
      * than repeated in both.
      */
     points: [
-      'Took Saria at Dubai Maritime City from pre-concept to design development: parametric facade iterations in Rhino and Grasshopper, then the BIM model for delivery.',
+      'Took Saria at Dubai Maritime City, now under construction, from pre-concept to design development: parametric facade iterations in Rhino and Grasshopper, then the BIM model for delivery.',
       'Produced design studies and BIM models for Verve at City Walk, and massing through to masterplan documentation for District O and Enara at Business Bay.',
     ],
   },

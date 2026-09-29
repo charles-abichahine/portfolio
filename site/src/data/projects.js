@@ -1416,16 +1416,21 @@ const _projects = [
     sections: [
       {
         heading: 'Two pieces',
+        brief:
+          'Two panels, 780 × 780 × 36 mm: a white one that always stands, a black one that always lies flat. Slotted together with no glue or screws, they make the support, the seat and the counter.',
         body: [
           'Both master pieces are 780 × 780 mm and 36 mm thick, with 120 mm slots and 50 mm corner radii. The joint is cut into the panel itself, so nothing is glued or screwed: the vertical pieces carry the horizontal ones and the crossing slots restrain the assembly. The same two pieces make the connection, the support and the furniture. A black panel low down becomes a seat, one higher up becomes a counter.',
         ],
         media: [
           { type: 'image', src: 'projects/codependent/two-pieces.webp', caption: 'Slot together, support one another, make room to gather: the same two pieces at every step.' },
-          { type: 'image', src: 'projects/codependent/on-site.webp', caption: 'The real joints: the white and black masters in the workshop, the slots meeting on site.' },
+          { type: 'image', src: 'projects/codependent/workshop.webp', caption: 'In the workshop: the two masters, a counter slotted together, the joint up close.' },
+          { type: 'image', src: 'projects/codependent/on-site.webp', caption: 'On site: a black panel carried in, the slots meeting, the booth from below.' },
         ],
       },
       {
         heading: 'Growing the booth',
+        brief:
+          'Grown from one white panel by extending, turning, rising or branching; a move that breaks the envelope, the clearance or the mass budget is retried.',
         body: [
           'The tool starts with one white panel, whose slots define where growth can go, and tries a direction: extend, turn, rise, or branch from an earlier piece. A horizontal addition arrives with the white support it needs. Every move has to fit the chosen width, depth and height, stay clear of the other pieces (slots may overlap, solid material may not), and keep the total mass inside the budget. If it fails, the tool tries another move.',
           'Once the assembly has grown, the whole of it is checked against the rules, its joints and its support paths. A piece that breaks one is flagged by its ID and the problem explained, so it can be removed and the rest rechecked.',
@@ -1438,6 +1443,8 @@ const _projects = [
       },
       {
         heading: 'Many booths, one chosen',
+        brief:
+          'Thirty candidates grown, ten compared. Option 29 was chosen: 34 panels, a counter at 948 mm, a seat at 408 mm.',
         body: [
           'Change the extent, the density or the seed and the same rules grow a different booth. Thirty candidates were grown and ten compared side by side, at one camera and one scale, each with its dimensions, density, panel count and its split of white and black, all inside a 650 kg mass budget. Lowering a single input shows the rules at work: with the height limit cut from 2940 to 1320 mm, the booth drops from 34 panels to 21.',
           'Option 29 was chosen: 34 connected panels on a 2940 × 3480 mm footprint, with a counter at 948 mm to stand and talk at and a seat at 408 mm to stay a little longer, and open edges that let people walk in.',
@@ -1451,6 +1458,8 @@ const _projects = [
       },
       {
         heading: 'A kit of parts',
+        brief:
+          '34 unique IDs, 23 white and 11 black, each with its position, mass, mating IDs and sheet; nested onto twelve sheets and cut on a CNC.',
         body: [
           'The chosen booth becomes a kit: 34 unique IDs, 23 white and 11 black, in one connected assembly of seven groups. Every part carries its axis, its level, its group, its position, its area and its mass, the IDs it mates with, and the stock sheet it is cut from. The flat profiles are nested onto twelve sheets and cut on a CNC.',
         ],
@@ -1461,6 +1470,8 @@ const _projects = [
       },
       {
         heading: 'On site',
+        brief:
+          'Pieces went missing on site with no spares, so we reworked the connections with what we had.',
         body: [
           'Then it had to stand up. The panels were pre-assembled group by group and slotted together on site. Some of the pieces went missing, and there were no spares, so we worked out new connections with the pieces we had: what could move, what could still fit, and how to keep the seats and the counters useful.',
         ],
@@ -1477,7 +1488,7 @@ const _projects = [
     date: '2024-03-15',
     title: 'Saria, Dubai Maritime City',
     subtitle:
-      'A residential tower on the water at Dubai Maritime City, 38 levels over a podium, taken from pre-concept to design development at SOMA: parametric facade iterations, then the BIM model for delivery.',
+      'A residential tower on the water at Dubai Maritime City, 38 levels over a podium, taken from pre-concept to design development at SOMA: parametric facade iterations, then the BIM model for delivery. It is now under construction.',
     tagline: 'A residential tower on the water in Dubai.',
     year: '2024',
     module: 'SOMA · Design Architect',
@@ -1490,7 +1501,7 @@ const _projects = [
     award: null,
     links: {},
     intro: [
-      'Saria is a residential tower on the water at Dubai Maritime City, with the Dubai skyline behind it. I took it from pre-concept through to design development as a Design Architect at SOMA: parametric facade iterations in Rhino and Grasshopper, then the BIM model for delivery. The drawings here are from the concept design submission of March 2024, with SOMA as design architect.',
+      'Saria is a residential tower on the water at Dubai Maritime City, with the Dubai skyline behind it. I took it from pre-concept through to design development as a Design Architect at SOMA: parametric facade iterations in Rhino and Grasshopper, then the BIM model for delivery. The tower is now under construction. The drawings here are from the concept design submission of March 2024, with SOMA as design architect.',
     ],
     sections: [
       {
