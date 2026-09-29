@@ -19,11 +19,10 @@ import { crossCap, makeProjector } from '../lib/crosscap.js'
  * is answered while it accumulates. One progress value p, the gesture's fraction
  * of its threshold, drives two things: the whole block gives a little in the
  * direction it is about to leave, and the cross-cap survey in the corner, whole
- * from the start, has its station numbers written in, the same drawing the
- * printed portfolio's cover carries, off the same equations
- * (src/lib/crosscap.js). A wheel meters p, and so
- * does a finger; the keyboard and the cue have no gesture to meter, so they go
- * straight to the leave.
+ * from the start, is inked and numbered by a front that crosses it, the same
+ * drawing the printed portfolio's cover carries, off the same equations
+ * (src/lib/crosscap.js). A wheel meters p, and so does a finger; the keyboard
+ * and the cue have no gesture to meter, so they go straight to the leave.
  *
  * p is held rather than timed: it sits where the last scroll left it, and only
  * another scroll moves it, up or down. So the half-open state is somewhere you
@@ -135,18 +134,26 @@ const DESKTOP_MIN = 1024
 // their place. Everything downstream of p — the give, the sweep, the caption —
 // is the same on both sides of this line.
 const SHORT_LAND = '(max-width: 1023.98px) and (orientation: landscape)'
-// What the gesture writes in. The points are all there at rest, the whole
-// surface, bare; the scroll is what annotates it, the station numbers arriving
-// in the order the field used to be swept in — u-row by u-row out of the corner
-// on the laptop, outward from behind the name on a phone. Ranked rather than
-// read off the raw row or radius, so they arrive at an even rate: the laptop's
-// fragment only has some of the rows on screen, and a sweep through the ones it
-// cannot see would read as a scroll that did nothing. They are all in by
-// LABEL_FULL_AT, short of the commit, so the fully annotated survey is a place
-// you can stop in rather than something glimpsed on the way out. Each one fades
-// up over LABEL_FADE of that range, so the frontier is soft, not a line.
-const LABEL_FULL_AT = 0.8
-const LABEL_FADE = 0.08
+// What the gesture does to the drawing. The points are all there at rest, the
+// whole surface, bare and in muted grey; the scroll is what surveys it. A band
+// travels through the field in the order it used to be swept in — u-row by
+// u-row out of the corner on the laptop, outward from behind the name on a
+// phone — and every point it passes is inked, from muted to the page's ink, and
+// the station numbers are written in with it. The numbers alone were too quiet
+// an answer to a gesture: eight-pixel grey type does not read as "keep going",
+// a visibly moving front does. Ranked rather than read off the raw row or
+// radius, so the front moves at an even rate: the laptop's fragment only has
+// some of the rows on screen, and a sweep through the ones it cannot see would
+// read as a scroll that did nothing. It is all the way through by
+// SURVEY_FULL_AT, short of the commit, so the finished survey is a place you can
+// stop in rather than something glimpsed on the way out. The front is
+// SURVEY_FADE of the field deep: across it a point swells by up to INK_SWELL of
+// its radius and settles back as it inks, which is what makes it a band rather
+// than a line, and a number fades up over the same stretch.
+const SURVEY_FULL_AT = 0.8
+const SURVEY_FADE = 0.08
+const INK_ALPHA = 0.9
+const INK_SWELL = 0.9
 const LABEL_ALPHA = 0.65
 // The radial reveal, taken bare, grows as a perfect circle — a compass arc that
 // reads as mechanical against a hand-plotted survey. So the frontier each point
@@ -431,10 +438,10 @@ export default function Home() {
    *
    * The projection is computed once, on mount and on resize, into a flat list of
    * canvas-space points — this is a static drawing redrawn on demand, not a
-   * per-frame loop. The points are drawn whole throughout; the gesture sweeps the
-   * numbers: `sweep` runs 0..1, writing station numbers in from none to all, and
-   * a short tween carries it between targets so a reversed scroll takes them back
-   * out and completion snaps shut. The palette and
+   * per-frame loop. The points are drawn whole throughout; the gesture moves the
+   * front that inks and numbers them: `sweep` runs 0..1, carrying it from none of
+   * the field to all of it, and a short tween carries it between targets so a
+   * reversed scroll draws it back and completion snaps shut. The palette and
    * the mono face are read from the tokens, so the drawing flips with the theme.
    */
   useEffect(() => {
@@ -455,17 +462,33 @@ export default function Home() {
       const s = getComputedStyle(document.documentElement)
       return {
         point: s.getPropertyValue('--color-muted').trim() || '#6a707b',
+        ink: s.getPropertyValue('--color-ink').trim() || '#16181d',
         mono: s.getPropertyValue('--font-mono').trim() || 'monospace',
       }
     }
 
-    // The phone and the laptop frame the same maths differently, and annotate it
-    // in a different order: the laptop numbers rows in order, the phone numbers
+    // The phone and the laptop frame the same maths differently, and survey it
+    // in a different order: the laptop takes rows in order, the phone works
     // outward by radius. Each is chosen here off the viewport's size and shape.
     let fullField = false
-    // The labelled points, sorted into the order they are written in, each with
-    // its rank in that order as `key`, 0..1.
+    // Every point, sorted into the order the front reaches it, each with its
+    // rank in that order as `key`, 0..1; and the labelled ones among them, in
+    // the same order, so a number arrives with the ink on its own point.
+    let order = []
     let labelled = []
+
+    // The name's box, in the canvas's own pixels, so the survey can keep off the
+    // type (and the probe can confirm it does). Both rects carry the same
+    // give/leave transform, so subtracting the origins cancels it out.
+    const nameBox = () => {
+      const nb = nameRef.current?.getBoundingClientRect()
+      const cb = cv.getBoundingClientRect()
+      if (!nb || !cb) return null
+      const pad = 16
+      return { l: nb.left - cb.left - pad, t: nb.top - cb.top - pad, r: nb.right - cb.left + pad, b: nb.bottom - cb.top + pad }
+    }
+    const inBox = (q, box) => box && q.X > box.l && q.X < box.r && q.Y > box.t && q.Y < box.b
+
     const compute = () => {
       const { w, h } = size
       if (!w || !h) return
@@ -523,32 +546,36 @@ export default function Home() {
         q.rev = q.rad / (1 + wobble) + (hash01(q.id) - 0.5) * CC_EDGE_JITTER
       }
       field = placed
-      labelled = placed
-        .filter((q) => q.label)
-        .sort((a, b) => (fullField ? a.rev - b.rev : a.row - b.row || a.id - b.id))
-      labelled.forEach((q, i) => {
-        q.key = i / Math.max(1, labelled.length)
+      // Ranked over what can be seen. The points behind the name are never
+      // drawn, and on a phone that is nearly half the field and all of it at the
+      // centre the front starts from, so ranking them too spent the first third
+      // of the scroll inking nothing. They go to the head of the order at key 0
+      // instead: if the give lifts the name off one, it shows already inked.
+      const box = nameBox()
+      order = [...placed].sort((a, b) => (fullField ? a.rev - b.rev : a.row - b.row || a.id - b.id))
+      const seen = order.filter((q) => !inBox(q, box))
+      for (const q of order) q.key = 0
+      seen.forEach((q, i) => {
+        q.key = i / Math.max(1, seen.length)
       })
+      order = [...order.filter((q) => inBox(q, box)), ...seen]
+      labelled = order.filter((q) => q.label)
     }
 
     const draw = () => {
       if (!field || !pal) return
       const { w, h } = size
       ctx.clearRect(0, 0, w, h)
-      // How far the numbering has got: none at rest, all of it by LABEL_FULL_AT.
-      // Reduced motion has no gesture to wait on, so the survey is simply whole.
-      const lfrac = motionOkRef.current ? Math.min(1, sweep / LABEL_FULL_AT) : 1
+      // How far the front has got: nowhere at rest, all the way by
+      // SURVEY_FULL_AT. Reduced motion has no gesture to wait on, so the survey
+      // is simply whole. `along` is how far past the front a point of a given
+      // key sits, in front-depths: 0 or less is untouched, 1 or more is done.
+      // Stretched so the last point is fully done at 1, not still settling.
+      const lfrac = motionOkRef.current ? Math.min(1, sweep / SURVEY_FULL_AT) : 1
+      const along = (key) => (lfrac * (1 + SURVEY_FADE) - key) / SURVEY_FADE
 
-      // The name's box, in the canvas's own pixels, so the probe (and the eye)
-      // can confirm the survey stays off the type. Both rects carry the same
-      // give/leave transform, so subtracting the origins cancels it out.
-      let box = null
+      const box = nameBox()
       let hits = 0
-      const nb = nameRef.current?.getBoundingClientRect()
-      const cb = cv.getBoundingClientRect()
-      const pad = 16
-      if (nb && cb)
-        box = { l: nb.left - cb.left - pad, t: nb.top - cb.top - pad, r: nb.right - cb.left + pad, b: nb.bottom - cb.top + pad }
 
       ctx.fillStyle = pal.point
       ctx.globalAlpha = 0.9
@@ -558,7 +585,7 @@ export default function Home() {
         // The name is the one thing the survey may not cross. The framing keeps
         // the field in the corner; this is the guarantee the sparse tail never
         // lands on the type, at any size.
-        if (box && q.X > box.l && q.X < box.r && q.Y > box.t && q.Y < box.b) {
+        if (inBox(q, box)) {
           hits++
           hidden.add(q)
           continue
@@ -567,6 +594,24 @@ export default function Home() {
         ctx.beginPath()
         ctx.arc(q.X, q.Y, POINT_R, 0, TAU)
         ctx.fill()
+      }
+      // The ink, over the muted points the front has reached. Walked in front
+      // order, so the first untouched point ends the walk.
+      let inked = 0
+      if (lfrac > 0) {
+        ctx.fillStyle = pal.ink
+        for (const q of order) {
+          const a = along(q.key)
+          if (a <= 0) break
+          if (hidden.has(q)) continue
+          const t = Math.min(1, a)
+          inked++
+          ctx.globalAlpha = INK_ALPHA * t
+          ctx.beginPath()
+          ctx.arc(q.X, q.Y, POINT_R * (1 + INK_SWELL * Math.sin(Math.PI * t)), 0, TAU)
+          ctx.fill()
+        }
+        ctx.fillStyle = pal.point
       }
       let numbered = 0
       if (lfrac > 0) {
@@ -579,8 +624,7 @@ export default function Home() {
         // decided first-come: a number already on the page is never displaced by
         // one that arrives after it, and scrolling on only ever adds.
         for (const q of labelled) {
-          // Stretched so the last one is fully up at lfrac 1, not still fading.
-          const a = (lfrac * (1 + LABEL_FADE) - q.key) / LABEL_FADE
+          const a = along(q.key)
           if (a <= 0) break
           if (hidden.has(q)) continue
           const l = q.X + 2.5 - LABEL_GAP
@@ -597,6 +641,7 @@ export default function Home() {
       ctx.globalAlpha = 1
 
       if (import.meta.env.DEV) {
+        cv.dataset.ccInked = String(inked)
         cv.dataset.ccNumbered = String(numbered)
         cv.dataset.ccDrawn = String(drawn)
         cv.dataset.ccNamehits = String(hits)
