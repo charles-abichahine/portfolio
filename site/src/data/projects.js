@@ -109,7 +109,6 @@ const _projects = [
           { type: 'image', src: 'projects/sensi/shape-01.webp', caption: 'Reading the plan into rooms, uses, and adjacencies.' },
           { type: 'image', src: 'projects/sensi/shape-02.webp', caption: 'Scores respond to every edit, the ripple propagating by fixed rules.' },
           { type: 'image', src: 'projects/sensi/shape-03.webp', caption: 'The galaxy view: rooms, senses, and levers as one connected system.' },
-          { type: 'image', src: 'projects/sensi/galaxy.webp', caption: 'The galaxy at rest: the whole project held as one quiet map.' },
           { type: 'image', src: 'projects/sensi/shape-analysis.webp', caption: 'A full analysis: the kitchen flagged, the fixes suggested, the whole layout read.' },
           { type: 'image', src: 'projects/sensi/checkpoints.webp', caption: 'Senses across checkpoints: every edit committed, every sense a line that answers it.' },
         ],
@@ -1432,8 +1431,18 @@ const _projects = [
         ],
         media: [
           { type: 'image', src: 'projects/codependent/two-pieces.webp', caption: 'Slot together, support one another, make room to gather: the same two pieces at every step.' },
-          { type: 'image', src: 'projects/codependent/workshop.webp', caption: 'In the workshop: the two masters, a counter slotted together, the joint up close.' },
-          { type: 'image', src: 'projects/codependent/on-site.webp', caption: 'On site: a black panel carried in, the slots meeting, the booth from below.' },
+          // The workshop and site strips as one sheet, three over three. The
+          // booklet keeps printing the site row alone under its cover: that
+          // is what `print` names, with the caption that row had.
+          {
+            type: 'image',
+            src: 'projects/codependent/hands-on.webp',
+            caption: 'In the workshop, the two masters, a counter slotted together and the joint up close; on site, a black panel carried in, the slots meeting and the booth from below.',
+            print: {
+              src: 'projects/codependent/on-site.webp',
+              caption: 'On site: a black panel carried in, the slots meeting, the booth from below.',
+            },
+          },
         ],
       },
       {
@@ -1486,6 +1495,9 @@ const _projects = [
         ],
         media: [
           { type: 'video', src: 'projects/codependent/preassembly.mp4', caption: 'Pre-assembly: the groups coming together before they meet on site.' },
+          // The cover, on purpose: now that the index tile rests on the loop, the
+          // gallery is the only place the finished booth would otherwise be seen.
+          { type: 'image', src: 'projects/codependent/cover.webp', caption: 'The booth, finished: 34 panels slotted together, with no glue and no screws.' },
         ],
       },
     ],
