@@ -2,6 +2,7 @@ import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import MediaFrame from './MediaFrame.jsx'
 import MediaLightbox from './MediaLightbox.jsx'
+import ProjectGlyph from './projectGlyphs.jsx'
 import { imgSrcSet, partnersOf } from '../data/projects.js'
 import { beltFor } from '../data/belts.js'
 
@@ -30,8 +31,10 @@ const sectionLabel = (i, heading) => `${String(i + 1).padStart(2, '0')} · ${hea
  * `poster.webp`, a section loop is `x.webm` beside `x-poster.webp`.
  */
 function galleryFor(project) {
+  // printOnly media exist for the booklet alone: a slide the card shows
+  // whole can be printed as its parts.
   const evidence = project.sections.flatMap((s, i) =>
-    s.media.map((m) => ({
+    s.media.filter((m) => !m.printOnly).map((m) => ({
       kind: m.type,
       src: m.src,
       // Both kinds carry a poster now, named the same way: the file beside it
@@ -429,8 +432,13 @@ export default function ProjectCard({ project, onClose }) {
             here at all on a portrait phone, where it heads the card instead. */}
         {masthead('sticky top-0 z-10 hidden bg-paper pb-1.5 wide-short:flex lg:static lg:flex lg:pb-0')}
 
-        <h2 className="mt-3 shrink-0 text-[1.55rem] font-bold leading-[1.12] tracking-tight lg:mt-3.5 lg:text-[1.9rem]">
-          {project.title}
+        {/* The project's mark beside its name, drawn the way the index tile
+            draws it (ink, the idea in the belt colour), so the card reads as
+            the tile you opened. Sized in em, so it keeps to the title's cap
+            height at both sizes and sits on its first line when it wraps. */}
+        <h2 className="mt-3 flex shrink-0 items-start gap-[0.4em] text-[1.55rem] font-bold leading-[1.12] tracking-tight lg:mt-3.5 lg:text-[1.9rem]">
+          <ProjectGlyph slug={project.slug} idea={color} className="mt-[0.03em] h-[1.06em] w-[1.06em] shrink-0" />
+          <span className="min-w-0">{project.title}</span>
         </h2>
 
         {/* When and where it was made, and the award if there is one: the two
