@@ -76,6 +76,7 @@ const add = (p) => {
 
 for (const p of projects) {
   add(p.cover.endsWith('.webm') ? p.cover.replace(/cover\.webm$/, 'poster.webp') : p.cover)
+  if (p.loop) add(p.loop.replace(/\.webm$/, '-poster.webp'))
   for (const s of p.sections) {
     for (const m of s.media) {
       add(m.type === 'image' ? m.src : m.src.replace(/\.[a-z0-9]+$/i, '-poster.webp'))

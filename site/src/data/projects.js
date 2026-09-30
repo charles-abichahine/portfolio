@@ -56,6 +56,10 @@ const _projects = [
     tag: 'AI',
     toolsShort: 'PYTHON · SENSORY AI',
     cover: 'projects/sensi/cover.webp',
+    // The /work tile's hover loop, kept apart from the cover so the still stays
+    // what the landing and the booklet print. x.webm beside x.mp4 and
+    // x-poster.webp, the way a section loop is named.
+    loop: 'projects/sensi/loop.webm',
     category: 'Computation & AI',
     award: 'MaCAD 2026 Award',
     links: {
@@ -1100,6 +1104,7 @@ const _projects = [
     tag: 'GH',
     toolsShort: 'RHINO · GH',
     cover: 'projects/puffer-playscape/cover.webp',
+    loop: 'projects/puffer-playscape/loop.webm',
     category: 'Design & Research',
     award: null,
     links: {},
@@ -1155,6 +1160,7 @@ const _projects = [
     tag: 'GH',
     toolsShort: 'RHINO · GH · DENDRO',
     cover: 'projects/wave-chair/cover.webp',
+    loop: 'projects/wave-chair/loop.webm',
     category: 'Design & Research',
     award: null,
     links: {},
@@ -1211,6 +1217,7 @@ const _projects = [
     tag: 'GH',
     toolsShort: 'RHINO · GH',
     cover: 'projects/cross-cap-house/cover.webp',
+    loop: 'projects/cross-cap-house/loop.webm',
     category: 'Design & Research',
     award: null,
     links: {},
@@ -1332,6 +1339,7 @@ const _projects = [
     tag: 'GH',
     toolsShort: 'PRACTICE',
     cover: 'projects/tideline/cover.webp',
+    loop: 'projects/tideline/loop.webm',
     category: 'Design & Research',
     award: null,
     links: {},
@@ -1407,6 +1415,7 @@ const _projects = [
     tag: 'GH',
     toolsShort: 'PRACTICE',
     cover: 'projects/codependent/cover.webp',
+    loop: 'projects/codependent/loop.webm',
     category: 'Design & Research',
     award: null,
     links: {},

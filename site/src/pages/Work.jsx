@@ -9,11 +9,23 @@ import { consumeHandoff, handoffMomentumActive } from '../handoff.js'
 // An animated cover rests on its static first-frame poster, so the index is a
 // wall of stills and nothing heavy loads. The animation is mounted only while
 // the cursor is on the tile, which is also what stops it again when it leaves.
-// The three animated covers are video, not GIF: same footage at roughly a tenth
-// of the bytes (3.9MB of GIF became 399KB of WebM). WebM first, MP4 for Safari.
-const isAnimated = (p) => p.cover.endsWith('.webm')
-const posterFor = (p) => (isAnimated(p) ? p.cover.replace(/cover\.webm$/, 'poster.webp') : p.cover)
-const videoFor = (p, ext) => p.cover.replace(/cover\.webm$/, `cover.${ext}`)
+// The animated covers are video, not GIF: same footage at roughly a tenth of
+// the bytes (3.9MB of GIF became 399KB of WebM). WebM first, MP4 for Safari.
+//
+// Two ways to be animated. The older three make the cover itself the video
+// (cover.webm beside poster.webp). A project can instead keep its still cover
+// and carry a separate `loop` (x.webm beside x-poster.webp): the tile plays the
+// loop over the loop's own first frame, while the landing and the booklet keep
+// printing the still. That is the way to add one without moving the PDF.
+const loopOf = (p) => p.loop ?? (p.cover.endsWith('.webm') ? p.cover : null)
+const isAnimated = (p) => loopOf(p) !== null
+const posterFor = (p) =>
+  p.loop
+    ? p.loop.replace(/\.webm$/, '-poster.webp')
+    : p.cover.endsWith('.webm')
+      ? p.cover.replace(/cover\.webm$/, 'poster.webp')
+      : p.cover
+const videoFor = (p, ext) => loopOf(p).replace(/\.webm$/, `.${ext}`)
 
 // 0.6875rem is the site's floor for anything informational: this voice carries
 // the project count, the years and the awards, and at 0.56rem it was 8.96px —
@@ -134,15 +146,19 @@ function ProjectTile({ p, hot, motionOk, onFocus, onBlur }) {
   // for it to settle — otherwise one pass pulls every cover on the row. Unlike
   // the preloaded GIF this replaced, an unmounted <video> also aborts its own
   // request, so a sweep costs nothing once the cursor has moved on.
+  //
+  // On a phone the same thing is driven by the reading band instead of the
+  // cursor: the loop plays while the cover holds its colour, so scrolling the
+  // grid plays one loop at a time, and a flick past a tile never mounts one.
   useEffect(() => {
-    if (!hot || !animate) {
+    if (!lit || !animate) {
       setMounted(false)
       setReady(false)
       return
     }
     const timer = setTimeout(() => setMounted(true), 140)
     return () => clearTimeout(timer)
-  }, [hot, animate])
+  }, [lit, animate])
 
   const playing = mounted && ready
 
