@@ -70,6 +70,12 @@ const ARROW =
 // cropped by mistake, with the arrow sitting on its picture. So the width is
 // solved for: as many whole cards as fit, plus a slice of 25–66% of the next,
 // at the largest size the height leaves for a cover.
+//
+// Solved for the whole index, never for the filtered set. Fed the filtered
+// count, a category of three fitted whole at the largest size while All was
+// sized down to show its slice, so the cards grew and shrank under the pills.
+// One size for every view: the slice still lands wherever a category runs past
+// the screen, and one that does not simply leaves the end of the row empty.
 const GAP = 24 // lg:gap-6
 const LEAD = 40 // lg:px-10, the strip's left inset
 const SLICE = [0.25, 0.66]
@@ -210,7 +216,7 @@ function ProjectTile({ p, hot, motionOk, onFocus, onBlur }) {
             className="mt-[3px] shrink-0 transition-colors duration-300"
             style={{ color: lit ? color : 'var(--color-ink)' }}
           >
-            <ProjectGlyph slug={p.slug} className="h-5 w-5" />
+            <ProjectGlyph slug={p.slug} idea={color} className="h-5 w-5" />
           </span>
           <h2
             className="min-h-[2.6em] min-w-0 flex-1 text-[1.1rem] font-semibold leading-[1.3] transition-colors duration-300"
@@ -349,8 +355,13 @@ export default function Work() {
 
   // Sets --tile-w from the room the column actually has: its height less the
   // header, the index strip and the text under each cover, and its width less
-  // the strip's lead. Re-measured on resize and on a filter, since a short
-  // category may fit whole and needs no slice at all.
+  // the strip's lead. Re-measured on resize; a filter re-runs it only to re-sync
+  // the strip, since the answer is the same for every category (see GAP above).
+  //
+  // The text is the shortest card's, not the first card's. Every field under a
+  // cover is reserved, but a long tagline can still take a second line, and the
+  // first card is a different project in every category, so reading it made the
+  // size depend on which project led the filter.
   useLayoutEffect(() => {
     const el = stripRef.current
     if (!el || !filmstrip) {
@@ -359,16 +370,17 @@ export default function Work() {
     }
     const column = el.parentElement.parentElement
     const fit = () => {
-      const li = el.querySelector('li')
-      const cover = li?.querySelector('img')?.parentElement
-      if (!li || !cover) return
+      const lis = [...el.querySelectorAll('li')]
+      const cover = lis[0]?.querySelector('img')?.parentElement
+      if (!cover) return
       const [header, , index] = column.children
       const indexBox = index.getBoundingClientRect().height + parseFloat(getComputedStyle(index).marginTop)
-      const text = li.getBoundingClientRect().height - cover.getBoundingClientRect().height
+      const text =
+        Math.min(...lis.map((li) => li.getBoundingClientRect().height)) - cover.getBoundingClientRect().height
       const room =
         column.clientHeight - parseFloat(getComputedStyle(column).paddingTop) -
         header.getBoundingClientRect().height - indexBox - text - AIR
-      const w = fitTiles(el.clientWidth - LEAD, room, filtered.length)
+      const w = fitTiles(el.clientWidth - LEAD, room, projects.length)
       el.style.setProperty('--tile-w', `${Math.floor(w)}px`)
       syncRef.current()
     }
@@ -376,7 +388,7 @@ export default function Work() {
     const ro = new ResizeObserver(fit)
     ro.observe(column)
     return () => ro.disconnect()
-  }, [filmstrip, filtered.length])
+  }, [filmstrip, filter])
 
   useEffect(() => {
     const el = stripRef.current
@@ -420,8 +432,14 @@ export default function Work() {
       // The lit window: each glyph cell lights while its tile is on screen, so
       // the strip below the cards is a map of where you are in them. Visibility
       // is read off the tiles rather than divided out of the scroll position,
-      // which would go wrong the moment the tiles are not all one width; the
-      // 24px slack keeps a sliver of a tile from lighting its cell.
+      // which would go wrong the moment the tiles are not all one width.
+      //
+      // A tile counts once three quarters of it is in view. The strip is sized
+      // to show whole cards plus a slice of the next (at most 66% of it, see
+      // SLICE), and that slice used to light its cell, so the strip claimed
+      // 01–04 over three cards and a sliver. Three quarters is above any slice
+      // and below what a card scrolled a little off the edge still shows, so
+      // mid-scroll it does not drop to two either.
       const lis = el.querySelectorAll('li')
       const cells = track.querySelectorAll('button')
       const box = el.getBoundingClientRect()
@@ -429,7 +447,8 @@ export default function Work() {
       let last = -1
       for (let i = 0; i < lis.length; i++) {
         const r = lis[i].getBoundingClientRect()
-        const vis = r.right > box.left + 24 && r.left < box.right - 24
+        const seen = Math.min(r.right, box.right) - Math.max(r.left, box.left)
+        const vis = seen >= r.width * 0.75
         if (vis) {
           if (first < 0) first = i
           last = i

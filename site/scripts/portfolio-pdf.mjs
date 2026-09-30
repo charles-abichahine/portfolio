@@ -206,10 +206,15 @@ const chosen = SELECTION.map((slug) => {
 
 /*
  * The glyphs, out of the JSX. Each entry in GLYPHS is `slug: (` then markup
- * then `),` at the file's own indentation, and the markup is already valid
- * SVG: every attribute in the marks is lowercase, only the fragment wrappers
- * have to go. The wrapper attributes (stroke, width, caps) live on the
- * component, so they are re-stated in glyph() below and must match it.
+ * then `),` at the file's own indentation, and the markup is almost valid
+ * SVG: only the fragment wrappers have to go, and the one camel-cased
+ * attribute the marks use, strokeDasharray, goes back to its SVG spelling.
+ * The wrapper attributes (stroke, width, caps) live on the component, so they
+ * are re-stated in glyph() below and must match it.
+ *
+ * The component also sets --idea, the colour of each mark's one idea element.
+ * Here it is currentColor: a glyph in this book is always drawn in a single
+ * colour, its belt's, so the idea goes with the rest of the mark.
  */
 const glyphSrc = readFileSync(SOURCES[3], 'utf8')
 const GLYPHS = {}
@@ -217,20 +222,21 @@ const GLYPHS = {}
   const body = glyphSrc.slice(glyphSrc.indexOf('const GLYPHS = {'), glyphSrc.indexOf('export default'))
   const re = /^  (?:'([\w-]+)'|(\w+)): \(\n([\s\S]*?)\n  \),$/gm
   let m
-  while ((m = re.exec(body))) GLYPHS[m[1] ?? m[2]] = m[3].replace(/<\/?>/g, '').trim()
+  while ((m = re.exec(body)))
+    GLYPHS[m[1] ?? m[2]] = m[3].replace(/<\/?>/g, '').replace(/strokeDasharray=/g, 'stroke-dasharray=').trim()
 }
 for (const p of projects) {
   if (!GLYPHS[p.slug]) throw new Error(`portfolio-pdf: no glyph found for "${p.slug}" in projectGlyphs.jsx`)
 }
-/* Drawn a shade lighter than the site's 1.4: on paper the same stroke reads
+/* Drawn a shade lighter than the site's 1.5: on paper the same stroke reads
  * heavier than on a screen, the way the rules do. */
 const GLYPH_STROKE = 1.1
 const glyph = (slug, mm) =>
-  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${GLYPH_STROKE}" stroke-linecap="round" stroke-linejoin="round" style="width:${mm}mm;height:${mm}mm">${GLYPHS[slug]}</svg>`
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${GLYPH_STROKE}" stroke-linecap="round" stroke-linejoin="round" style="--idea:currentColor;width:${mm}mm;height:${mm}mm">${GLYPHS[slug]}</svg>`
 
 /*
  * The marks a pipeline stage can name, in the grammar the project glyphs use:
- * a 24-unit square, line only, stroke 1.4, colour inherited. A stage names one
+ * a 24-unit square, stroke 1.5 on the site, colour inherited. A stage names one
  * by key the way a project names its glyph by slug, so the data stays a list of
  * stages and the drawing stays here.
  *
@@ -251,7 +257,7 @@ const MARKS = {
 }
 const mark = (key, mm) => {
   if (!MARKS[key]) throw new Error(`portfolio-pdf: no pipeline mark named "${key}"`)
-  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${GLYPH_STROKE}" stroke-linecap="round" stroke-linejoin="round" style="width:${mm}mm;height:${mm}mm">${MARKS[key]}</svg>`
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${GLYPH_STROKE}" stroke-linecap="round" stroke-linejoin="round" style="--idea:currentColor;width:${mm}mm;height:${mm}mm">${MARKS[key]}</svg>`
 }
 
 /* The pipeline strip: the halves side by side, split by a dashed rule, each
