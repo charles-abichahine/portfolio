@@ -213,8 +213,9 @@ const chosen = SELECTION.map((slug) => {
  * are re-stated in glyph() below and must match it.
  *
  * The component also sets --idea, the colour of each mark's one idea element.
- * Here it is currentColor: a glyph in this book is always drawn in a single
- * colour, its belt's, so the idea goes with the rest of the mark.
+ * The sheets and the two lists draw the mark the way the /work card does: ink,
+ * with the idea in its belt colour. The index strip passes nothing, so there
+ * the whole mark takes one colour, the way the site's strip does.
  */
 const glyphSrc = readFileSync(SOURCES[3], 'utf8')
 const GLYPHS = {}
@@ -231,8 +232,8 @@ for (const p of projects) {
 /* Drawn a shade lighter than the site's 1.5: on paper the same stroke reads
  * heavier than on a screen, the way the rules do. */
 const GLYPH_STROKE = 1.1
-const glyph = (slug, mm) =>
-  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${GLYPH_STROKE}" stroke-linecap="round" stroke-linejoin="round" style="--idea:currentColor;width:${mm}mm;height:${mm}mm">${GLYPHS[slug]}</svg>`
+const glyph = (slug, mm, idea = 'currentColor') =>
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${GLYPH_STROKE}" stroke-linecap="round" stroke-linejoin="round" style="--idea:${idea};width:${mm}mm;height:${mm}mm">${GLYPHS[slug]}</svg>`
 
 /*
  * The marks a pipeline stage can name, in the grammar the project glyphs use:
@@ -471,8 +472,11 @@ async function aspectOf(relPath) {
 const posterFor = (p) =>
   p.cover.endsWith('.webm') ? p.cover.replace(/cover\.webm$/, 'poster.webp') : p.cover
 
-// Every video and loop ships a poster beside it, named the same way.
-const stillOf = (m) => (m.type === 'image' ? m.src : m.src.replace(/\.[a-z0-9]+$/i, '-poster.webp'))
+// Every video and loop ships a poster beside it, named the same way. A media
+// item may also name its own still for print (`print: { src, caption }`), when
+// the site shows a composite the page has no room for.
+const stillOf = (m) =>
+  m.print?.src ?? (m.type === 'image' ? m.src : m.src.replace(/\.[a-z0-9]+$/i, '-poster.webp'))
 
 /* The candidate figures, in the order the sections tell the story, demos
  * included: their captions already say what they are and the DEMO tag on the
@@ -487,7 +491,8 @@ async function figPool(p, cover = posterFor(p)) {
     const src = stillOf(m)
     if (src === cover || src === drawn) continue
     const cut = PRINT_CUTS[src]
-    pool.push({ m: cut?.caption ? { ...m, caption: cut.caption } : m, src, a: await aspectOf(src) })
+    const caption = cut?.caption ?? m.print?.caption
+    pool.push({ m: caption ? { ...m, caption } : m, src, a: await aspectOf(src) })
   }
   return pool
 }
@@ -1234,7 +1239,7 @@ const index = `
         .map(
           (p, i) => `<li>
         <span class="no">${pad(i + 1)}</span>
-        <span style="color:${beltFor(p).color}">${glyph(p.slug, 5)}</span>
+        <span>${glyph(p.slug, 5, beltFor(p).color)}</span>
         <span class="t">${esc(p.title)}</span>
         <span class="tag">${esc(p.tagline)}</span>
       </li>`,
@@ -1282,7 +1287,7 @@ async function sheet(p, i, lay) {
   </div>
   <div class="tb">
     <p class="sno"><a href="${cardUrl(p)}">${esc(cardLabel(p))}</a></p>
-    <span class="g" style="color:${b.color}">${glyph(p.slug, 12)}</span>
+    <span class="g">${glyph(p.slug, 12, b.color)}</span>
     <h2>${esc(p.title).replace(/ (\d+)$/, '&nbsp;$1')}</h2>
     <p class="yr">${esc(p.year)}</p>
     <p class="bl" style="color:${b.color}">${esc(b.label)}</p>
@@ -1442,7 +1447,7 @@ const closing = `
       ${rest
         .map(
           (p) => `<li>
-        <span style="color:${beltFor(p).color}">${glyph(p.slug, 5)}</span>
+        <span>${glyph(p.slug, 5, beltFor(p).color)}</span>
         <a class="t" href="${cardUrl(p)}">${esc(p.title)}</a>
         <span class="tag">${esc(p.tagline)}</span>
       </li>`,
