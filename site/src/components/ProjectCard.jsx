@@ -87,6 +87,16 @@ export default function ProjectCard({ project, onClose }) {
   const items = useMemo(() => galleryFor(project), [project])
   const [at, setAt] = useState(0)
   const [full, setFull] = useState(false)
+  /*
+   * The summary first, the write-up on request.
+   *
+   * The rail used to open straight into a scrolling box of everything: the
+   * one-sentence summary, the intro and every section, so the sentence that
+   * says what the project is sat at the top of a wall of grey text. Now the
+   * summary stands alone, centred in the room the rail has, with one control
+   * under it; the full write-up replaces it in the same box when asked for.
+   */
+  const [reading, setReading] = useState(false)
   const color = beltFor(project).color
   const many = items.length > 1
   const item = items[at]
@@ -99,6 +109,7 @@ export default function ProjectCard({ project, onClose }) {
   useEffect(() => {
     setAt(0)
     setFull(false)
+    setReading(false)
   }, [project.slug])
 
   useEffect(() => {
@@ -140,8 +151,9 @@ export default function ProjectCard({ project, onClose }) {
       el.removeEventListener('scroll', sync)
       ro.disconnect()
     }
-    // The content only changes with the project.
-  }, [project.slug])
+    // The box only exists while reading, and its content only changes with
+    // the project.
+  }, [project.slug, reading])
 
   // Year and module are one short line under the title now; what is left is the
   // part that wraps, set as labelled rows rather than a two-column form.
@@ -459,60 +471,82 @@ export default function ProjectCard({ project, onClose }) {
          * use to someone deciding whether there is anything down there.
          */}
         <div className="relative max-lg:order-2 lg:flex lg:min-h-0 lg:flex-1 lg:flex-col">
-          <div
-            ref={proseRef}
-            className="min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1.5 [scrollbar-color:color-mix(in_srgb,var(--color-line)_60%,var(--color-ink))_transparent] [scrollbar-width:thin] max-lg:flex-none max-lg:overflow-visible wide-short:flex-none wide-short:overflow-visible [&::-webkit-scrollbar]:w-[5px] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[color-mix(in_srgb,var(--color-line)_60%,var(--color-ink))] [&::-webkit-scrollbar-track]:bg-transparent"
-          >
-            <p className="mt-2.5 font-serif text-[1.02rem] leading-[1.55] lg:mt-3">
-              {project.subtitle}
-            </p>
-            <p className="mt-2.5 font-serif text-[0.9rem] leading-[1.62] text-soft lg:mt-3">
-              {project.intro[0]}
-            </p>
+          {!reading ? (
+            // Centred in whatever height the rail leaves: the summary is the
+            // card's one sentence to read before deciding to read on.
+            <div className="flex flex-col items-start lg:flex-1 lg:justify-center lg:pb-6">
+              <p className="mt-3 font-serif text-[1.08rem] leading-[1.55] lg:text-[1.16rem]">
+                {project.subtitle}
+              </p>
+              <button type="button" onClick={() => setReading(true)} className="mt-4 control-label rounded-[8px] border border-line px-2.5 py-1.5 text-soft transition-colors hover:border-[var(--c)] hover:text-[var(--c)]">
+                Read the full write-up ↓
+              </button>
+            </div>
+          ) : (
+            <>
+              <div
+                ref={proseRef}
+                className="min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1.5 [scrollbar-color:color-mix(in_srgb,var(--color-line)_60%,var(--color-ink))_transparent] [scrollbar-width:thin] max-lg:flex-none max-lg:overflow-visible wide-short:flex-none wide-short:overflow-visible [&::-webkit-scrollbar]:w-[5px] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[color-mix(in_srgb,var(--color-line)_60%,var(--color-ink))] [&::-webkit-scrollbar-track]:bg-transparent"
+              >
+                <p className="mt-2.5 font-serif text-[1.02rem] leading-[1.55] lg:mt-3">
+                  {project.subtitle}
+                </p>
+                <p className="mt-2.5 font-serif text-[0.9rem] leading-[1.62] text-soft lg:mt-3">
+                  {project.intro[0]}
+                </p>
 
-            {/*
-             * The write-up, which until now was on no page of the site.
-             *
-             * Two thousand words of it sat in sections[].body and the card showed
-             * the subtitle and one intro paragraph — the booklet PDF was the only
-             * place the writing existed. The media of those same sections has
-             * always been on the card; this puts the words back beside it, headed
-             * by the label the caption already uses, so a paragraph and the images
-             * it is about say the same "03 · Shape".
-             *
-             * Twelve of the eighteen projects carry no body text, and they render
-             * exactly as before: the map yields nothing and the box ends at the
-             * intro.
-             */}
-            {project.sections.map((s, i) =>
-              s.body.length === 0 ? null : (
-                <section key={s.heading} className="mt-5 lg:mt-6">
-                  <h3 className="font-mono text-[0.58rem] font-medium uppercase tracking-[0.13em] text-[var(--c)]">
-                    {sectionLabel(i, s.heading)}
-                  </h3>
-                  {s.body.map((para, j) => (
-                    <p
-                      key={j}
-                      className="mt-2 font-serif text-[0.9rem] leading-[1.62] text-soft lg:mt-2.5"
-                    >
-                      {para}
-                    </p>
-                  ))}
-                </section>
-              ),
-            )}
-          </div>
+                {/*
+                 * The write-up, which until now was on no page of the site.
+                 *
+                 * Two thousand words of it sat in sections[].body and the card showed
+                 * the subtitle and one intro paragraph — the booklet PDF was the only
+                 * place the writing existed. The media of those same sections has
+                 * always been on the card; this puts the words back beside it, headed
+                 * by the label the caption already uses, so a paragraph and the images
+                 * it is about say the same "03 · Shape".
+                 *
+                 * Twelve of the eighteen projects carry no body text, and they render
+                 * exactly as before: the map yields nothing and the box ends at the
+                 * intro.
+                 */}
+                {project.sections.map((s, i) =>
+                  s.body.length === 0 ? null : (
+                    <section key={s.heading} className="mt-5 lg:mt-6">
+                      <h3 className="font-mono text-[0.58rem] font-medium uppercase tracking-[0.13em] text-[var(--c)]">
+                        {sectionLabel(i, s.heading)}
+                      </h3>
+                      {s.body.map((para, j) => (
+                        <p
+                          key={j}
+                          className="mt-2 font-serif text-[0.9rem] leading-[1.62] text-soft lg:mt-2.5"
+                        >
+                          {para}
+                        </p>
+                      ))}
+                    </section>
+                  ),
+                )}
+                <button
+                  type="button"
+                  onClick={() => setReading(false)}
+                  className="mb-1 mt-5 control-label rounded-[8px] border border-line px-2.5 py-1.5 text-soft transition-colors hover:border-[var(--c)] hover:text-[var(--c)]"
+                >
+                  Back to the summary ↑
+                </button>
+              </div>
 
-          {/* The last line, half cut by the bottom edge, was the whole problem:
-              a hard edge reads as a bug, a soft one reads as more text. It
-              clears the scrollbar rather than covering it, and it goes away at
-              the end so it never sits over the final line pretending. */}
-          <div
-            aria-hidden="true"
-            className={`pointer-events-none absolute bottom-0 left-0 right-2 hidden h-9 bg-gradient-to-b from-transparent to-paper transition-opacity duration-200 lg:block ${
-              more ? 'opacity-100' : 'opacity-0'
-            }`}
-          />
+              {/* The last line, half cut by the bottom edge, was the whole problem:
+                  a hard edge reads as a bug, a soft one reads as more text. It
+                  clears the scrollbar rather than covering it, and it goes away at
+                  the end so it never sits over the final line pretending. */}
+              <div
+                aria-hidden="true"
+                className={`pointer-events-none absolute bottom-0 left-0 right-2 hidden h-9 bg-gradient-to-b from-transparent to-paper transition-opacity duration-200 lg:block ${
+                  more ? 'opacity-100' : 'opacity-0'
+                }`}
+              />
+            </>
+          )}
         </div>
 
         {/* Pinned to the foot of the rail where the rail has a foot: the writing
