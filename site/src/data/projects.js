@@ -574,6 +574,7 @@ const _projects = [
     tag: 'GH',
     toolsShort: 'GH · KANGAROO',
     cover: 'projects/luminous-stratum/cover.webp',
+    loop: 'projects/luminous-stratum/loop.webm',
     category: 'Design & Research',
     award: null,
     links: {
@@ -591,8 +592,12 @@ const _projects = [
           'The system is deliberately independent: it revitalizes the market below without touching the historic walls. Voids are cut into the geometry precisely so the new form pulls away from its context, respecting the constraint of independence. It reads as a continuous volume that nests within the void: a porous buffer that protects the atrium without sealing it off.',
         ],
         media: [
-          { type: 'image', src: 'projects/luminous-stratum/concept-strip.webp', caption: 'The references: a shaft of light in a dark room, sedimented strata, an excavated pit.' },
-          { type: 'image', src: 'projects/luminous-stratum/exploded-system.webp', caption: 'The system exploded, level by level: the historic hall untouched.' },
+          { type: 'image', src: 'projects/luminous-stratum/design-concept.webp', caption: 'The concept: a shaft of light in a dark room, sedimented strata and an excavated pit, beside the system exploded level by level, the historic hall untouched.' },
+          // The same slide's two halves, which the booklet still prints apart
+          // (the exploded system in its band, the references in its aside).
+          // printOnly keeps them out of the card's gallery.
+          { type: 'image', src: 'projects/luminous-stratum/concept-strip.webp', caption: 'The references: a shaft of light in a dark room, sedimented strata, an excavated pit.', printOnly: true },
+          { type: 'image', src: 'projects/luminous-stratum/exploded-system.webp', caption: 'The system exploded, level by level: the historic hall untouched.', printOnly: true },
           { type: 'image', src: 'projects/luminous-stratum/axo.webp', caption: 'The lattice hovering within the historic market hall.' },
         ],
       },
@@ -947,6 +952,7 @@ const _projects = [
     tag: 'ENV',
     toolsShort: 'LADYBUG · GALAPAGOS',
     cover: 'projects/tsukiji/cover.webp',
+    loop: 'projects/tsukiji/loop.webm',
     category: 'Design & Research',
     award: null,
     links: {
@@ -996,7 +1002,7 @@ const _projects = [
           'The last step is a validation loop: Infrared.City and Galapagos turning the massing through a full 360 degrees, shortlisting orientations by minimising high-velocity zones at 10 m/s while keeping airflow between 1.5 and 5 m/s. The site is well shielded, annual winds averaging 1.5 m/s, and the winning orientation is the one the proposal already had. Thermal comfort is good across 88% of the area, and bad in exactly the places the courtyards make.',
         ],
         media: [
-          { type: 'image', src: 'projects/tsukiji/rotation-study.webp', caption: 'The full 360° rotation, wind speed above and thermal comfort below. Top 1 is the orientation the proposal already had.' },
+          { type: 'loop', src: 'projects/tsukiji/rotation-study.webm', caption: 'The full 360° rotation, wind speed above and thermal comfort below. Top 1 is the orientation the proposal already had.' },
           { type: 'image', src: 'projects/tsukiji/galapagos.webp', caption: 'Two Galapagos loops: culling the infrared mesh to plant trees where heat lingers, and rotating and scaling the original geometry.' },
         ],
       },
