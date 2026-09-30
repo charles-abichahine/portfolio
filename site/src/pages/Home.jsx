@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { projects } from '../data/projects.js'
-import { summary } from '../data/cv.js'
+import { role, summary } from '../data/cv.js'
 import { markHandoff } from '../handoff.js'
 import { crossCap, makeProjector } from '../lib/crosscap.js'
 
@@ -803,11 +803,11 @@ export default function Home() {
             Charles Abi Chahine
           </h1>
           <p className="mt-3.5 font-mono text-[0.72rem] lowercase tracking-[0.08em] text-soft">
-            architect · computational designer
+            {role}
           </p>
-          {/* The one sentence on the cover, so it is set as one: the serif here is
-              what tells you the rest of the site has writing in it. Balanced,
-              because on a phone it broke with "built." alone on the last line. */}
+          {/* The one line on the cover under the role: the three fields. The
+              serif here is what tells you the rest of the site has writing in
+              it. Balanced, so a phone that has to break it breaks it evenly. */}
           <p className="mt-5 text-balance font-serif text-[clamp(0.95rem,1.2vw,1.05rem)] leading-[1.6] text-soft">
             {summary}
           </p>

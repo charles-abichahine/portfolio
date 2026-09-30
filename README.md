@@ -1,6 +1,6 @@
 # Charles Abi Chahine — Portfolio
 
-Architect & computational designer. MaCAD, IAAC.
+Architect & design technologist. MaCAD, IAAC.
 
 ## Structure
 

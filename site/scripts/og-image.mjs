@@ -58,7 +58,6 @@ const INK = '#16181d'
 const SOFT = '#4e535c'
 const MUTED = '#6a707b'
 const LINE = '#e0e3e7'
-const ACCENT = '#c9261b'
 
 /*
  * The cross-cap survey, the same drawing the homepage carries, rendered into the
@@ -169,7 +168,6 @@ const html = `<!doctype html>
     letter-spacing: -0.024em;
     color: ${INK};
   }
-  .dot { color: ${ACCENT}; }
   .role {
     font-family: "IBM Plex Mono", monospace;
     font-weight: 400;
@@ -213,10 +211,10 @@ const html = `<!doctype html>
 </style>
 ${crossCapField(1200, 630)}
 <div class="block">
-  <h1>Charles Abi<br>Chahine<span class="dot">.</span></h1>
-  <p class="role">architect · computational designer</p>
+  <h1>Charles Abi<br>Chahine</h1>
+  <p class="role">architect · design technologist</p>
   <hr>
-  <p class="summary">design, computation, and the work of getting it built.</p>
+  <p class="summary">computational design · BIM · AI in architecture</p>
 </div>
 `
 

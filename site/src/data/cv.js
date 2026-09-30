@@ -41,18 +41,20 @@ export const contact = {
 
 // Sits under the name on both the page and the PDF. Shared rather than typed
 // into each, which is how the PDF used to carry its own copy of it.
-export const role = 'Architect · Computational Designer'
+export const role = 'Architect · Design Technologist'
 
 /*
  * The one line under the role. The landing, the CV page and the generated PDF
- * all read it from here, so there is a single sentence rather than one per
+ * all read it from here, so there is a single line rather than one per
  * surface: the landing used to carry its own copy and the CV a different
  * sentence entirely, which meant the site said two things about him.
  *
- * Stored lowercase rather than lowercased in CSS, so every surface gets it the
- * same way without each one having to remember a text-transform.
+ * A list of the three fields, not a sentence, and the same three his LinkedIn
+ * headline carries, so the two say one thing. Set as written rather than
+ * lowercased in CSS, because BIM and AI are the only capitals in it and a
+ * text-transform would take them.
  */
-export const summary = 'design, computation, and the work of getting it built.'
+export const summary = 'computational design · BIM · AI in architecture'
 
 /*
  * `work` turns a degree into evidence: the projects it actually produced, each

@@ -1216,11 +1216,13 @@ const cover = `
 
 /* The index names the eight that are printed; the other ten are marks on the
  * strip and a count in the foot, not a list, because /work is their index. */
-/* The about, short: the site's About page cut to the four sentences a reader
- * of the index needs before the list. Kept here rather than in cv.js because
- * it is written for this page's width and no other surface prints it. */
+/* The about, short: the first two paragraphs of his LinkedIn About, which is
+ * what a reader of the index needs before the list. The third, on the IAAC
+ * projects, is left out because the list below it is those projects. Kept here
+ * rather than in cv.js because it is written for this page's width and no
+ * other surface prints it. */
 const ABOUT =
-  'Architect and computational designer, Master in Advanced Computation for Architecture and Design (MaCAD) at IAAC. I build the tools I used to ask other people for: Rhino, Grasshopper and Python, wired to Rhino Compute, BIM pipelines and generative AI, so a design can be scored, priced or proven while it is still on the screen. The machine generates; I curate, steer, and shape the output into architecture.'
+  'Architect and design technologist, Master in Advanced Computation for Architecture and Design (MaCAD) at IAAC. My focus is computational design in service of architecture: parametric design, BIM delivery and AI-assisted workflows, with a particular interest in digital fabrication.'
 
 const index = `
 <section class="page sidx">

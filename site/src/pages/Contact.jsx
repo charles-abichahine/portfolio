@@ -39,10 +39,12 @@ const ROUTES = [
 ]
 
 // The page's two lines of writing, kept together so they are changed together.
-// From his LinkedIn About, which says it in his own words.
-const HEADING = 'I build the tools I used to ask for'
+// Plain on purpose, in the register of his LinkedIn About: what he does, and
+// what to write to him about. The heading used to be a slogan about building
+// tools, which put the tools ahead of the architecture.
+const HEADING = 'Get in touch'
 const TEXT =
-  "Trained to draw buildings, I went back for the machinery. If your project needs both, I'd like to hear about it."
+  "I'm an architect working in computational design, BIM and AI. For roles, collaborations or projects, email is the quickest way to reach me."
 
 const PILL =
   'control-label inline-flex rounded-[10px] border border-[color-mix(in_srgb,var(--color-ink)_34%,transparent)] px-4 py-2.5 leading-none text-ink transition-colors hover:border-ink hover:bg-ink hover:text-paper'

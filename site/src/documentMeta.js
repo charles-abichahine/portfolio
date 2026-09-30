@@ -14,7 +14,7 @@ export const ORIGIN = 'https://charlesabichahine.com'
 
 // The static default in index.html, and the only route whose title is not a
 // label followed by the name.
-export const HOME_TITLE = 'Charles Abi Chahine • Architect & Computational Designer'
+export const HOME_TITLE = 'Charles Abi Chahine • Architect & Design Technologist'
 
 const PAGES = { '/work': 'Work', '/cv': 'CV', '/contact': 'Contact' }
 
